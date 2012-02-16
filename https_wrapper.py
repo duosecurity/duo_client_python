@@ -119,12 +119,12 @@ class CertValidatingHTTPSConnection(httplib.HTTPConnection):
         raise InvalidCertificateException(hostname, cert, 'hostname mismatch')
 
 
-class CertValidatingHTTPSHandler(urllib2.AbstractHTTPHandler):
+class CertValidatingHTTPSHandler(urllib2.HTTPSHandler):
   """An HTTPHandler that validates SSL certificates."""
 
   def __init__(self, **kwargs):
     """Constructor. Any keyword args are passed to the httplib handler."""
-    urllib2.AbstractHTTPHandler.__init__(self)
+    urllib2.HTTPSHandler.__init__(self)
     self._connection_args = kwargs
 
   def https_open(self, req):
@@ -140,4 +140,4 @@ class CertValidatingHTTPSHandler(urllib2.AbstractHTTPHandler):
                                           e.reason.args[1])
       raise
 
-  https_request = urllib2.AbstractHTTPHandler.do_request_
+  https_request = urllib2.HTTPSHandler.do_request_
