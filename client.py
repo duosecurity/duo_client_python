@@ -5,17 +5,13 @@ from https_wrapper import CertValidatingHTTPSConnection
 ca_certs = os.path.join(os.path.dirname(__file__), 'ca_certs.pem')
 
 def canonicalize(method, host, uri, params):
-    """
-    Return a string of canonically joined request attributes, suitable for
-    signature comparison.
-    """
     canon = [method.upper(), host.lower(), uri]
 
     args = []
     for key in sorted(params.keys()):
-        val = ','.join(sorted(params[key]))
-        args.append(
-            '%s=%s' % (urllib.quote(key, '~'), urllib.quote(val, '~')))
+        val = params[key]
+        arg = '%s=%s' % (urllib.quote(key, '~'), urllib.quote(val, '~'))
+        args.append(arg)
     canon.append('&'.join(args))
 
     return '\n'.join(canon)
