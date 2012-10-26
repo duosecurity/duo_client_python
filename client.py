@@ -61,4 +61,5 @@ def call_json_api(ikey, skey, host, method, path, **kwargs):
             raise RuntimeError('Received error response: %s' % data)
         return data['response']
     except (ValueError, KeyError):
-        raise RuntimeError('Received bad responss: %s' % data)
+        raise RuntimeError('Received bad response: %s' % data)
+
