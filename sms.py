@@ -13,7 +13,7 @@ def sms(ikey, skey, host, phone):
     """
     response = client.call_json_api(
         ikey, skey, host, 'POST', '/verify/v1/sms.json',
-        phone=[phone], message=['The PIN is <pin>'])
+        phone=phone, message='The PIN is <pin>')
     return response['pin']
 
 if __name__ == '__main__':

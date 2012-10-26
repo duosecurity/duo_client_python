@@ -14,7 +14,7 @@ def call(ikey, skey, host, phone):
     """
     response = client.call_json_api(
         ikey, skey, host, 'POST', '/verify/v1/call.json',
-        phone=[phone], message=['The PIN is <pin>'])
+        phone=phone, message='The PIN is <pin>')
     return (response['pin'], response['txid'])
 
 def status(ikey, skey, host, txid):
@@ -23,7 +23,7 @@ def status(ikey, skey, host, txid):
     """
     response = client.call_json_api(
         ikey, skey, host, 'GET', '/verify/v1/status.json',
-        txid=[txid])
+        txid=txid)
     return response
 
 if __name__ == '__main__':
