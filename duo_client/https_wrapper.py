@@ -46,6 +46,7 @@ class InvalidCertificateException(httplib.HTTPException):
             'http://code.google.com/appengine/kb/general.html#rpcssl' %
             (self.host, self.reason, self.cert))
 
+
 class CertValidatingHTTPSConnection(httplib.HTTPConnection):
   """An HTTPConnection that connects over SSL and validates certificates."""
 
