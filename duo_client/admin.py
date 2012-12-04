@@ -687,7 +687,7 @@ def get_tokens_by_serial(ikey, skey, host, type, serial, ca=None):
 
 def delete_token(ikey, skey, host, token_id, ca=None):
     """
-    Returns a token.
+    Deletes a token. If the token is already deleted, does nothing.
 
     ikey - Admin API integration ikey
     skey - Admin API integration skey
