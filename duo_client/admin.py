@@ -590,7 +590,13 @@ def get_phones_by_number(ikey, skey, host, number, extension=None, ca=None):
     return response
 
 
-def add_phone(ikey, skey, host, number, extension=None, ca=None):
+def add_phone(ikey, skey, host, number,
+              extension=None,
+              type=None,
+              platform=None,
+              predelay=None,
+              postdelay=None,
+              ca=None):
     """
     Adds a phone.
 
@@ -599,6 +605,12 @@ def add_phone(ikey, skey, host, number, extension=None, ca=None):
     host - Duo host
     number - Phone number
     extension - Phone number extension (optional)
+    type - The phone type.
+    platform - The phone platform.
+    predelay - Number of seconds to wait after the number picks up
+               before dialing the extension.
+    postdelay - Number of seconds to wait after the extension is
+                dialed before the speaking the prompt.
     ca - Optional CA cert
 
     Returns phone object.
@@ -609,6 +621,14 @@ def add_phone(ikey, skey, host, number, extension=None, ca=None):
     kwargs = {'number': number}
     if extension is not None:
         kwargs['extension'] = extension
+    if type is not None:
+        kwargs['type'] = type
+    if platform is not None:
+        kwargs['platform'] = platform
+    if predelay is not None:
+        kwargs['predelay'] = predelay
+    if postdelay is not None:
+        kwargs['postdelay'] = postdelay
     response = client.call_json_api(
         ikey, skey, host, 'POST', url, ca, **kwargs)
     return response
