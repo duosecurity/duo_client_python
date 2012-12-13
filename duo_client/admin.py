@@ -836,6 +836,7 @@ def update_settings(ikey, skey, host, ca=None,
     keypress_fraud - <str:0-9, #, or *>|None
     timezone - <str:IANA timezone>|NOne
     caller_id - <str:phone number>
+
     Returns updated settings object.
 
     Raises RuntimeError on error.
@@ -1146,7 +1147,7 @@ def delete_integration(ikey, skey, host, ca=None, integration_key=None):
     ca - Optional CA cert
     integration_key - The integration key of the integration to delete.
 
-    returns None
+    Returns None.
 
     Raises RuntimeError on error.
 
@@ -1386,7 +1387,7 @@ def reset_admin(ikey, skey, host, admin_id, ca=None):
     ca - Optional CA cert
     admin_id - <int:admin id>
 
-    Returns None
+    Returns None.
 
     Raises RuntimeError on error.
     """
@@ -1413,10 +1414,11 @@ def activate_admin(ikey, skey, host, email, send_email=False,
         "email": <str:email for admin/message>,
         "valid_days": <int:valid days>
         "link": <str:activation link>
-        "message": <str:message as in supersecret, whether sent or not>
+        "message": <str:message, whether sent or not>
         "email_sent": <bool:true if email was sent, false otherwise>
         "code": <str:activation code>
     }
+
     See the adminapi docs for updated return values.
 
     Raises RuntimeError on error.
