@@ -652,6 +652,55 @@ def delete_phone(ikey, skey, host, phone_id, ca=None):
     client.call_json_api(ikey, skey, host, 'DELETE', url, ca)
 
 
+def send_sms_activation_to_phone(ikey, skey, host, phone_id,
+                                 valid_secs=None,
+                                 install=None,
+                                 installation_msg=None,
+                                 activation_msg=None,
+                                 ca=None):
+    """
+    Generate a Duo Mobile activation code and send it to the phone via
+    SMS, optionally sending an additional message with a URL to
+    install Duo Mobile.
+
+    ikey - Admin API integration ikey
+    skey - Admin API integration skey
+    host - Duo host
+    phone_id - Phone ID.
+    valid_secs - The number of seconds activation code should be valid for.
+                 Default: 86400 seconds (one day).
+    install - '1' to also send an installation SMS message before the
+              activation message; '0' to not send. Default: '0'.
+    installation_msg - Custom installation message template to send to
+                       the user if install was 1. Must contain
+                       <insturl>, which is replaced with the
+                       installation URL.
+    activation_msg - Custom activation message template. Must contain
+                     <acturl>, which is replaced with the activation URL.
+    ca - Optional CA cert
+
+    Returns: {
+        "activation_msg": "To activate the Duo Mobile app, click this link: https://m-eval.duosecurity.com/iphone/7dmi4Oowz5g3J47FARLs",
+        "installation_msg": "Welcome to Duo! To install the Duo Mobile app, click this link: http://m-eval.duosecurity.com",
+        "valid_secs": 3600
+    }
+
+    Raises RuntimeError on error.
+    """
+    url = '/admin/v1/phones/' + phone_id + '/send_sms_activation'
+    kwargs = {}
+    if valid_secs is not None:
+        kwargs['valid_secs'] = valid_secs
+    if install is not None:
+        kwargs['install'] = str(install)
+    if installation_msg is not None:
+        kwargs['installation_msg'] = installation_msg
+    if activation_msg is not None:
+        kwargs['activation_msg'] = activation_msg
+    return client.call_json_api(ikey, skey, host, 'POST', url, ca,
+                                **kwargs)
+
+
 def get_tokens(ikey, skey, host, ca=None):
     """
     Returns list of tokens.
