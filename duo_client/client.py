@@ -59,6 +59,8 @@ def sign(ikey, skey, method, host, uri, date, sig_version, params):
     Return basic authorization header line with a Duo Web API signature.
     """
     canonical = canonicalize(method, host, uri, params, date, sig_version)
+    if isinstance(skey, unicode):
+        skey = skey.encode('utf-8')
     sig = hmac.new(skey, canonical, hashlib.sha1)
     auth = '%s:%s' % (ikey, sig.hexdigest())
     return 'Basic %s' % base64.b64encode(auth)
