@@ -937,7 +937,7 @@ def update_settings(ikey, skey, host, ca=None,
         kwargs['caller_id'] = caller_id
 
     if not kwargs:
-        raise RuntimeError("No settings were provided")
+        raise TypeError("No settings were provided")
 
     response = client.call_json_api(ikey, skey, host, 'POST', url, ca,
                                     **kwargs)
@@ -1099,7 +1099,7 @@ def get_integrations(ikey, skey, host, ca=None):
     return response
 
 
-def get_integration(ikey, skey, host, ca=None, integration_key=None):
+def get_integration(ikey, skey, host, integration_key, ca=None):
     """
     Returns the requested integration.
 
@@ -1113,9 +1113,6 @@ def get_integration(ikey, skey, host, ca=None, integration_key=None):
 
     Raises RuntimeError on error.
     """
-    if integration_key is None:
-        raise RuntimeError("integration_key is required.")
-
     response = client.call_json_api(
         ikey,
         skey,
@@ -1127,20 +1124,21 @@ def get_integration(ikey, skey, host, ca=None, integration_key=None):
     return response
 
 
-def create_integration(ikey, skey, host, ca=None,
-                    name=None,
-                    integration_type=None,
-                    visual_style=None,
-                    greeting=None,
-                    notes=None,
-                    enroll_policy=None,
-                    adminapi_admins=None,
-                    adminapi_info=None,
-                    adminapi_integrations=None,
-                    adminapi_read_log=None,
-                    adminapi_read_resource=None,
-                    adminapi_settings=None,
-                    adminapi_write_resource=None):
+def create_integration(ikey, skey, host,
+                       name,
+                       integration_type,
+                       visual_style=None,
+                       greeting=None,
+                       notes=None,
+                       enroll_policy=None,
+                       adminapi_admins=None,
+                       adminapi_info=None,
+                       adminapi_integrations=None,
+                       adminapi_read_log=None,
+                       adminapi_read_resource=None,
+                       adminapi_settings=None,
+                       adminapi_write_resource=None,
+                       ca=None):
     """Creates a new integration.
 
     ikey - Admin API integration ikey
@@ -1172,12 +1170,8 @@ def create_integration(ikey, skey, host, ca=None,
     kwargs = {}
     if name is not None:
         kwargs['name'] = name
-    else:
-        raise RuntimeError("name is a required parameter")
     if integration_type is not None:
         kwargs['type'] = integration_type
-    else:
-        raise RuntimeError("integration_type is a required parameter")
     if visual_style is not None:
         kwargs['visual_style'] = visual_style
     if greeting is not None:
@@ -1207,7 +1201,7 @@ def create_integration(ikey, skey, host, ca=None,
     return response
 
 
-def delete_integration(ikey, skey, host, ca=None, integration_key=None):
+def delete_integration(ikey, skey, host, integration_key, ca=None):
     """Deletes an integration.
 
     ikey - Admin API integration ikey
@@ -1221,31 +1215,29 @@ def delete_integration(ikey, skey, host, ca=None, integration_key=None):
     Raises RuntimeError on error.
 
     """
-    if integration_key is None:
-        raise RuntimeError("integration_key is required.")
-
     url = '/admin/v1/integrations/%s' % integration_key
 
     client.call_json_api(ikey, skey, host, 'DELETE', url, ca)
     return None
 
 
-def update_integration(ikey, skey, host, ca=None,
-                    integration_key=None,
-                    name=None,
-                    integration_type=None,
-                    visual_style=None,
-                    greeting=None,
-                    notes=None,
-                    enroll_policy=None,
-                    adminapi_admins=None,
-                    adminapi_info=None,
-                    adminapi_integrations=None,
-                    adminapi_read_log=None,
-                    adminapi_read_resource=None,
-                    adminapi_settings=None,
-                    adminapi_write_resource=None,
-                    reset_secret_key=None):
+def update_integration(ikey, skey, host,
+                       integration_key,
+                       name=None,
+                       integration_type=None,
+                       visual_style=None,
+                       greeting=None,
+                       notes=None,
+                       enroll_policy=None,
+                       adminapi_admins=None,
+                       adminapi_info=None,
+                       adminapi_integrations=None,
+                       adminapi_read_log=None,
+                       adminapi_read_resource=None,
+                       adminapi_settings=None,
+                       adminapi_write_resource=None,
+                       reset_secret_key=None,
+                       ca=None):
     """Updates an integration.
 
     ikey - Admin API integration ikey
@@ -1277,9 +1269,6 @@ def update_integration(ikey, skey, host, ca=None,
     Raises RuntimeError on error.
 
     """
-    if integration_key is None:
-        raise RuntimeError("integration_key is required.")
-
     url = '/admin/v1/integrations/%s' % integration_key
     kwargs = {}
     if name is not None:
@@ -1312,7 +1301,7 @@ def update_integration(ikey, skey, host, ca=None,
         kwargs['reset_secret_key'] = '1'
 
     if not kwargs:
-        raise RuntimeError("No new values were provided")
+        raise TypeError("No new values were provided")
 
     response = client.call_json_api(ikey, skey, host, 'POST', url, ca,
                                     **kwargs)
