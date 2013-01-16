@@ -189,7 +189,7 @@ def cmd_args():
     param = collections.defaultdict(list)
     for p in args.param:
         try:
-            (k, v) = p.split('=')
+            (k, v) = p.split('=', 1)
         except ValueError:
             sys.exit('Error: Positional argument %s is not '
                      'in key=value format.' % (p,))
