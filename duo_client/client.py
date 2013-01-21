@@ -34,23 +34,29 @@ from https_wrapper import CertValidatingHTTPSConnection
 ca_certs = os.path.join(os.path.dirname(__file__), 'ca_certs.pem')
 
 
+def canon_params(params):
+    args = []
+    for key in sorted(params.keys()):
+        val = params[key]
+        arg = '%s=%s' % (urllib.quote(key, '~'), urllib.quote(val, '~'))
+        args.append(arg)
+    return '&'.join(args)
+
+
 def canonicalize(method, host, uri, params, date, sig_version):
     if sig_version == 1:
         canon = []
     elif sig_version == 2:
         canon = [date]
     else:
-        raise ValueError(sig_version)
+        raise NotImplementedError(sig_version)
 
-    canon += [method.upper(), host.lower(), uri]
-
-    args = []
-    for key in sorted(params.keys()):
-        val = params[key]
-        arg = '%s=%s' % (urllib.quote(key, '~'), urllib.quote(val, '~'))
-        args.append(arg)
-    canon.append('&'.join(args))
-
+    canon += [
+        method.upper(),
+        host.lower(),
+        uri,
+        canon_params(params),
+    ]
     return '\n'.join(canon)
 
 
@@ -66,14 +72,16 @@ def sign(ikey, skey, method, host, uri, date, sig_version, params):
     return 'Basic %s' % base64.b64encode(auth)
 
 
-def encode_kwargs(kwargs):
-    """Returns copy of kwargs with unicode strings utf-8 encoded"""
-    kwargs = copy.deepcopy(kwargs)
-    for key in kwargs.keys():
-        value = kwargs[key]
+def encode_params(params):
+    """Returns copy of params with unicode strings utf-8 encoded"""
+    new_params = {}
+    for key, value in params.items():
+        if isinstance(key, unicode):
+            key = key.encode("utf-8")
         if isinstance(value, unicode):
-            kwargs[key] = value.encode("utf-8")
-    return kwargs
+            value = value.encode("utf-8")
+        new_params[key] = value
+    return new_params
 
 
 def call(ikey, skey, host, method, path, ca=None, sig_version=2,
@@ -85,7 +93,7 @@ def call(ikey, skey, host, method, path, ca=None, sig_version=2,
     """
     # urllib cannot handle unicode strings properly. quote() excepts,
     # and urlencode() replaces them with '?'.
-    kwargs = encode_kwargs(kwargs)
+    kwargs = encode_params(kwargs)
 
     if sig_timezone == 'UTC':
         now = email.utils.formatdate()
