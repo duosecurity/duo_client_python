@@ -43,23 +43,3 @@ def sms(ikey, skey, host, phone,
         sig_version=SIG_VERSION,
         phone=phone, message='The PIN is <pin>')
     return response['pin']
-
-if __name__ == '__main__':
-    ####### DUO SECURITY SETTINGS #######
-    # You can find this information in the integrations section
-    # where you signed up for Duo.
-    #
-    # Please use your valid telephone number with country code, area
-    # code, and 7 digit number. For example: PHONE = '+1-313-555-5555'
-    IKEY = ''
-    SKEY = ''
-    HOST = ''
-    PHONE = ''
-
-    (pin, txid) = call(IKEY, SKEY, HOST, PHONE)
-    print 'Sent PIN: %s' % pin
-    state = ''
-    while state != 'ended':
-        response = status(IKEY, SKEY, HOST, txid)
-        print response['event'], 'event:', response['info']
-        state = response['state']
