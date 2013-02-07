@@ -142,8 +142,24 @@ def call_json_api(ikey, skey, host, method, path, ca=None, sig_version=2,
                                   sig_version,
                                   **kwargs)
     if response.status != 200:
-        error = RuntimeError(
-            'Received %s %s' % (response.status, response.reason))
+        msg = 'Received %s %s' % (response.status, response.reason)
+        try:
+            data = json.loads(data)
+            if data['stat'] == 'FAIL':
+                if 'message_detail' in data:
+                    msg = 'Received %s %s (%s)' % (
+                        response.status,
+                        data['message'],
+                        data['message_detail'],
+                    )
+                else:
+                    msg = 'Received %s %s' % (
+                        response.status,
+                        data['message'],
+                    )
+        except (ValueError, KeyError, TypeError):
+            pass
+        error = RuntimeError(msg)
         error.status = response.status
         error.reason = response.reason
         error.data = data
@@ -153,7 +169,7 @@ def call_json_api(ikey, skey, host, method, path, ca=None, sig_version=2,
         if data['stat'] != 'OK':
             raise RuntimeError('Received error response: %s' % data)
         return data['response']
-    except (ValueError, KeyError):
+    except (ValueError, KeyError, TypeError):
         raise RuntimeError('Received bad response: %s' % data)
 
 
