@@ -3,7 +3,6 @@ import ConfigParser
 import os
 import sys
 import time
-import datetime
 
 from duo_client import admin
 
