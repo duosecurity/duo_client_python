@@ -3,6 +3,7 @@ import ConfigParser
 import os
 import sys
 import time
+import datetime
 
 from duo_client import admin
 
@@ -110,7 +111,8 @@ class AdministratorLog(BaseLog):
                 'user_delete': "Delete User"}.get(
                 event['action'], event['action'])
 
-            fmtstr = '[%(ctime)s] ' \
+                #fmtstr = '[%(ctime)s] ' \
+            fmtstr = '%(timestamp)s,' \
                      'host="%(host)s", ' \
                      'eventtype="%(eventtype)s", ' \
                      'username="%(username)s", ' \
@@ -138,7 +140,8 @@ class AuthenticationLog(BaseLog):
         for event in self.events:
             event['ctime'] = time.ctime(event['timestamp'])
 
-            fmtstr = '[%(ctime)s] ' \
+            #fmtstr = '[%(ctime)s] ' \
+            fmtstr = '%(timestamp)s,' \
                      'host="%(host)s", ' \
                      'eventtype="%(eventtype)s", ' \
                      'username="%(username)s", ' \
@@ -167,7 +170,8 @@ class TelephonyLog(BaseLog):
             event['ctime'] = time.ctime(event['timestamp'])
             event['host'] = self.host
 
-            fmtstr = '[%(ctime)s] ' \
+            #fmtstr = '[%(ctime)s] ' \
+            fmtstr = '%(timestamp)s,' \
                      'host="%(host)s", ' \
                      'eventtype="%(eventtype)s", ' \
                      'context="%(context)s", ' \
