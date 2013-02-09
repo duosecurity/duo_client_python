@@ -1,2 +1,5 @@
-*~
 *.pyc
+*.pyo
+*.swp
+.gitconfig
+duo_client_python/
