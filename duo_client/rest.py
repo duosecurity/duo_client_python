@@ -62,6 +62,8 @@ def auth(ikey, skey, host, username, factor=FACTOR_PHONE,
     kwargs = {}
     if async:
         kwargs['async'] = '1'
+    if pushinfo is not None:
+        kwargs['pushinfo'] = pushinfo
 
     if factor == FACTOR_AUTO:
         kwargs['auto'] = auto
