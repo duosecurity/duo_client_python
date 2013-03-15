@@ -168,7 +168,7 @@ class Client(object):
             host = self.proxy_host
             port = self.proxy_port
         else:
-            raise NotImplementedError('proxy_type=%s' % (proxy_type,))
+            raise NotImplementedError('proxy_type=%s' % (self.proxy_type,))
 
         # Create outer HTTP(S) connection.
         if self.ca_certs == 'HTTP':
@@ -189,9 +189,11 @@ class Client(object):
                                 api_port,
                                 self.proxy_headers)
             elif hasattr(conn, '_set_tunnel'): # 2.6.3+
+                # pylint: disable=E1103
                 conn._set_tunnel(self.host,
                                  api_port,
                                  self.proxy_headers)
+                # pylint: enable=E1103
 
         conn.request(method, uri, body, headers)
         response = conn.getresponse()
