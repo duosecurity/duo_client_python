@@ -12,22 +12,20 @@ def get_next_arg(prompt):
 
 # You can find this information in the integrations section
 # where you signed up for Duo.
-VERIFY_API_CFG = {
-    'ikey': get_next_arg('ikey ("DI..."): '),
-    'skey': get_next_arg('integration secret key: '),
-    'host': get_next_arg('API hostname ("api-....duosecurity.com"): '),
-}
+verify_api = duo_client.Verify(
+    ikey=get_next_arg('Verify API integration key ("DI..."): '),
+    skey=get_next_arg('integration secret key: '),
+    host=get_next_arg('API hostname ("api-....duosecurity.com"): '),
+)
 
 # Please use your valid telephone number with country code, area
 # code, and 7 digit number. For example: PHONE = '+1-313-555-5555'
 PHONE_NUMBER = get_next_arg('phone number ("+1-313-555-5555"): ')
 
-(pin, txid) = duo_client.verify.call(phone=PHONE_NUMBER,
-                                          **VERIFY_API_CFG)
+(pin, txid) = verify_api.call(phone=PHONE_NUMBER)
 print 'Sent PIN: %s' % pin
 state = ''
 while state != 'ended':
-    status_res = duo_client.verify.status(txid=txid,
-                                          **VERIFY_API_CFG)
+    status_res = verify_api.status(txid=txid)
     print status_res['event'], 'event:', status_res['info']
     state = status_res['state']

@@ -12,11 +12,11 @@ def get_next_arg(prompt):
         return raw_input(prompt)
 
 # Configuration and information about objects to create.
-ADMIN_API_CFG = {
-    'ikey': get_next_arg('ikey ("DI..."): '),
-    'skey': get_next_arg('integration secret key: '),
-    'host': get_next_arg('API hostname ("api-....duosecurity.com"): '),
-}
+admin_api = duo_client.Admin(
+    ikey=get_next_arg('Admin API integration key ("DI..."): '),
+    skey=get_next_arg('integration secret key: '),
+    host=get_next_arg('API hostname ("api-....duosecurity.com"): '),
+)
 
 USERNAME = get_next_arg('user login name: ')
 REALNAME = get_next_arg('user full name: ')
@@ -28,38 +28,34 @@ PHONE_TYPE = get_next_arg('phone type (e.g. mobile): ')
 PHONE_PLATFORM = get_next_arg('phone platform (e.g. google android): ')
 
 # Create and return a new user object.
-user = duo_client.admin.add_user(
+user = admin_api.add_user(
     username=USERNAME,
     realname=REALNAME,
-    **ADMIN_API_CFG
 )
 print 'Created user:'
 pprint.pprint(user)
 
 # Create and return a new phone object.
-phone = duo_client.admin.add_phone(
+phone = admin_api.add_phone(
     number=PHONE_NUMBER,
     type=PHONE_TYPE,
     platform=PHONE_PLATFORM,
-    **ADMIN_API_CFG
 )
 print 'Created phone:'
 pprint.pprint(phone)
 
 # Associate the user with the phone.
-duo_client.admin.add_user_phone(
+admin_api.add_user_phone(
     user_id=user['user_id'],
     phone_id=phone['phone_id'],
-    **ADMIN_API_CFG
 )
 print 'Added phone', phone['number'], 'to user', user['username']
 
 # Send two SMS messages to the phone with information about installing
 # the app for PHONE_PLATFORM and activating it with this Duo account.
-act_sent = duo_client.admin.send_sms_activation_to_phone(
+act_sent = admin_api.send_sms_activation_to_phone(
     phone_id=phone['phone_id'],
     install='1',
-    **ADMIN_API_CFG
 )
 print 'SMS activation sent to', phone['number'] + ':'
 pprint.pprint(act_sent)

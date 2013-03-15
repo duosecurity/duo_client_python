@@ -1,21 +1,19 @@
 #!/usr/bin/python
 import ConfigParser
+import optparse
 import os
 import sys
 import time
 
-from duo_client import admin
+import duo_client
 
 
 class BaseLog(object):
 
-    def __init__(self, ikey, skey, host, path, logname, ca):
-        self.ikey = ikey
-        self.skey = skey
-        self.host = host
+    def __init__(self, admin_api, path, logname):
+        self.admin_api = admin_api
         self.path = path
         self.logname = logname
-        self.ca = ca
 
         self.mintime = 0
         self.events = []
@@ -31,7 +29,8 @@ class BaseLog(object):
         Returns the path to the file containing the timestamp of the last
         event fetched.
         """
-        path = self.path + "/" + self.logname + "_last_timestamp_" + self.host
+        filename = self.logname + "_last_timestamp_" + self.admin_api.host
+        path = os.path.join(self.path, filename)
         return path
 
     def get_mintime(self):
@@ -76,13 +75,13 @@ class BaseLog(object):
 
 
 class AdministratorLog(BaseLog):
-    def __init__(self, ikey, skey, host, path, ca=None):
-        BaseLog.__init__(self, ikey, skey, host, path, "administrator",
-                         ca=ca)
+    def __init__(self, admin_api, path):
+        BaseLog.__init__(self, admin_api, path, "administrator")
 
     def get_events(self):
-        self.events = admin.get_administrator_log(self.ikey, self.skey,
-            self.host, ca=self.ca, mintime=self.mintime)
+        self.events = self.admin_api.get_administrator_log(
+            mintime=self.mintime,
+        )
 
     def print_events(self):
         """
@@ -124,12 +123,13 @@ class AdministratorLog(BaseLog):
 
 
 class AuthenticationLog(BaseLog):
-    def __init__(self, ikey, skey, host, path, ca=None):
-        BaseLog.__init__(self, ikey, skey, host, path, "authentication", ca)
+    def __init__(self, admin_api, path):
+        BaseLog.__init__(self, admin_api, path, "authentication")
 
     def get_events(self):
-        self.events = admin.get_authentication_log(self.ikey, self.skey,
-            self.host, ca=self.ca, mintime=self.mintime)
+        self.events = self.admin_api.get_authentication_log(
+            mintime=self.mintime,
+        )
 
     def print_events(self):
         """
@@ -151,13 +151,13 @@ class AuthenticationLog(BaseLog):
 
 
 class TelephonyLog(BaseLog):
-    def __init__(self, ikey, skey, host, path, ca=None):
-        BaseLog.__init__(self, ikey, skey, host, path, "telephony",
-                         ca=ca)
+    def __init__(self, admin_api, path):
+        BaseLog.__init__(self, admin_api, path, "telephony")
 
     def get_events(self):
-        self.events = admin.get_telephony_log(self.ikey, self.skey,
-            self.host, ca=self.ca, mintime=self.mintime)
+        self.events = self.admin_api.get_telephony_log(
+            mintime=self.mintime,
+        )
 
     def print_events(self):
         """
@@ -165,7 +165,7 @@ class TelephonyLog(BaseLog):
         """
         for event in self.events:
             event['ctime'] = time.ctime(event['timestamp'])
-            event['host'] = self.host
+            event['host'] = self.admin_api.host
 
             fmtstr = '%(timestamp)s,' \
                      'host="%(host)s", ' \
@@ -178,47 +178,43 @@ class TelephonyLog(BaseLog):
             print fmtstr % event
 
 
-def get_config(path):
+def admin_api_from_config(config_path):
     """
-    Returns the configuration parameters stored in config file.
-
-    Returns: (<str:ikey>, <str:skey>, <str:host>, <str:ca path>)
+    Return a duo_client.Admin object created using the parameters
+    stored in a config file.
     """
     config = ConfigParser.ConfigParser()
-    config.read(path)
+    config.read(config_path)
     config_d = dict(config.items('duo'))
-    ca = config_d.get("ca", None)
-    return (config_d['ikey'], config_d['skey'], config_d['host'], ca)
-
-
-def usage():
-    """
-        Display usage information and exit.
-    """
-    progname = os.path.basename(sys.argv[0])
-    print >> sys.stderr, "usage: %s [<path>]" % progname
-    print >> sys.stderr, "\tpath - path to configuration file"
-    sys.exit(1)
+    ca_certs = config_d.get("ca_certs", None)
+    if ca_certs is None:
+        ca_certs = config_d.get("ca", None)
+    return duo_client.Admin(
+        ikey=config_d['ikey'],
+        skey=config_d['skey'],
+        host=config_d['host'],
+        ca_certs=ca_certs,
+    )
 
 
 def main():
-    if len(sys.argv) > 2:
-        usage()
+    parser = optparse.OptionParser(usage="%prog [<config file path>]")
+    (options, args) = parser.parse_args(sys.argv[1:])
 
     if len(sys.argv) == 1:
         config_path = os.path.abspath(__file__)
         config_path = os.path.dirname(config_path)
-        config_path = config_path + "/duo.conf"
+        config_path = os.path.join(config_path, "duo.conf")
     else:
         config_path = os.path.abspath(sys.argv[1])
 
-    ikey, skey, host, ca = get_config(config_path)
+    admin_api = admin_api_from_config(config_path)
 
     # Use the directory of the config file to store the last event tstamps
     path = os.path.dirname(config_path)
 
     for logclass in (AdministratorLog, AuthenticationLog, TelephonyLog):
-        log = logclass(ikey, skey, host, path, ca)
+        log = logclass(admin_api, path)
         log.run()
 
 

@@ -18,20 +18,18 @@ import urllib
 try:
     # For the optional demonstration CLI program.
     import argparse
-    argparse_error = None
 except ImportError as e:
     argparse_error = e
 
 try:
     # Only needed if signing requests with timezones other than UTC.
     import pytz
-    pytz_error = None
 except ImportError as e:
     pytz_error = e
 
 from https_wrapper import CertValidatingHTTPSConnection
 
-ca_certs = os.path.join(os.path.dirname(__file__), 'ca_certs.pem')
+DEFAULT_CA_CERTS = os.path.join(os.path.dirname(__file__), 'ca_certs.pem')
 
 
 def canon_params(params):
@@ -84,93 +82,112 @@ def encode_params(params):
     return new_params
 
 
-def call(ikey, skey, host, method, path, ca=None, sig_version=2,
-         sig_timezone='UTC', **kwargs):
-    """
-    Call a Duo Web API method and return a (status, reason, data) tuple.
+class Client(object):
+    sig_version = 2
 
-    ca - Path to CA pem file.
-    """
-    # urllib cannot handle unicode strings properly. quote() excepts,
-    # and urlencode() replaces them with '?'.
-    kwargs = encode_params(kwargs)
+    def __init__(self, ikey, skey, host,
+                 ca_certs=DEFAULT_CA_CERTS,
+                 sig_timezone='UTC'):
+        """
+        ca - Path to CA pem file.
+        """
+        self.ikey = ikey
+        self.skey = skey
+        self.host = host
+        self.sig_timezone = sig_timezone
+        if ca_certs is None:
+            ca_certs = DEFAULT_CA_CERTS
+        self.ca_certs = ca_certs
 
-    if sig_timezone == 'UTC':
-        now = email.utils.formatdate()
-    elif pytz_error:
-        raise pytz_error
-    else:
-        d = datetime.datetime.now(pytz.timezone(sig_timezone))
-        now = d.strftime("%a, %d %b %Y %H:%M:%S %z")
+    def api_call(self, method, path, params):
+        """
+        Call a Duo API method. Return a (status, reason, data) tuple.
+        """
+        # urllib cannot handle unicode strings properly. quote() excepts,
+        # and urlencode() replaces them with '?'.
+        params = encode_params(params)
 
-    auth = sign(ikey, skey, method, host, path, now, sig_version, kwargs)
-    headers = {'Authorization': auth, 'Date': now}
+        if self.sig_timezone == 'UTC':
+            now = email.utils.formatdate()
+        elif pytz is None:
+            raise pytz_error
+        else:
+            d = datetime.datetime.now(pytz.timezone(self.sig_timezone))
+            now = d.strftime("%a, %d %b %Y %H:%M:%S %z")
 
-    if method in ['POST', 'PUT']:
-        headers['Content-type'] = 'application/x-www-form-urlencoded'
-        body = urllib.urlencode(kwargs, doseq=True)
-        uri = path
-    else:
-        body = None
-        uri = path + '?' + urllib.urlencode(kwargs, doseq=True)
+        auth = sign(self.ikey,
+                    self.skey,
+                    method,
+                    self.host,
+                    path,
+                    now,
+                    self.sig_version,
+                    params)
+        headers = {
+            'Authorization': auth,
+            'Date': now,
+        }
 
-    if ca is None:
-        ca = ca_certs
+        if method in ['POST', 'PUT']:
+            headers['Content-type'] = 'application/x-www-form-urlencoded'
+            body = urllib.urlencode(params, doseq=True)
+            uri = path
+        else:
+            body = None
+            uri = path + '?' + urllib.urlencode(params, doseq=True)
 
-    if ca == 'HTTP':
-        conn = httplib.HTTPConnection(host)
-    elif ca == 'DISABLE':
-        conn = httplib.HTTPSConnection(host, 443)
-    else:
-        conn = CertValidatingHTTPSConnection(host, 443, ca_certs=ca)
-    conn.request(method, uri, body, headers)
-    response = conn.getresponse()
-    data = response.read()
-    conn.close()
+        if self.ca_certs == 'HTTP':
+            conn = httplib.HTTPConnection(self.host)
+        elif self.ca_certs == 'DISABLE':
+            conn = httplib.HTTPSConnection(self.host, 443)
+        else:
+            conn = CertValidatingHTTPSConnection(self.host,
+                                                 443,
+                                                 ca_certs=self.ca_certs)
+        conn.request(method, uri, body, headers)
+        response = conn.getresponse()
+        data = response.read()
+        conn.close()
 
-    return (response, data)
+        return (response, data)
 
-
-def call_json_api(ikey, skey, host, method, path, ca=None, sig_version=2,
-                  **kwargs):
-    """
-    Call a Duo Web API method which is expected to return a standard JSON
-    body with a 200 status.  Return the response element, or raise
-    RuntimeError.
-    """
-    (response, data) = call(ikey, skey, host, method, path, ca,
-                                  sig_version,
-                                  **kwargs)
-    if response.status != 200:
-        msg = 'Received %s %s' % (response.status, response.reason)
+    def json_api_call(self, method, path, params):
+        """
+        Call a Duo API method which is expected to return a JSON body
+        with a 200 status. Return the response data structure or raise
+        RuntimeError.
+        """
+        (response, data) = self.api_call(method, path, params)
+        if response.status != 200:
+            msg = 'Received %s %s' % (response.status, response.reason)
+            try:
+                data = json.loads(data)
+                if data['stat'] == 'FAIL':
+                    if 'message_detail' in data:
+                        msg = 'Received %s %s (%s)' % (
+                            response.status,
+                            data['message'],
+                            data['message_detail'],
+                        )
+                    else:
+                        msg = 'Received %s %s' % (
+                            response.status,
+                            data['message'],
+                        )
+            except (ValueError, KeyError, TypeError):
+                pass
+            error = RuntimeError(msg)
+            error.status = response.status
+            error.reason = response.reason
+            error.data = data
+            raise error
         try:
             data = json.loads(data)
-            if data['stat'] == 'FAIL':
-                if 'message_detail' in data:
-                    msg = 'Received %s %s (%s)' % (
-                        response.status,
-                        data['message'],
-                        data['message_detail'],
-                    )
-                else:
-                    msg = 'Received %s %s' % (
-                        response.status,
-                        data['message'],
-                    )
+            if data['stat'] != 'OK':
+                raise RuntimeError('Received error response: %s' % data)
+            return data['response']
         except (ValueError, KeyError, TypeError):
-            pass
-        error = RuntimeError(msg)
-        error.status = response.status
-        error.reason = response.reason
-        error.data = data
-        raise error
-    try:
-        data = json.loads(data)
-        if data['stat'] != 'OK':
-            raise RuntimeError('Received error response: %s' % data)
-        return data['response']
-    except (ValueError, KeyError, TypeError):
-        raise RuntimeError('Received bad response: %s' % data)
+            raise RuntimeError('Received bad response: %s' % data)
 
 
 def output_response(response, data, headers=[]):
@@ -190,35 +207,60 @@ def output_response(response, data, headers=[]):
     print data
 
 
-def cmd_args():
-    """
-    Return namespace of args from command invocation.
-    """
-    if argparse_error:
+def main():
+    if argparse is None:
         raise argparse_error
     parser = argparse.ArgumentParser()
     # named arguments
-    parser.add_argument('--ikey', required=True)
-    parser.add_argument('--skey', required=True)
-    parser.add_argument('--host', required=True)
-    parser.add_argument('--method', required=True)
-    parser.add_argument('--path', required=True)
-    parser.add_argument('--ca')
+    parser.add_argument('--ikey', required=True,
+                        help='Duo integration key')
+    parser.add_argument('--skey', required=True,
+                        help='Duo integration secret key')
+    parser.add_argument('--host', required=True,
+                        help='Duo API hostname')
+    parser.add_argument('--method', required=True,
+                        help='HTTP request method')
+    parser.add_argument('--path', required=True,
+                        help='API endpoint path')
+    parser.add_argument('--ca', default=DEFAULT_CA_CERTS)
     parser.add_argument('--sig-version', type=int, default=2)
     parser.add_argument('--sig-timezone', default='UTC')
-    parser.add_argument('--show-header', action='append', default=[])
+    parser.add_argument(
+        '--show-header',
+        action='append',
+        default=[],
+        metavar='Header-Name',
+        help='Show specified response header(s) (default: only output body).',
+    )
+    parser.add_argument('--file-args', default=[])
     # optional positional arguments are used for GET/POST params, name=val
     parser.add_argument('param', nargs='*')
     args = parser.parse_args()
-    param = collections.defaultdict(list)
+
+    client = Client(
+        ikey=args.ikey,
+        skey=args.skey,
+        host=args.host,
+        ca_certs=args.ca,
+        sig_timezone=args.sig_timezone,
+    )
+    client.sig_version = args.sig_version
+
+    params = collections.defaultdict(list)
     for p in args.param:
         try:
             (k, v) = p.split('=', 1)
         except ValueError:
             sys.exit('Error: Positional argument %s is not '
                      'in key=value format.' % (p,))
-        param[k].append(v)
-    for (k, v) in param.items():
+        params[k].append(v)
+
+    # parse which arguments are filenames
+    file_args = args.file_args
+    if args.file_args:
+        file_args = file_args.split(',')
+
+    for (k, v) in params.items():
         if len(v) != 1:
             # Each parameter must have a single value. No Duo API
             # endpoints have arguments that accept multiple values for
@@ -227,25 +269,14 @@ def cmd_args():
             # parameter.
             raise NotImplementedError
         (v,) = v
-        param[k] = v
-    del args.param
-    for (k, v) in param.items():
-        setattr(args, k, v)
-    return args
+        if k in file_args:      # value is a filename, replace with contents
+            with open(v, 'rb') as val:
+                params[k] = base64.b64encode(val.read())
+        else:
+            params[k] = v
 
-
-def main():
-    args = cmd_args()
-
-    # akgood hack! (I don't particularly like the **kwargs interface
-    # in call() FWIW, would rather it explicitly accepted a dict of
-    # params...)
-    kwargs = vars(args)
-    headers = kwargs['show_header']
-    del kwargs['show_header']
-
-    (response, data) = call(**kwargs)
-    output_response(response, data, headers)
+    (response, data) = client.api_call(args.method, args.path, params)
+    output_response(response, data, args.show_header)
 
 if __name__ == '__main__':
     main()

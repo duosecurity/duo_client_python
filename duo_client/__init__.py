@@ -1,13 +1,11 @@
-import accounts
-import admin
-import auth
-import rest
-import verify
+from accounts import Accounts
+from admin import Admin
+from auth import Auth
+from verify import Verify
 
 __all__ = [
-    'accounts',
-    'admin',
-    'auth',
-    'rest',
-    'verify',
+    'Accounts',
+    'Admin',
+    'Auth',
+    'Verify',
 ]
