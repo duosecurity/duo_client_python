@@ -98,6 +98,22 @@ class Client(object):
         if ca_certs is None:
             ca_certs = DEFAULT_CA_CERTS
         self.ca_certs = ca_certs
+        self.set_proxy(host=None, proxy_type=None)
+
+    def set_proxy(self, host, port=None, headers=None,
+                  proxy_type='CONNECT'):
+        """
+        Configure proxy for API calls. Supported proxy_type values:
+
+        'CONNECT' - HTTP proxy with CONNECT.
+        None - Disable proxy.
+        """
+        if proxy_type not in ('CONNECT', None):
+            raise NotImplementedError('proxy_type=%s' % (proxy_type,))
+        self.proxy_headers = headers
+        self.proxy_host = host
+        self.proxy_port = port
+        self.proxy_type = proxy_type
 
     def api_call(self, method, path, params):
         """
@@ -136,14 +152,47 @@ class Client(object):
             body = None
             uri = path + '?' + urllib.urlencode(params, doseq=True)
 
+        # Host and port for the HTTP(S) connection to the API server.
         if self.ca_certs == 'HTTP':
-            conn = httplib.HTTPConnection(self.host)
-        elif self.ca_certs == 'DISABLE':
-            conn = httplib.HTTPSConnection(self.host, 443)
+            api_port = 80
+            api_proto = 'http'
         else:
-            conn = CertValidatingHTTPSConnection(self.host,
-                                                 443,
+            api_port = 443
+            api_proto = 'https'
+
+        # Host and port for outer HTTP(S) connection if proxied.
+        if self.proxy_type is None:
+            host = self.host
+            port = api_port
+        elif self.proxy_type == 'CONNECT':
+            host = self.proxy_host
+            port = self.proxy_port
+        else:
+            raise NotImplementedError('proxy_type=%s' % (proxy_type,))
+
+        # Create outer HTTP(S) connection.
+        if self.ca_certs == 'HTTP':
+            conn = httplib.HTTPConnection(host, port)
+        elif self.ca_certs == 'DISABLE':
+            conn = httplib.HTTPSConnection(host, port)
+        else:
+            conn = CertValidatingHTTPSConnection(host,
+                                                 port,
                                                  ca_certs=self.ca_certs)
+
+        # Configure CONNECT proxy tunnel, if any.
+        if self.proxy_type == 'CONNECT':
+            # Ensure the request has the correct Host.
+            uri = ''.join((api_proto, '://', self.host, uri))
+            if hasattr(conn, 'set_tunnel'): # 2.7+
+                conn.set_tunnel(self.host,
+                                api_port,
+                                self.proxy_headers)
+            elif hasattr(conn, '_set_tunnel'): # 2.6.3+
+                conn._set_tunnel(self.host,
+                                 api_port,
+                                 self.proxy_headers)
+
         conn.request(method, uri, body, headers)
         response = conn.getresponse()
         data = response.read()

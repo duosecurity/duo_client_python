@@ -109,7 +109,10 @@ class CertValidatingHTTPSConnection(httplib.HTTPConnection):
     "Connect to a host on a given (SSL) port."
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((self.host, self.port))
-    self.sock = ssl.wrap_socket(sock, keyfile=self.key_file,
+    self.sock = sock
+    if self._tunnel_host:
+      self._tunnel()
+    self.sock = ssl.wrap_socket(self.sock, keyfile=self.key_file,
                                 certfile=self.cert_file,
                                 cert_reqs=self.cert_reqs,
                                 ca_certs=self.ca_certs)
