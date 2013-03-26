@@ -1,5 +1,6 @@
-#!/usr/bin/env python
-#
+### The following code was adapted from:
+### https://googleappengine.googlecode.com/svn-history/r136/trunk/python/google/appengine/tools/https_wrapper.py
+
 # Copyright 2007 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
