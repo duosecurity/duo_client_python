@@ -1,5 +1,7 @@
-*~
 *.pyc
 *.pyo
 *.swp
+*~
 .gitconfig
+MANIFEST
+dist
