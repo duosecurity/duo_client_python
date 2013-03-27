@@ -1,3 +1,4 @@
 include apache-license-2.0.txt
 recursive-include examples *
 include tests/*.py
+include README.md
