@@ -8,4 +8,7 @@ setup(
     author_email='support@duosecurity.com',
     url='https://github.com/duosecurity/duo_client_python',
     packages=['duo_client'],
+    data_files=[
+        ('duo_client', ['duo_client/ca_certs.pem']),
+    ],
 )
