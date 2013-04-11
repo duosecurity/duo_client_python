@@ -11,4 +11,9 @@ setup(
     data_files=[
         ('duo_client', ['duo_client/ca_certs.pem']),
     ],
+    license='BSD',
+    classifiers=[
+        'Programming Language :: Python',
+        'License :: OSI Approved :: BSD License',
+    ],
 )
