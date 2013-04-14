@@ -94,7 +94,7 @@ class Auth(client.Client):
                                       params)
         return response
 
-    def preauth(self, username=None, user_id=None):
+    def preauth(self, username=None, user_id=None, ipaddr=None):
         """
         Determine if and with what factors a user may authenticate or enroll.
         """
@@ -103,6 +103,8 @@ class Auth(client.Client):
             params['username'] = username
         if user_id is not None:
             params['user_id'] = user_id
+        if ipaddr is not None:
+            params['ipaddr'] = ipaddr
         response = self.json_api_call('POST',
                                       '/auth/v2/preauth',
                                       params)
