@@ -209,6 +209,12 @@ class Client(object):
         RuntimeError.
         """
         (response, data) = self.api_call(method, path, params)
+        return self.parse_json_response(response, data)
+
+    def parse_json_response(self, response, data):
+        """
+        Return the parsed data structure or raise RuntimeError.
+        """
         if response.status != 200:
             msg = 'Received %s %s' % (response.status, response.reason)
             try:

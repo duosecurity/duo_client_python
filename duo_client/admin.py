@@ -1327,3 +1327,38 @@ class Admin(client.Client):
                                       '/admin/v1/admins/activate',
                                       params)
         return response
+
+    def get_logo(self):
+        """
+        Returns current logo's PNG data or raises an error if none is set.
+
+        Raises RuntimeError on error.
+        """
+        response, data = self.api_call('GET',
+                                       '/admin/v1/logo',
+                                       params={})
+        content_type = response.getheader('Content-Type')
+        if content_type and content_type.startswith('image/'):
+            return data
+        else:
+            return self.parse_json_response(response, data)
+
+    def update_logo(self, logo):
+        """
+        Set a logo that will appear in future Duo Mobile activations.
+
+        logo - <str:PNG byte sequence>
+
+        Raises RuntimeError on error.
+        """
+        params = {
+            'logo': logo.encode('base64'),
+        }
+        self.json_api_call('POST',
+                           '/admin/v1/logo',
+                           params)
+
+    def delete_logo(self):
+        self.json_api_call('DELETE',
+                           '/admin/v1/logo',
+                           params={})
