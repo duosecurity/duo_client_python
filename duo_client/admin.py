@@ -1228,7 +1228,7 @@ class Admin(client.Client):
         if phone is not None:
             params['phone'] = phone
         if password is not None:
-            params['password'] = phone
+            params['password'] = password
         response = self.json_api_call('POST', '/admin/v1/admins', params)
         return response
 
@@ -1238,7 +1238,7 @@ class Admin(client.Client):
                      phone=None,
                      password=None):
         """
-        Create an administrator and adds it to a customer.
+        Update one or more attributes of an administrator.
 
         admin_id - The id of the administrator.
         name - <str:the name of the administrator> (optional)
