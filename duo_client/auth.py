@@ -163,7 +163,7 @@ class Auth(client.Client):
         """
         Longpoll for the status of an asynchronous authentication call.
 
-        Returns a tuple with four named fields:
+        Returns a dict with four items:
 
         * waiting: True if the authentication attempt is still in progress
           and the caller can continue to poll, else False.
