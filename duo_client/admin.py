@@ -547,8 +547,10 @@ class Admin(client.Client):
         return response
 
 
-    def add_phone(self, number,
+    def add_phone(self,
+                  number=None,
                   extension=None,
+                  name=None,
                   type=None,
                   platform=None,
                   predelay=None,
@@ -556,23 +558,75 @@ class Admin(client.Client):
         """
         Adds a phone.
 
-        number - Phone number
-        extension - Phone number extension (optional)
-        type - The phone type.
-        platform - The phone platform.
+        number - Phone number (optional).
+        extension - Phone number extension (optional).
+        name - Phone name (optional).
+        type - The phone type (optional).
+        platform - The phone platform (optional).
         predelay - Number of seconds to wait after the number picks up
-                   before dialing the extension.
+                   before dialing the extension (optional).
         postdelay - Number of seconds to wait after the extension is
-                    dialed before the speaking the prompt.
+                    dialed before the speaking the prompt (optional).
 
         Returns phone object.
 
         Raises RuntimeError on error.
         """
         path = '/admin/v1/phones'
-        params = {'number': number}
+        params = {}
+        if number is not None:
+            params['number'] = number
         if extension is not None:
             params['extension'] = extension
+        if name is not None:
+            params['name'] = name
+        if type is not None:
+            params['type'] = type
+        if platform is not None:
+            params['platform'] = platform
+        if predelay is not None:
+            params['predelay'] = predelay
+        if postdelay is not None:
+            params['postdelay'] = postdelay
+        response = self.json_api_call('POST', path,
+                                        params)
+        return response
+
+
+    def update_phone(self, phone_id,
+                     number=None,
+                     extension=None,
+                     name=None,
+                     type=None,
+                     platform=None,
+                     predelay=None,
+                     postdelay=None):
+        """
+        Update a phone.
+
+        number - Phone number (optional)
+        extension - Phone number extension (optional).
+        name - Phone name (optional).
+        type - The phone type (optional).
+        platform - The phone platform (optional).
+        predelay - Number of seconds to wait after the number picks up
+                   before dialing the extension (optional).
+        postdelay - Number of seconds to wait after the extension is
+                    dialed before the speaking the prompt (optional).
+
+        Returns phone object.
+
+        Raises RuntimeError on error.
+        """
+        phone_id = urllib.quote_plus(str(phone_id))
+        path = '/admin/v1/phones/' + phone_id
+        params = {}
+        if number is not None:
+            params['number'] = number
+        if extension is not None:
+            params['extension'] = extension
+        if name is not None:
+            params['name'] = name
         if type is not None:
             params['type'] = type
         if platform is not None:
