@@ -44,7 +44,8 @@ class Verify(client.Client):
         return response
 
     def sms(self, phone,
-            message='The PIN is <pin>'):
+            message='The PIN is <pin>',
+            digits=None):
         """
         Return the PIN from the response for a SMS API call.
         """
@@ -52,6 +53,8 @@ class Verify(client.Client):
             'phone': phone,
             'message': message,
         }
+        if digits:
+            params['digits'] = str(digits)
         response = self.json_api_call('POST',
                                       '/verify/v1/sms.json',
                                       params)
