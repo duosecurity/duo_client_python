@@ -673,10 +673,10 @@ class Admin(client.Client):
                   activation message; '0' to not send. Default: '0'.
         installation_msg - Custom installation message template to send to
                            the user if install was 1. Must contain
-                           <instpath>, which is replaced with the
-                           installation PATH.
+                           <insturl>, which is replaced with the
+                           installation URL.
         activation_msg - Custom activation message template. Must contain
-                         <actpath>, which is replaced with the activation PATH.
+                         <acturl>, which is replaced with the activation URL.
 
         Returns: {
             "activation_msg": "To activate the Duo Mobile app, click this link: https://m-eval.duosecurity.com/iphone/7dmi4Oowz5g3J47FARLs",
