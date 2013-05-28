@@ -20,6 +20,7 @@ try:
     import argparse
 except ImportError as e:
     argparse_error = e
+    argparse = None
 
 try:
     # Only needed if signing requests with timezones other than UTC.
