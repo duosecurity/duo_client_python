@@ -66,7 +66,8 @@ Settings objects are returned in the following format:
      'sms_batch': <int:sms batch size>,
      'lockout_threshold': <int:lockout threshold>
      'sms_expiration': <int:minutes until expiration>|0,
-     'sms_refresh': <bool:is sms refresh enambed (0|1)>
+     'sms_refresh': <bool:is sms refresh enabled (0|1)>,
+     'telephony_warning_min': <int:credits>'}
 
 
 INTEGRATIONS
@@ -856,6 +857,7 @@ class Admin(client.Client):
                         keypress_confirm=None,
                         keypress_fraud=None,
                         timezone=None,
+                        telephony_warning_min=None,
                         caller_id=None):
         """
         Update settings.
@@ -869,7 +871,8 @@ class Admin(client.Client):
         fraud_email - <str:email address>|None
         keypress_confirm - <str:0-9, #, or *>|None
         keypress_fraud - <str:0-9, #, or *>|None
-        timezone - <str:IANA timezone>|NOne
+        timezone - <str:IANA timezone>|None
+        telephony_warning_min - <int:credits>
         caller_id - <str:phone number>
 
         Returns updated settings object.
@@ -898,6 +901,8 @@ class Admin(client.Client):
             params['keypress_fraud'] = keypress_fraud
         if timezone is not None:
             params['timezone'] = timezone
+        if telephony_warning_min is not None:
+            params['telephony_warning_min'] = str(telephony_warning_min)
         if caller_id is not None:
             params['caller_id'] = caller_id
 
