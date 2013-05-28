@@ -3,3 +3,4 @@ include LICENSE
 recursive-include examples *
 include tests/*.py
 include README.md
+include duo_client/ca_certs.pem
