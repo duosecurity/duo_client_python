@@ -108,9 +108,8 @@ class CertValidatingHTTPSConnection(httplib.HTTPConnection):
 
   def connect(self):
     "Connect to a host on a given (SSL) port."
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((self.host, self.port))
-    self.sock = sock
+    self.sock = socket.create_connection((self.host, self.port),
+                                         self.timeout)
     if self._tunnel_host:
       self._tunnel()
     self.sock = ssl.wrap_socket(self.sock, keyfile=self.key_file,

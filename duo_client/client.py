@@ -12,6 +12,7 @@ import hmac
 import httplib
 import json
 import os
+import socket
 import sys
 import urllib
 
@@ -95,11 +96,13 @@ class Client(object):
         self.ikey = ikey
         self.skey = skey
         self.host = host
+        self.port = None
         self.sig_timezone = sig_timezone
         if ca_certs is None:
             ca_certs = DEFAULT_CA_CERTS
         self.ca_certs = ca_certs
         self.set_proxy(host=None, proxy_type=None)
+        self.timeout = socket._GLOBAL_DEFAULT_TIMEOUT
 
     def set_proxy(self, host, port=None, headers=None,
                   proxy_type='CONNECT'):
@@ -160,6 +163,8 @@ class Client(object):
         else:
             api_port = 443
             api_proto = 'https'
+        if self.port is not None:
+            api_port = self.port
 
         # Host and port for outer HTTP(S) connection if proxied.
         if self.proxy_type is None:
@@ -180,6 +185,9 @@ class Client(object):
             conn = CertValidatingHTTPSConnection(host,
                                                  port,
                                                  ca_certs=self.ca_certs)
+
+        # Override default socket timeout if requested.
+        conn.timeout = self.timeout
 
         # Configure CONNECT proxy tunnel, if any.
         if self.proxy_type == 'CONNECT':
