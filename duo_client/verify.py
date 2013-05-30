@@ -12,7 +12,8 @@ class Verify(client.Client):
              extension=None,
              predelay=None,
              postdelay=None,
-             message='The PIN is <pin>'):
+             message='The PIN is <pin>',
+             digits=None):
         """
         Return a (PIN, txid) tuple from the response for a call API call.
         """
@@ -26,6 +27,8 @@ class Verify(client.Client):
             params['predelay'] = predelay
         if postdelay is not None:
             params['postdelay'] = postdelay
+        if digits is not None:
+            params['digits'] = str(int(digits))
         response = self.json_api_call('POST',
                                       '/verify/v1/call.json',
                                       params)
@@ -53,8 +56,8 @@ class Verify(client.Client):
             'phone': phone,
             'message': message,
         }
-        if digits:
-            params['digits'] = str(digits)
+        if digits is not None:
+            params['digits'] = str(int(digits))
         response = self.json_api_call('POST',
                                       '/verify/v1/sms.json',
                                       params)
