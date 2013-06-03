@@ -90,7 +90,7 @@ Integration objects are returned in the following format:
      'type': <str:integration type>,
      'visual_style': <str:visual style>}
 
-See the adminapi docs for possible values for enroll_policy, visual_style,
+See the adminapi docs for possible values for enroll_policy, visual_style, ip_whitelist,
 and type.
 
 ERRORS
@@ -128,6 +128,14 @@ class Admin(client.Client):
         if self.account_id is not None:
             params['account_id'] = self.account_id
         return super(Admin, self).api_call(method, path, params)
+
+    @classmethod
+    def _canonicalize_ip_whitelist(klass, ip_whitelist):
+        if isinstance(ip_whitelist, basestring):
+            return ip_whitelist
+        else:
+            return ','.join(ip_whitelist)
+        pass
 
     def get_administrator_log(self,
                               mintime=0):
@@ -1081,7 +1089,10 @@ class Admin(client.Client):
                            adminapi_read_log=None,
                            adminapi_read_resource=None,
                            adminapi_settings=None,
-                           adminapi_write_resource=None):
+                           adminapi_write_resource=None,
+                           trusted_device_days=None,
+                           ip_whitelist=None,
+                           ip_whitelist_enroll_policy=None):
         """Creates a new integration.
 
         name - The name of the integration (required)
@@ -1092,6 +1103,11 @@ class Admin(client.Client):
         greeting - <str:Voice greeting> (optional, default '')
         notes - <str:internal use> (optional, uses default setting)
         enroll_policy - <str:'enroll'|'allow'|'deny'> (optional, default 'enroll')
+        trusted_device_days - <int: days>|None
+        ip_whitelist - <str: CSV list of IP/Ranges>|None
+                       See adminapi docs for more details.
+        ip_whitelist_enroll_policy - <bool: policy>
+                                     See adminapi docs for more details.
         adminapi_admins - <bool: admins permission>|None
         adminapi_info - <bool: info permission>|None
         adminapi_integrations - <bool:integrations permission>|None
@@ -1118,6 +1134,12 @@ class Admin(client.Client):
             params['notes'] = notes
         if enroll_policy is not None:
             params['enroll_policy'] = enroll_policy
+        if trusted_device_days is not None:
+            params['trusted_device_days'] = str(trusted_device_days)
+        if ip_whitelist is not None:
+            params['ip_whitelist'] = self._canonicalize_ip_whitelist(ip_whitelist)
+        if ip_whitelist_enroll_policy is not None:
+            params['ip_whitelist_enroll_policy'] = ip_whitelist_enroll_policy
         if adminapi_admins is not None:
             params['adminapi_admins'] = '1' if adminapi_admins else '0'
         if adminapi_info is not None:
@@ -1170,7 +1192,10 @@ class Admin(client.Client):
                            adminapi_read_resource=None,
                            adminapi_settings=None,
                            adminapi_write_resource=None,
-                           reset_secret_key=None):
+                           reset_secret_key=None,
+                           trusted_device_days=None,
+                           ip_whitelist=None,
+                           ip_whitelist_enroll_policy=None):
         """Updates an integration.
 
         integration_key - The key of the integration to update. (required)
@@ -1180,6 +1205,11 @@ class Admin(client.Client):
         greeting - Voice greeting (optional, default '')
         notes - internal use (optional, uses default setting)
         enroll_policy - <'enroll'|'allow'|'deny'> (optional, default 'enroll')
+        trusted_device_days - <int: days>|None
+        ip_whitelist - <str: CSV list of IP/Ranges>|None
+                       See adminapi docs for more details.
+        ip_whitelist_enroll_policy - <bool: policy>
+                                     See adminapi docs for more details.
         adminapi_admins - <int:0|1>|None
         adminapi_info - True|False|None
         adminapi_integrations - True|False|None
@@ -1211,6 +1241,12 @@ class Admin(client.Client):
             params['notes'] = notes
         if enroll_policy is not None:
             params['enroll_policy'] = enroll_policy
+        if trusted_device_days is not None:
+            params['trusted_device_days'] = str(trusted_device_days)
+        if ip_whitelist is not None:
+            params['ip_whitelist'] = self._canonicalize_ip_whitelist(ip_whitelist)
+        if ip_whitelist_enroll_policy is not None:
+            params['ip_whitelist_enroll_policy'] = ip_whitelist_enroll_policy
         if adminapi_admins is not None:
             params['adminapi_admins'] = '1' if adminapi_admins else '0'
         if adminapi_info is not None:
