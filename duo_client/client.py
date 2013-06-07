@@ -157,13 +157,14 @@ class Client(object):
             body = None
             uri = path + '?' + urllib.urlencode(params, doseq=True)
 
+        return self._make_request(method, uri, body, headers)
+
+    def _connect(self):
         # Host and port for the HTTP(S) connection to the API server.
         if self.ca_certs == 'HTTP':
             api_port = 80
-            api_proto = 'http'
         else:
             api_port = 443
-            api_proto = 'https'
         if self.port is not None:
             api_port = self.port
 
@@ -192,8 +193,6 @@ class Client(object):
 
         # Configure CONNECT proxy tunnel, if any.
         if self.proxy_type == 'CONNECT':
-            # Ensure the request has the correct Host.
-            uri = ''.join((api_proto, '://', self.host, uri))
             if hasattr(conn, 'set_tunnel'): # 2.7+
                 conn.set_tunnel(self.host,
                                 api_port,
@@ -205,12 +204,25 @@ class Client(object):
                                  self.proxy_headers)
                 # pylint: enable=E1103
 
+        return conn
+
+    def _make_request(self, method, uri, body, headers):
+        conn = self._connect()
+        if self.proxy_type == 'CONNECT':
+            # Ensure the request uses the correct protocol and Host.
+            if self.ca_certs == 'HTTP':
+                api_proto = 'http'
+            else:
+                api_proto = 'https'
+            uri = ''.join((api_proto, '://', self.host, uri))
         conn.request(method, uri, body, headers)
         response = conn.getresponse()
         data = response.read()
-        conn.close()
-
+        self._disconnect(conn)
         return (response, data)
+
+    def _disconnect(self, conn):
+        conn.close()
 
     def json_api_call(self, method, path, params):
         """
