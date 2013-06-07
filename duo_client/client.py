@@ -146,6 +146,7 @@ class Client(object):
         headers = {
             'Authorization': auth,
             'Date': now,
+            'Host': self.host,
         }
 
         if method in ['POST', 'PUT']:
