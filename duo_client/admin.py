@@ -42,6 +42,16 @@ Phone objects are returned in the following format:
      "users": [<user object>, ...]}
 
 
+DESKTOP_TOKENS
+
+Desktop token objects are returned in the following format:
+
+    {"desktoptoken_id": <str:phone id>,
+     "name": <str>,
+     "platform": <str:phone platform>|"Unknown",
+     "type"": "Desktop Token",
+     "users": [<user object>, ...]}
+
 TOKENS
 
 Token objects are returned in the following format:
@@ -707,6 +717,121 @@ class Admin(client.Client):
             params['activation_msg'] = activation_msg
         return self.json_api_call('POST', path,
                                     params)
+
+    def get_desktoptokens(self):
+        """
+        Returns list of desktop tokens.
+
+        Returns list of desktop token objects.
+
+        Raises RuntimeError on error.
+        """
+        response = self.json_api_call('GET', '/admin/v1/desktoptokens', {})
+        return response
+
+    def get_desktoptoken_by_id(self, desktoptoken_id):
+        """
+        Returns a desktop token specified by dtoken_id.
+
+        desktoptoken_id - Desktop Token ID
+
+        Returns desktop token object.
+
+        Raises RuntimeError on error.
+        """
+        path = '/admin/v1/desktoptokens/' + desktoptoken_id
+        response = self.json_api_call('GET', path, {})
+        return response
+
+    def add_desktoptoken(self,
+                         platform,
+                         name=None):
+        """
+        Adds a desktop token.
+
+        Returns desktop token object.
+
+        platform - The desktop token platform.
+        name - Desktop token name (optional).
+
+        Raises RuntimeError on error.
+        """
+        params = {
+            'platform': platform,
+        }
+        if name is not None:
+            params['name'] = name
+        response = self.json_api_call('POST',
+                                      '/admin/v1/desktoptokens',
+                                      params)
+        return response
+
+
+    def delete_desktoptoken(self, desktoptoken_id):
+        """
+        Deletes a desktop token. If the desktop token has already been deleted,
+        does nothing.
+
+        desktoptoken_id - Desktop token ID.
+
+        Returns nothing.
+
+        Raises RuntimeError on error.
+        """
+        path = '/admin/v1/desktoptokens/' + urllib.quote_plus(desktoptoken_id)
+        params = {}
+        self.json_api_call('DELETE', path, params)
+
+
+    def update_desktoptoken(self,
+                            desktoptoken_id,
+                            platform=None,
+                            name=None):
+        """
+        Update a desktop token.
+
+        Returns desktop token object.
+
+        name - Desktop token name (optional).
+        platform - The desktop token platform (optional).
+
+        Raises RuntimeError on error.
+        """
+        desktoptoken_id = urllib.quote_plus(str(desktoptoken_id))
+        path = '/admin/v1/desktoptokens/' + desktoptoken_id
+        params = {}
+        if platform is not None:
+            params['platform'] = platform
+        if name is not None:
+            params['name'] = name
+        response = self.json_api_call('POST',
+                                      path,
+                                      params)
+        return response
+
+
+    def activate_desktoptoken(self, desktoptoken_id, valid_secs=None):
+        """
+        Generates an activation code for a desktop token.
+
+
+        Returns activation info like:
+        {
+            'activation_msg': <str:message with activation url>,
+            'activation_url': <str:activation url>,
+            'valid_secs': <int:seconds}
+
+        Raises RuntimeError on error.
+        """
+
+        params = {}
+        if valid_secs:
+            params['valid_secs'] = str(valid_secs)
+        quoted_id = urllib.quote_plus(desktoptoken_id)
+        response = self.json_api_call('POST',
+            '/admin/v1/desktoptokens/%s/activate' % quoted_id,
+            params)
+        return response
 
 
     def get_tokens(self):
