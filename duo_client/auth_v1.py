@@ -22,6 +22,7 @@ PHONE5 = 'phone5'
 
 class AuthV1(client.Client):
     sig_version = 1
+    auth_details = False
 
     def ping(self):
         """
@@ -87,6 +88,8 @@ class AuthV1(client.Client):
             params['phone'] = phone
 
         response = self.json_api_call('POST', '/rest/v1/auth', params)
+        if self.auth_details:
+            return response
         if async:
             return response['txid']
         return response['result'] == 'allow'
