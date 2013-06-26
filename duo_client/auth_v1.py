@@ -40,10 +40,13 @@ class AuthV1(client.Client):
         return response == 'valid'
 
 
-    def preauth(self, username):
+    def preauth(self, username,
+                ipaddr=None):
         params = {
             'user': username,
         }
+        if ipaddr is not None:
+            params['ipaddr'] = ipaddr
         response = self.json_api_call('POST', '/rest/v1/preauth', params)
         return response
 
@@ -54,6 +57,7 @@ class AuthV1(client.Client):
              passcode=None,
              phone=PHONE1,
              pushinfo=None,
+             ipaddr=None,
              async=False):
         """
         Returns True if authentication was a success, else False.
@@ -68,6 +72,8 @@ class AuthV1(client.Client):
             params['async'] = '1'
         if pushinfo is not None:
             params['pushinfo'] = pushinfo
+        if ipaddr is not None:
+            params['ipaddr'] = ipaddr
 
         if factor == FACTOR_AUTO:
             params['auto'] = auto
