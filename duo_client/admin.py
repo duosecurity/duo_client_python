@@ -698,8 +698,9 @@ class Admin(client.Client):
                          <acturl>, which is replaced with the activation URL.
 
         Returns: {
-            "activation_msg": "To activate the Duo Mobile app, click this link: https://m-eval.duosecurity.com/iphone/7dmi4Oowz5g3J47FARLs",
-            "installation_msg": "Welcome to Duo! To install the Duo Mobile app, click this link: http://m-eval.duosecurity.com",
+            "activation_barcode": "https://api-abcdef.duosecurity.com/frame/qr?value=duo%3A%2F%2Factivation-code",
+            "activation_msg": "To activate the Duo Mobile app, click this link: https://m-abcdef.duosecurity.com/iphone/7dmi4Oowz5g3J47FARLs",
+            "installation_msg": "Welcome to Duo! To install the Duo Mobile app, click this link: http://m-abcdef.duosecurity.com",
             "valid_secs": 3600
         }
 
@@ -708,15 +709,64 @@ class Admin(client.Client):
         path = '/admin/v1/phones/' + phone_id + '/send_sms_activation'
         params = {}
         if valid_secs is not None:
-            params['valid_secs'] = valid_secs
+            params['valid_secs'] = str(valid_secs)
         if install is not None:
-            params['install'] = str(install)
+            params['install'] = str(int(bool(install)))
         if installation_msg is not None:
             params['installation_msg'] = installation_msg
         if activation_msg is not None:
             params['activation_msg'] = activation_msg
         return self.json_api_call('POST', path,
                                     params)
+
+    def create_activation_url(self, phone_id,
+                              valid_secs=None,
+                              install=None):
+        """
+        Create an activation code for Duo Mobile.
+
+        phone_id - Phone ID.
+        install - '1' to also return an installation_url for Duo
+                  Mobile; '0' to not return. Default: '0'.
+
+        Returns: {
+            "activation_barcode": "https://api-abcdef.duosecurity.com/frame/qr?value=duo%3A%2F%2Factivation-code",
+            "activation_url": "https://m-abcdef.duosecurity.com/iphone/7dmi4Oowz5g3J47FARLs",
+            "valid_secs": 3600
+        }
+
+        Raises RuntimeError on error.
+        """
+        path = '/admin/v1/phones/' + phone_id + '/activation_url'
+        params = {}
+        if valid_secs is not None:
+            params['valid_secs'] = str(valid_secs)
+        if install is not None:
+            params['install'] = str(int(bool(install)))
+        return self.json_api_call('POST', path, params)
+
+    def send_sms_installation(self, phone_id,
+                              installation_msg=None):
+        """
+        Send a message via SMS describing how to install Duo Mobile.
+
+        phone_id - Phone ID.
+        installation_msg - Custom installation message template to send to
+                           the user if install was 1. Must contain
+                           <insturl>, which is replaced with the
+                           installation URL.
+
+        Returns: {
+            "installation_msg": "Welcome to Duo! To install the Duo Mobile app, click this link: http://m-abcdef.duosecurity.com",
+        }
+
+        Raises RuntimeError on error.
+        """
+        path = '/admin/v1/phones/' + phone_id + '/send_sms_installation'
+        params = {}
+        if installation_msg is not None:
+            params['installation_msg'] = installation_msg
+        return self.json_api_call('POST', path, params)
 
     def get_desktoptokens(self):
         """
