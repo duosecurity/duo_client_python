@@ -726,6 +726,8 @@ class Admin(client.Client):
         Create an activation code for Duo Mobile.
 
         phone_id - Phone ID.
+        valid_secs - The number of seconds activation code should be valid for.
+                     Default: 86400 seconds (one day).
         install - '1' to also return an installation_url for Duo
                   Mobile; '0' to not return. Default: '0'.
 
@@ -869,7 +871,7 @@ class Admin(client.Client):
         {
             'activation_msg': <str:message with activation url>,
             'activation_url': <str:activation url>,
-            'valid_secs': <int:seconds}
+            'valid_secs': <int:seconds>}
 
         Raises RuntimeError on error.
         """
