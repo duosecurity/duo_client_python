@@ -89,7 +89,7 @@ class Client(object):
 
     def __init__(self, ikey, skey, host,
                  ca_certs=DEFAULT_CA_CERTS,
-                 sig_timezone='UTC'):
+                 sig_timezone='UTC', user_agent=None):
         """
         ca - Path to CA pem file.
         """
@@ -101,6 +101,7 @@ class Client(object):
         if ca_certs is None:
             ca_certs = DEFAULT_CA_CERTS
         self.ca_certs = ca_certs
+        self.user_agent = user_agent
         self.set_proxy(host=None, proxy_type=None)
         self.timeout = socket._GLOBAL_DEFAULT_TIMEOUT
 
@@ -148,6 +149,9 @@ class Client(object):
             'Date': now,
             'Host': self.host,
         }
+
+        if self.user_agent:
+            headers['User-Agent'] = self.user_agent
 
         if method in ['POST', 'PUT']:
             headers['Content-type'] = 'application/x-www-form-urlencoded'
