@@ -994,33 +994,39 @@ class Admin(client.Client):
         self.json_api_call('DELETE', path, {})
 
 
-    def add_hotp6_token(self, serial, secret):
+    def add_hotp6_token(self, serial, secret, counter=None):
         """
         Add a HOTP6 token.
 
         serial - Token serial number
         secret - HOTP secret
+        counter - Initial counter value (default: 0)
 
         Returns newly added token object.
         """
         path = '/admin/v1/tokens'
         params = {'type': 'h6', 'serial': serial, 'secret': secret}
+        if counter is not None:
+            params['counter'] = str(int(counter))
         response = self.json_api_call('POST', path,
                                         params)
         return response
 
 
-    def add_hotp8_token(self, serial, secret):
+    def add_hotp8_token(self, serial, secret, counter=None):
         """
         Add a HOTP8 token.
 
         serial - Token serial number
         secret - HOTP secret
+        counter - Initial counter value (default: 0)
 
         Returns newly added token object.
         """
         path = '/admin/v1/tokens'
         params = {'type': 'h8', 'serial': serial, 'secret': secret}
+        if counter is not None:
+            params['counter'] = str(int(counter))
         response = self.json_api_call('POST', path,
                                         params)
         return response
