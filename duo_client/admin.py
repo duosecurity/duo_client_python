@@ -92,6 +92,7 @@ Integration objects are returned in the following format:
      'adminapi_settings': <bool:settings permission (0|1)>,
      'adminapi_write_resource': <bool:write resource permission (0|1)>,
      'enroll_policy': <str:enroll policy (enroll|allow|deny)>,
+     'username_normalization_policy': <str:normalization policy (simple|none)>,
      'greeting': <str:voice greeting>,
      'integration_key': <str:integration key>,
      'name': <str:integration name>,
@@ -1292,6 +1293,7 @@ class Admin(client.Client):
                            greeting=None,
                            notes=None,
                            enroll_policy=None,
+                           username_normalization_policy=None,
                            adminapi_admins=None,
                            adminapi_info=None,
                            adminapi_integrations=None,
@@ -1312,6 +1314,7 @@ class Admin(client.Client):
         greeting - <str:Voice greeting> (optional, default '')
         notes - <str:internal use> (optional, uses default setting)
         enroll_policy - <str:'enroll'|'allow'|'deny'> (optional, default 'enroll')
+        username_normalization_policy - <str:'simple'|'none'> (optional, default 'none')
         trusted_device_days - <int: days>|None
         ip_whitelist - <str: CSV list of IP/Ranges>|None
                        See adminapi docs for more details.
@@ -1341,6 +1344,8 @@ class Admin(client.Client):
             params['greeting'] = greeting
         if notes is not None:
             params['notes'] = notes
+        if username_normalization_policy is not None:
+            params['username_normalization_policy'] = username_normalization_policy
         if enroll_policy is not None:
             params['enroll_policy'] = enroll_policy
         if trusted_device_days is not None:
@@ -1394,6 +1399,7 @@ class Admin(client.Client):
                            greeting=None,
                            notes=None,
                            enroll_policy=None,
+                           username_normalization_policy=None,
                            adminapi_admins=None,
                            adminapi_info=None,
                            adminapi_integrations=None,
@@ -1450,6 +1456,8 @@ class Admin(client.Client):
             params['notes'] = notes
         if enroll_policy is not None:
             params['enroll_policy'] = enroll_policy
+        if username_normalization_policy is not None:
+            params['username_normalization_policy'] = username_normalization_policy
         if trusted_device_days is not None:
             params['trusted_device_days'] = str(trusted_device_days)
         if ip_whitelist is not None:
