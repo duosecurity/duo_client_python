@@ -211,6 +211,7 @@ class Admin(client.Client):
                  'factor': <str:factor>,
                  'result': <str:result>,
                  'ip': <str:ip address>,
+                 'new_enrollment': <bool:if event corresponds to enrollment>,
                  'integration': <str:integration>}, ...
             ]
 

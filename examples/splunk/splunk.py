@@ -138,14 +138,17 @@ class AuthenticationLog(BaseLog):
         for event in self.events:
             event['ctime'] = time.ctime(event['timestamp'])
 
-            fmtstr = '%(timestamp)s,' \
-                     'host="%(host)s", ' \
-                     'eventtype="%(eventtype)s", ' \
-                     'username="%(username)s", ' \
-                     'factor="%(factor)s", ' \
-                     'result="%(result)s", ' \
-                     'ip="%(ip)s", ' \
-                     'integration="%(integration)s"'
+            fmtstr = (
+                '%(timestamp)s,'
+                'host="%(host)s", '
+                'eventtype="%(eventtype)s", '
+                'username="%(username)s", '
+                'factor="%(factor)s", '
+                'result="%(result)s", '
+                'ip="%(ip)s", '
+                'integration="%(integration)s"'
+                'newenrollment="%(new_enrollment)s"'
+            )
 
             print fmtstr % event
 
