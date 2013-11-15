@@ -123,6 +123,10 @@ class Client(object):
     def api_call(self, method, path, params):
         """
         Call a Duo API method. Return a (status, reason, data) tuple.
+
+        * method: HTTP request method. E.g. "GET", "POST", or "DELETE".
+        * path: Full path of the API endpoint. E.g. "/auth/v2/ping".
+        * params: dict mapping from parameter name to stringified value.
         """
         # urllib cannot handle unicode strings properly. quote() excepts,
         # and urlencode() replaces them with '?'.
@@ -241,36 +245,40 @@ class Client(object):
         """
         Return the parsed data structure or raise RuntimeError.
         """
-        if response.status != 200:
-            msg = 'Received %s %s' % (response.status, response.reason)
-            try:
-                data = json.loads(data)
-                if data['stat'] == 'FAIL':
-                    if 'message_detail' in data:
-                        msg = 'Received %s %s (%s)' % (
-                            response.status,
-                            data['message'],
-                            data['message_detail'],
-                        )
-                    else:
-                        msg = 'Received %s %s' % (
-                            response.status,
-                            data['message'],
-                        )
-            except (ValueError, KeyError, TypeError):
-                pass
+        def raise_error(msg):
             error = RuntimeError(msg)
             error.status = response.status
             error.reason = response.reason
             error.data = data
             raise error
+        if response.status != 200:
+            try:
+                data = json.loads(data)
+                if data['stat'] == 'FAIL':
+                    if 'message_detail' in data:
+                        raise_error('Received %s %s (%s)' % (
+                            response.status,
+                            data['message'],
+                            data['message_detail'],
+                        ))
+                    else:
+                        raise_error('Received %s %s' % (
+                                response.status,
+                            data['message'],
+                        ))
+            except (ValueError, KeyError, TypeError):
+                pass
+            raise_error('Received %s %s' % (
+                    response.status,
+                    response.reason,
+            ))
         try:
             data = json.loads(data)
             if data['stat'] != 'OK':
-                raise RuntimeError('Received error response: %s' % data)
+                raise_error('Received error response: %s' % data)
             return data['response']
         except (ValueError, KeyError, TypeError):
-            raise RuntimeError('Received bad response: %s' % data)
+            raise_error('Received bad response: %s' % data)
 
 
 def output_response(response, data, headers=[]):
