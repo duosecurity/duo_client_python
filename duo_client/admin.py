@@ -13,7 +13,7 @@ User objects are returned in the following format:
          "realname": <str:real name>,
          "status": <str:status>,
          "notes": <str:notes>,
-         "last_login": <int:unix timestamp>,
+         "last_login": <int:unix timestamp>|None,
          "phones": [<phone object>, ...],
          "tokens": [<token object>, ...]}
 
