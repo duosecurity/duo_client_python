@@ -518,6 +518,51 @@ class Admin(client.Client):
         path = '/admin/v1/users/' + user_id + '/tokens/' + token_id
         return self.json_api_call('DELETE', path, {})
 
+    def get_user_groups(self, user_id):
+        """
+        Returns an array of groups associated with the user.
+
+        user_id - User ID
+
+        Returns list of groups objects.
+
+        Raises RuntimeError on error.
+        """
+        user_id = urllib.quote_plus(str(user_id))
+        path = '/admin/v1/users/' + user_id + '/groups'
+        return self.json_api_call('GET', path, {})
+
+    def add_user_group(self, user_id, group_id):
+        """
+        Associates a group with a user.
+
+        user_id - User ID
+        group_id - Group ID
+
+        Returns nothing.
+
+        Raises RuntimeError on error.
+        """
+        user_id = urllib.quote_plus(str(user_id))
+        path = '/admin/v1/users/' + user_id + '/groups'
+        params = {'group_id': group_id}
+        return self.json_api_call('POST', path, params)
+
+    def delete_user_group(self, user_id, group_id):
+        """
+        Dissociates a group from a user.
+
+        user_id - User ID
+        group_id - Group ID
+
+        Returns nothing.
+
+        Raises RuntimeError on error.
+        """
+        user_id = urllib.quote_plus(str(user_id))
+        path = '/admin/v1/users/' + user_id + '/groups/' + group_id
+        params = {}
+        return self.json_api_call('DELETE', path, params)
 
     def get_phones(self):
         """
@@ -1244,6 +1289,78 @@ class Admin(client.Client):
         response = self.json_api_call(
             'GET',
             '/admin/v1/info/user_authentication_attempts',
+            params
+        )
+        return response
+
+    def get_groups(self):
+        """
+        Returns a list of groups.
+        """
+        return self.json_api_call(
+            'GET',
+            '/admin/v1/groups',
+            {}
+        )
+
+    def get_group(self, gkey):
+        """
+        Returns a group by gkey.
+        """
+        return self.json_api_call(
+            'GET',
+            '/admin/v1/groups/' + gkey,
+            {}
+        )
+
+    def create_group(self, name, desc=None):
+        """
+        Create a new group.
+
+        name - The name of the group (Required)
+        desc - Group description (Optional)
+        """
+        params = {}
+        if name is not None:
+            params['name'] = name
+        if desc is not None:
+            params['desc'] = desc
+        response = self.json_api_call(
+            'POST',
+            '/admin/v1/groups',
+            params
+        )
+        return response
+
+    def delete_group(self, gkey):
+        """
+        Delete a group by gkey
+        """
+        return self.json_api_call(
+            'DELETE',
+            '/admin/v1/groups/' + gkey,
+            {}
+        )
+
+    def modify_group(self,
+                     gkey,
+                     name=None,
+                     desc=None):
+        """
+        Modify a group
+
+        gkey - Group to modify (Required)
+        name - New group name (Optional)
+        desc - New group description (Optional)
+        """
+        params = {}
+        if name is not None:
+            params['name'] = name
+        if desc is not None:
+            params['desc'] = desc
+        response = self.json_api_call(
+            'POST',
+            '/admin/v1/groups/' + gkey,
             params
         )
         return response
