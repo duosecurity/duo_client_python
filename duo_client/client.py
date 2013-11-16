@@ -35,15 +35,22 @@ DEFAULT_CA_CERTS = os.path.join(os.path.dirname(__file__), 'ca_certs.pem')
 
 
 def canon_params(params):
+    """
+    Return a canonical string version of the given request parameters.
+    """
+    # this is normalized the same as for OAuth 1.0,
+    # http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2
     args = []
-    for key in sorted(params.keys()):
-        val = params[key]
-        arg = '%s=%s' % (urllib.quote(key, '~'), urllib.quote(val, '~'))
-        args.append(arg)
+    for (key, vals) in sorted(
+        (urllib.quote(key, '~'), vals) for (key, vals) in params.items()):
+        for val in sorted(urllib.quote(val, '~') for val in vals):
+            args.append('%s=%s' % (key, val))
     return '&'.join(args)
 
-
 def canonicalize(method, host, uri, params, date, sig_version):
+    """
+    Return a canonical string version of the given request attributes.
+    """
     if sig_version == 1:
         canon = []
     elif sig_version == 2:
@@ -59,7 +66,6 @@ def canonicalize(method, host, uri, params, date, sig_version):
     ]
     return '\n'.join(canon)
 
-
 def sign(ikey, skey, method, host, uri, date, sig_version, params):
     """
     Return basic authorization header line with a Duo Web API signature.
@@ -71,18 +77,24 @@ def sign(ikey, skey, method, host, uri, date, sig_version, params):
     auth = '%s:%s' % (ikey, sig.hexdigest())
     return 'Basic %s' % base64.b64encode(auth)
 
-
-def encode_params(params):
-    """Returns copy of params with unicode strings utf-8 encoded"""
-    new_params = {}
-    for key, value in params.items():
-        if isinstance(key, unicode):
-            key = key.encode("utf-8")
+def normalize_params(params):
+    """
+    Return copy of params with strings listified
+    and unicode strings utf-8 encoded.
+    """
+    # urllib cannot handle unicode strings properly. quote() excepts,
+    # and urlencode() replaces them with '?'.
+    def encode(value):
         if isinstance(value, unicode):
-            value = value.encode("utf-8")
-        new_params[key] = value
-    return new_params
-
+            return value.encode("utf-8")
+        return value
+    def to_list(value):
+        if value is None or isinstance(value, basestring):
+            return [value]
+        return value
+    return dict(
+        (encode(key), [encode(v) for v in to_list(value)])
+        for (key, value) in params.items())
 
 class Client(object):
     sig_version = 2
@@ -128,9 +140,7 @@ class Client(object):
         * path: Full path of the API endpoint. E.g. "/auth/v2/ping".
         * params: dict mapping from parameter name to stringified value.
         """
-        # urllib cannot handle unicode strings properly. quote() excepts,
-        # and urlencode() replaces them with '?'.
-        params = encode_params(params)
+        params = normalize_params(params)
 
         if self.sig_timezone == 'UTC':
             now = email.utils.formatdate()
@@ -352,15 +362,11 @@ def main():
         file_args = file_args.split(',')
 
     for (k, v) in params.items():
-        if len(v) != 1:
-            # Each parameter must have a single value. No Duo API
-            # endpoints have arguments that accept multiple values for
-            # the same parameter. Thus, the call() and sign() provided
-            # here can't handle a list of values for the same
-            # parameter.
-            raise NotImplementedError
-        (v,) = v
         if k in file_args:      # value is a filename, replace with contents
+            if len(v) != 1:
+                # file arguments cannot have multiple values
+                raise NotImplementedError
+            (v,) = v
             with open(v, 'rb') as val:
                 params[k] = base64.b64encode(val.read())
         else:
