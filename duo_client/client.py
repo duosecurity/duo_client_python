@@ -103,7 +103,7 @@ class Client(object):
                  ca_certs=DEFAULT_CA_CERTS,
                  sig_timezone='UTC', user_agent=None):
         """
-        ca - Path to CA pem file.
+        ca_certs - Path to CA pem file.
         """
         self.ikey = ikey
         self.skey = skey
