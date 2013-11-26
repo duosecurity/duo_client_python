@@ -1,8 +1,10 @@
 from distutils.core import setup
 
+from duo_client import __version__
+
 setup(
     name='duo_client',
-    version='2.0',
+    version=__version__,
     description='Reference client for Duo Security APIs',
     author='Duo Security, Inc.',
     author_email='support@duosecurity.com',

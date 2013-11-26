@@ -1,6 +1,7 @@
 """
 Low level functions for generating Duo Web API calls and parsing results.
 """
+__version__ = '2.0'
 
 import base64
 import collections
@@ -101,7 +102,8 @@ class Client(object):
 
     def __init__(self, ikey, skey, host,
                  ca_certs=DEFAULT_CA_CERTS,
-                 sig_timezone='UTC', user_agent=None):
+                 sig_timezone='UTC',
+                 user_agent=('Duo API Python/' + __version__)):
         """
         ca_certs - Path to CA pem file.
         """

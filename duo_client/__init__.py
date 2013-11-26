@@ -1,6 +1,7 @@
 from accounts import Accounts
 from admin import Admin
 from auth import Auth
+from client import __version__
 from verify import Verify
 
 __all__ = [
