@@ -1032,33 +1032,39 @@ class Admin(client.Client):
         return response
 
 
-    def add_totp6_token(self, serial, secret):
+    def add_totp6_token(self, serial, secret, totp_step=None):
         """
         Add a TOTP6 token.
 
         serial - Token serial number
         secret - TOTP secret
+        totp_step - Time step (default: 30 seconds)
 
         Returns newly added token object.
         """
         path = '/admin/v1/tokens'
         params = {'type': 't6', 'serial': serial, 'secret': secret}
+        if totp_step is not None:
+            params['totp_step'] = str(int(totp_step))
         response = self.json_api_call('POST', path,
                                         params)
         return response
 
 
-    def add_totp8_token(self, serial, secret):
+    def add_totp8_token(self, serial, secret, totp_step=None):
         """
         Add a TOTP8 token.
 
         serial - Token serial number
         secret - TOTP secret
+        totp_step - Time step (default: 30 seconds)
 
         Returns newly added token object.
         """
         path = '/admin/v1/tokens'
         params = {'type': 't8', 'serial': serial, 'secret': secret}
+        if totp_step is not None:
+            params['totp_step'] = str(int(totp_step))
         response = self.json_api_call('POST', path,
                                         params)
         return response
