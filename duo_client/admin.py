@@ -59,6 +59,7 @@ Token objects are returned in the following format:
     {"type": <str:token type>,
      "serial": <str:token serial number>,
      "token_id": <str:token id>,
+     "totp_step": <int:number of seconds> or null,
      "users": [<user object>, ...]}
 
 Token type is one of:
