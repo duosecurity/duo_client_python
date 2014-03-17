@@ -1153,7 +1153,10 @@ class Admin(client.Client):
                         keypress_fraud=None,
                         timezone=None,
                         telephony_warning_min=None,
-                        caller_id=None):
+                        caller_id=None,
+                        push_enabled=None,
+                        voice_enabled=None,
+                        sms_enabled=None):
         """
         Update settings.
 
@@ -1169,6 +1172,9 @@ class Admin(client.Client):
         timezone - <str:IANA timezone>|None
         telephony_warning_min - <int:credits>
         caller_id - <str:phone number>
+        push_enabled - True|False|None
+        sms_enabled = True|False|None
+        voice_enabled = True|False|None
 
         Returns updated settings object.
 
@@ -1200,6 +1206,12 @@ class Admin(client.Client):
             params['telephony_warning_min'] = str(telephony_warning_min)
         if caller_id is not None:
             params['caller_id'] = caller_id
+        if push_enabled is not None:
+            params['push_enabled'] = '1' if push_enabled else '0'
+        if sms_enabled is not None:
+            params['sms_enabled'] = '1' if sms_enabled else '0'
+        if voice_enabled is not None:
+            params['voice_enabled'] = '1' if voice_enabled else '0'
 
         if not params:
             raise TypeError("No settings were provided")
@@ -1345,18 +1357,36 @@ class Admin(client.Client):
             {}
         )
 
-    def create_group(self, name, desc=None):
+    def create_group(self, name,
+                    desc=None,
+                    status=None,
+                    push_enabled=None,
+                    sms_enabled=None,
+                    voice_enabled=None
+                    ):
         """
         Create a new group.
 
         name - The name of the group (Required)
         desc - Group description (Optional)
+        status - Group authentication status <str: 'active'/'disabled'/'bypass'> (Optional)
+        push_enabled - Push factor restriction <True/False> (Optional)
+        sms_enabled - SMS factor restriction <True/False> (Optional)
+        voice_enabled - Voice factor restriction <True/False> (Optional)
         """
         params = {}
         if name is not None:
             params['name'] = name
         if desc is not None:
             params['desc'] = desc
+        if status is not None:
+            params['status'] = status
+        if push_enabled is not None:
+            params['push_enabled'] = '1' if push_enabled else '0'
+        if sms_enabled is not None:
+            params['sms_enabled'] = '1' if sms_enabled else '0'
+        if voice_enabled is not None:
+            params['voice_enabled'] = '1' if voice_enabled else '0'
         response = self.json_api_call(
             'POST',
             '/admin/v1/groups',
@@ -1377,19 +1407,35 @@ class Admin(client.Client):
     def modify_group(self,
                      gkey,
                      name=None,
-                     desc=None):
+                     desc=None,
+                     status=None,
+                     push_enabled=None,
+                     sms_enabled=None,
+                     voice_enabled=None):
         """
         Modify a group
 
         gkey - Group to modify (Required)
         name - New group name (Optional)
         desc - New group description (Optional)
+        status - Group authentication status <str: 'active'/'disabled'/'bypass'> (Optional)
+        push_enabled - Push factor restriction <True/False> (Optional)
+        sms_enabled - SMS factor restriction <True/False> (Optional)
+        voice_enabled - Voice factor restriction <True/False> (Optional)
         """
         params = {}
         if name is not None:
             params['name'] = name
         if desc is not None:
             params['desc'] = desc
+        if status is not None:
+            params['status'] = status
+        if push_enabled is not None:
+            params['push_enabled'] = '1' if push_enabled else '0'
+        if sms_enabled is not None:
+            params['sms_enabled'] = '1' if sms_enabled else '0'
+        if voice_enabled is not None:
+            params['voice_enabled'] = '1' if voice_enabled else '0'
         response = self.json_api_call(
             'POST',
             '/admin/v1/groups/' + gkey,
@@ -1452,7 +1498,8 @@ class Admin(client.Client):
                            adminapi_write_resource=None,
                            trusted_device_days=None,
                            ip_whitelist=None,
-                           ip_whitelist_enroll_policy=None):
+                           ip_whitelist_enroll_policy=None,
+                           groups_allowed=None):
         """Creates a new integration.
 
         name - The name of the integration (required)
@@ -1476,6 +1523,7 @@ class Admin(client.Client):
         adminapi_read_resource - <bool: read resource permission>|None
         adminapi_settings - <bool: settings permission>|None
         adminapi_write_resource - <bool:write resource permission>|None
+        groups_allowed - <str: CSV list of gkeys of groups allowed to auth>
 
         Returns the created integration.
 
@@ -1519,6 +1567,8 @@ class Admin(client.Client):
         if adminapi_write_resource is not None:
             params['adminapi_write_resource'] = (
                 '1' if adminapi_write_resource else '0')
+        if groups_allowed is not None:
+            params['groups_allowed'] = groups_allowed
         response = self.json_api_call('POST',
                                       '/admin/v1/integrations',
                                       params)
@@ -1559,7 +1609,8 @@ class Admin(client.Client):
                            reset_secret_key=None,
                            trusted_device_days=None,
                            ip_whitelist=None,
-                           ip_whitelist_enroll_policy=None):
+                           ip_whitelist_enroll_policy=None,
+                           groups_allowed=None):
         """Updates an integration.
 
         integration_key - The key of the integration to update. (required)
@@ -1582,6 +1633,7 @@ class Admin(client.Client):
         adminapi_settings - True|False|None
         adminapi_write_resource - True|False|None
         reset_secret_key - <any value>|None
+        groups_allowed - <str: CSV list of gkeys of groups allowed to auth>
 
         If any value other than None is provided for 'reset_secret_key'
         (for example, 1), then a new secret key will be generated for the
@@ -1631,6 +1683,8 @@ class Admin(client.Client):
                 '1' if adminapi_write_resource else '0')
         if reset_secret_key is not None:
             params['reset_secret_key'] = '1'
+        if groups_allowed is not None:
+            params['groups_allowed'] = groups_allowed
 
         if not params:
             raise TypeError("No new values were provided")
