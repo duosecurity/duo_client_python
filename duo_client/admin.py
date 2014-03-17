@@ -149,6 +149,13 @@ class Admin(client.Client):
             return ','.join(ip_whitelist)
         pass
 
+    @staticmethod
+    def _canonicalize_bypass_codes(codes):
+        if isinstance(codes, basestring):
+            return codes
+        else:
+            return ','.join([str(int(code)) for code in codes])
+
     def get_administrator_log(self,
                               mintime=0):
         """
@@ -393,13 +400,16 @@ class Admin(client.Client):
         self.json_api_call('DELETE', path, {})
 
 
-    def get_user_bypass_codes(self, user_id, count=10, valid_secs=0):
+    def get_user_bypass_codes(self, user_id, count=None, valid_secs=None, remaining_uses=None, codes=None):
         """
         Replace a user's bypass codes with new codes.
 
         user_id - User ID
-        count - Number of new codes to generate
+        count - Number of new codes to randomly generate
         valid_secs - Seconds before codes expire (if 0 they will never expire)
+        remaining_uses - The number of times this code can be used (0 is unlimited)
+        codes - Optionally provide custom codes, otherwise will be random
+        count and codes are mutually exclusive
 
         Returns a list of newly created codes.
 
@@ -407,12 +417,20 @@ class Admin(client.Client):
         """
         user_id = urllib.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/bypass_codes'
-        count = str(int(count))
-        valid_secs = str(int(valid_secs))
-        params = {
-            'count': count,
-            'valid_secs': valid_secs,
-        }
+        params = {}
+
+        if count is not None:
+            params['count'] = str(int(count))
+
+        if valid_secs is not None:
+            params['valid_secs'] = str(int(valid_secs))
+
+        if remaining_uses is not None:
+            params['reuse_count'] = str(int(remaining_uses))
+
+        if codes is not None:
+            params['codes'] = self._canonicalize_bypass_codes(codes)
+
         return self.json_api_call('POST', path, params)
 
 
