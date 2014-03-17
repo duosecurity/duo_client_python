@@ -82,9 +82,15 @@ class Auth(client.Client):
                                       params)
         return response
 
-    def preauth(self, username=None, user_id=None, ipaddr=None):
+    def preauth(self,
+                username=None,
+                user_id=None,
+                ipaddr=None,
+                trusted_device_token=None):
         """
         Determine if and with what factors a user may authenticate or enroll.
+
+        See the adminapi docs for parameter and response information.
         """
         params = {}
         if username is not None:
@@ -93,6 +99,8 @@ class Auth(client.Client):
             params['user_id'] = user_id
         if ipaddr is not None:
             params['ipaddr'] = ipaddr
+        if trusted_device_token is not None:
+            params['trusted_device_token'] = trusted_device_token
         response = self.json_api_call('POST',
                                       '/auth/v2/preauth',
                                       params)
@@ -121,6 +129,11 @@ class Auth(client.Client):
             'status': <str:machine-parsable>,
             'status_msg': <str:human-readable>,
         }
+
+        If Trusted Devices is enabled, async is not True, and status is
+        'allow', another item is returned:
+
+        * trusted_device_token: <str: device token for use with preauth>
         """
         params = {
             'factor': factor,
@@ -162,16 +175,27 @@ class Auth(client.Client):
         * status: String constant identifying the request's state.
 
         * status_msg: Human-readable string describing the request state.
+
+        If Trusted Devices is enabled, another item is returned when success
+        is True:
+
+        * trusted_device_token: String token to bypass second-factor
+          authentication for this user during an admin-defined period.
         """
         params = {
             'txid': txid,
         }
-        response = self.json_api_call('GET',
-                                      '/auth/v2/auth_status',
-                                      params)
-        return {
-            'waiting': (response.get('result') == 'waiting'),
-            'success': (response.get('result') == 'allow'),
-            'status': response.get('status', ''),
-            'status_msg': response.get('status_msg', ''),
+        status = self.json_api_call('GET',
+                                    '/auth/v2/auth_status',
+                                    params)
+        response = {
+            'waiting': (status.get('result') == 'waiting'),
+            'success': (status.get('result') == 'allow'),
+            'status': status.get('status', ''),
+            'status_msg': status.get('status_msg', ''),
         }
+
+        if 'trusted_device_token' in status:
+            response['trusted_device_token'] = status['trusted_device_token']
+
+        return response
