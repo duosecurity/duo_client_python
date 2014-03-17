@@ -30,7 +30,7 @@ class Verify(client.Client):
         if digits is not None:
             params['digits'] = str(int(digits))
         response = self.json_api_call('POST',
-                                      '/verify/v1/call.json',
+                                      '/verify/v1/call',
                                       params)
         return (response['pin'], response['txid'])
 
@@ -42,7 +42,7 @@ class Verify(client.Client):
             'txid': txid,
         }
         response = self.json_api_call('GET',
-                                      '/verify/v1/status.json',
+                                      '/verify/v1/status',
                                       params)
         return response
 
@@ -59,6 +59,6 @@ class Verify(client.Client):
         if digits is not None:
             params['digits'] = str(int(digits))
         response = self.json_api_call('POST',
-                                      '/verify/v1/sms.json',
+                                      '/verify/v1/sms',
                                       params)
         return response['pin']
