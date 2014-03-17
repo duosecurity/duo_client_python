@@ -27,6 +27,19 @@ class Auth(client.Client):
         """
         return self.json_api_call('GET', '/auth/v2/check', {})
 
+    def logo(self):
+        """
+        Retrieve the user-supplied logo.
+
+        Returns the logo on success, raises RuntimeError on failure.
+        """
+        response, data = self.api_call('GET', '/auth/v2/logo', {})
+        content_type = response.getheader('Content-Type')
+        if content_type and content_type.startswith('image/'):
+            return data
+        else:
+            return self.parse_json_response(response, data)
+
     def enroll(self, username=None, valid_secs=None, bypass_codes=None):
         """
         Create a new user and associated numberless phone.

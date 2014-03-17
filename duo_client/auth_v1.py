@@ -41,6 +41,21 @@ class AuthV1(client.Client):
         return response == 'valid'
 
 
+    def logo(self):
+        """
+        Retrieve the user-supplied logo.
+
+        Returns the logo on success, raises RuntimeError on failure.
+        """
+        response, data = self.api_call('GET', '/rest/v1/logo', {})
+        content_type = response.getheader('Content-Type')
+        if content_type and content_type.startswith('image/'):
+            return data
+        else:
+            return self.parse_json_response(response, data)
+
+
+
     def preauth(self, username,
                 ipaddr=None):
         params = {
