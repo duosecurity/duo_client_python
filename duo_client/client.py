@@ -136,7 +136,7 @@ class Client(object):
 
     def api_call(self, method, path, params):
         """
-        Call a Duo API method. Return a (status, reason, data) tuple.
+        Call a Duo API method. Return a (response, data) tuple.
 
         * method: HTTP request method. E.g. "GET", "POST", or "DELETE".
         * path: Full path of the API endpoint. E.g. "/auth/v2/ping".
