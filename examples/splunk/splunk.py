@@ -7,6 +7,9 @@ import time
 
 import duo_client
 
+# For proxy support
+from urlparse import urlparse
+
 
 class BaseLog(object):
 
@@ -192,12 +195,22 @@ def admin_api_from_config(config_path):
     ca_certs = config_d.get("ca_certs", None)
     if ca_certs is None:
         ca_certs = config_d.get("ca", None)
-    return duo_client.Admin(
+
+    ret = duo_client.Admin(
         ikey=config_d['ikey'],
         skey=config_d['skey'],
         host=config_d['host'],
         ca_certs=ca_certs,
     )
+
+    http_proxy = config_d.get("http_proxy", None)
+    if http_proxy is not None:
+        proxy_parsed = urlparse(http_proxy)
+        proxy_host = proxy_parsed.hostname
+        proxy_port = proxy_parsed.port
+        ret.set_proxy(host = proxy_host, port = proxy_port)
+
+    return ret
 
 
 def main():
