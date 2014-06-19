@@ -1088,6 +1088,25 @@ class Admin(client.Client):
                                         params)
         return response
 
+    def update_token(self, token_id, totp_step=None):
+        """
+        Update a token.
+
+        totp_step - Time step (optional)
+
+        Returns token object.
+
+        Raises RuntimeError on error.
+        """
+        token_id = urllib.quote_plus(str(token_id))
+        path = '/admin/v1/tokens/' + token_id
+        params = {}
+        if totp_step is not None:
+            params['totp_step'] = totp_step
+        response = self.json_api_call('POST', path,
+                                        params)
+        return response
+
 
     def add_yubikey_token(self, serial, private_id, aes_key):
         """
