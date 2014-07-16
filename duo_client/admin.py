@@ -327,7 +327,7 @@ class Admin(client.Client):
 
 
     def add_user(self, username, realname=None, status=None,
-                 notes=None):
+                 notes=None, email=None):
         """
         Adds a user.
 
@@ -335,6 +335,7 @@ class Admin(client.Client):
         realname - User's real name (optional)
         status - User's status, defaults to USER_STATUS_ACTIVE
         notes - Comment field (optional)
+	email - User's email address (optional)
 
         Returns newly created user object.
 
@@ -349,6 +350,8 @@ class Admin(client.Client):
             params['status'] = status
         if notes is not None:
             params['notes'] = notes
+        if email is not None:
+            params['email'] = email
         response = self.json_api_call('POST',
                                       '/admin/v1/users',
                                       params)
