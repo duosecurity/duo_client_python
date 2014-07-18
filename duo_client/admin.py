@@ -80,7 +80,13 @@ Settings objects are returned in the following format:
      'sms_expiration': <int:minutes until expiration>|0,
      'log_retention_days': <int:days to retain>|0,
      'sms_refresh': <bool:is sms refresh enabled (0|1)>,
-     'telephony_warning_min': <int:credits>'}
+     'telephony_warning_min': <int:credits>',
+     'minimum_password_length': <int:minimum length>,
+     'password_requires_upper_alpha': <bool:is upper alpha character required>,
+     'password_requires_lower_alpha': <bool:is lower alpha character required>,
+     'password_requires_numeric': <bool:is numeric character required>,
+     'password_requires_special': <bool:is special character required>,
+    }
 
 
 INTEGRATIONS
@@ -1189,6 +1195,11 @@ class Admin(client.Client):
                         sms_enabled=None,
                         mobile_otp_enabled=None,
                         user_telephony_cost_max=None):
+                        minimum_password_length=None,
+                        password_requires_upper_alpha=None,
+                        password_requires_lower_alpha=None,
+                        password_requires_numeric=None,
+                        password_requires_special=None):
         """
         Update settings.
 
@@ -1211,6 +1222,11 @@ class Admin(client.Client):
         voice_enabled = True|False|None
         mobile_otp_enabled = True|False|None
         user_telephony_cost_max = <int:positive number of credits>
+        minimum_password_length = <int:length>|None,
+        password_requires_upper_alpha = True|False|None
+        password_requires_lower_alpha = True|False|None
+        password_requires_numeric = True|False|None
+        password_requires_special = True|False|None
 
         Returns updated settings object.
 
@@ -1256,6 +1272,20 @@ class Admin(client.Client):
             params['mobile_otp_enabled'] = '1' if mobile_otp_enabled else '0'
         if user_telephony_cost_max is not None:
             params['user_telephony_cost_max'] = str(user_telephony_cost_max)
+        if minimum_password_length is not None:
+            params['minimum_password_length'] = str(minimum_password_length)
+        if password_requires_upper_alpha is not None:
+            params['password_requires_upper_alpha'] = ('1' if
+              password_requires_upper_alpha else '0')
+        if password_requires_lower_alpha is not None:
+            params['password_requires_lower_alpha'] = ('1' if
+              password_requires_lower_alpha else '0')
+        if password_requires_numeric is not None:
+            params['password_requires_numeric'] = ('1' if
+              password_requires_numeric else '0')
+        if password_requires_special is not None:
+            params['password_requires_special'] = ('1' if
+              password_requires_special else '0')
 
         if not params:
             raise TypeError("No settings were provided")
