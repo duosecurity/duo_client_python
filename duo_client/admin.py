@@ -78,6 +78,7 @@ Settings objects are returned in the following format:
      'lockout_threshold': <int:lockout threshold>
      'lockout_expire_duration': <int:minutes until expiration>|0,
      'sms_expiration': <int:minutes until expiration>|0,
+     'log_retention_days': <int:days to retain>|0,
      'sms_refresh': <bool:is sms refresh enabled (0|1)>,
      'telephony_warning_min': <int:credits>'}
 
@@ -1165,6 +1166,7 @@ class Admin(client.Client):
                         lockout_threshold=None,
                         lockout_expire_duration=None,
                         inactive_user_expiration=None,
+                        log_retention_days=None,
                         sms_batch=None,
                         sms_expiration=None,
                         sms_refresh=None,
@@ -1185,6 +1187,7 @@ class Admin(client.Client):
         lockout_threshold - <int:number of attempts>|None
         lockout_expire_duration - <int:minutes>|0|None
         inactive_user_expiration - <int:number of days>|None
+        log_retention_days - <int:number of days>|0|None
         sms_batch - <int:batch size>|None
         sms_expiration - <int:minutes>|None
         sms_refresh - True|False|None
@@ -1212,6 +1215,8 @@ class Admin(client.Client):
             params['lockout_expire_duration'] = str(lockout_expire_duration)
         if inactive_user_expiration is not None:
             params['inactive_user_expiration'] = str(inactive_user_expiration)
+        if log_retention_days is not None:
+            params['log_retention_days'] = str(log_retention_days)
         if sms_batch is not None:
             params['sms_batch'] = str(sms_batch)
         if sms_expiration is not None:
