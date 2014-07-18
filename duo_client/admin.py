@@ -76,6 +76,7 @@ Settings objects are returned in the following format:
      'name': <str:name>,
      'sms_batch': <int:sms batch size>,
      'lockout_threshold': <int:lockout threshold>
+     'lockout_expire_duration': <int:minutes until expiration>|0,
      'sms_expiration': <int:minutes until expiration>|0,
      'sms_refresh': <bool:is sms refresh enabled (0|1)>,
      'telephony_warning_min': <int:credits>'}
@@ -1161,7 +1162,8 @@ class Admin(client.Client):
 
 
     def update_settings(self,
-                         lockout_threshold=None,
+                        lockout_threshold=None,
+                        lockout_expire_duration=None,
                         inactive_user_expiration=None,
                         sms_batch=None,
                         sms_expiration=None,
@@ -1181,6 +1183,7 @@ class Admin(client.Client):
         Update settings.
 
         lockout_threshold - <int:number of attempts>|None
+        lockout_expire_duration - <int:minutes>|0|None
         inactive_user_expiration - <int:number of days>|None
         sms_batch - <int:batch size>|None
         sms_expiration - <int:minutes>|None
@@ -1205,6 +1208,8 @@ class Admin(client.Client):
         params = {}
         if lockout_threshold is not None:
             params['lockout_threshold'] = str(lockout_threshold)
+        if lockout_expire_duration is not None:
+            params['lockout_expire_duration'] = str(lockout_expire_duration)
         if inactive_user_expiration is not None:
             params['inactive_user_expiration'] = str(inactive_user_expiration)
         if sms_batch is not None:
