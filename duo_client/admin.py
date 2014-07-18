@@ -1175,7 +1175,8 @@ class Admin(client.Client):
                         caller_id=None,
                         push_enabled=None,
                         voice_enabled=None,
-                        sms_enabled=None):
+                        sms_enabled=None,
+                        mobile_otp_enabled=None):
         """
         Update settings.
 
@@ -1194,6 +1195,7 @@ class Admin(client.Client):
         push_enabled - True|False|None
         sms_enabled = True|False|None
         voice_enabled = True|False|None
+        mobile_otp_enabled = True|False|None
 
         Returns updated settings object.
 
@@ -1231,6 +1233,8 @@ class Admin(client.Client):
             params['sms_enabled'] = '1' if sms_enabled else '0'
         if voice_enabled is not None:
             params['voice_enabled'] = '1' if voice_enabled else '0'
+        if mobile_otp_enabled is not None:
+            params['mobile_otp_enabled'] = '1' if mobile_otp_enabled else '0'
 
         if not params:
             raise TypeError("No settings were provided")
@@ -1381,7 +1385,8 @@ class Admin(client.Client):
                     status=None,
                     push_enabled=None,
                     sms_enabled=None,
-                    voice_enabled=None
+                    voice_enabled=None,
+                    mobile_otp_enabled=None,
                     ):
         """
         Create a new group.
@@ -1392,6 +1397,7 @@ class Admin(client.Client):
         push_enabled - Push factor restriction <True/False> (Optional)
         sms_enabled - SMS factor restriction <True/False> (Optional)
         voice_enabled - Voice factor restriction <True/False> (Optional)
+        mobile_otp_enabled - Mobile OTP restriction <>True/False (Optional)
         """
         params = {}
         if name is not None:
@@ -1406,6 +1412,8 @@ class Admin(client.Client):
             params['sms_enabled'] = '1' if sms_enabled else '0'
         if voice_enabled is not None:
             params['voice_enabled'] = '1' if voice_enabled else '0'
+        if mobile_otp_enabled is not None:
+            params['mobile_otp_enabled'] = '1' if mobile_otp_enabled else '0'
         response = self.json_api_call(
             'POST',
             '/admin/v1/groups',
@@ -1430,7 +1438,8 @@ class Admin(client.Client):
                      status=None,
                      push_enabled=None,
                      sms_enabled=None,
-                     voice_enabled=None):
+                     voice_enabled=None,
+                     mobile_otp_enabled=None):
         """
         Modify a group
 
@@ -1441,6 +1450,7 @@ class Admin(client.Client):
         push_enabled - Push factor restriction <True/False> (Optional)
         sms_enabled - SMS factor restriction <True/False> (Optional)
         voice_enabled - Voice factor restriction <True/False> (Optional)
+        mobile_otp_enabled - Mobile OTP restriction <True/False> (Optional)
         """
         params = {}
         if name is not None:
@@ -1455,6 +1465,8 @@ class Admin(client.Client):
             params['sms_enabled'] = '1' if sms_enabled else '0'
         if voice_enabled is not None:
             params['voice_enabled'] = '1' if voice_enabled else '0'
+        if mobile_otp_enabled is not None:
+            params['mobile_otp_enabled'] = '1' if mobile_otp_enabled else '0'
         response = self.json_api_call(
             'POST',
             '/admin/v1/groups/' + gkey,
