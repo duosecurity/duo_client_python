@@ -94,6 +94,7 @@ Integration objects are returned in the following format:
      'adminapi_read_resource': <bool:read resource permission (0|1)>,
      'adminapi_settings': <bool:settings permission (0|1)>,
      'adminapi_write_resource': <bool:write resource permission (0|1)>,
+     'self_service_allowed': <bool:self service permission (0|1)>,
      'enroll_policy': <str:enroll policy (enroll|allow|deny)>,
      'username_normalization_policy': <str:normalization policy (simple|none)>,
      'greeting': <str:voice greeting>,
@@ -1546,7 +1547,8 @@ class Admin(client.Client):
                            trusted_device_days=None,
                            ip_whitelist=None,
                            ip_whitelist_enroll_policy=None,
-                           groups_allowed=None):
+                           groups_allowed=None,
+                           self_service_allowed=None):
         """Creates a new integration.
 
         name - The name of the integration (required)
@@ -1571,6 +1573,7 @@ class Admin(client.Client):
         adminapi_settings - <bool: settings permission>|None
         adminapi_write_resource - <bool:write resource permission>|None
         groups_allowed - <str: CSV list of gkeys of groups allowed to auth>
+        self_service_allowed - <bool: self service permission>|None
 
         Returns the created integration.
 
@@ -1616,6 +1619,8 @@ class Admin(client.Client):
                 '1' if adminapi_write_resource else '0')
         if groups_allowed is not None:
             params['groups_allowed'] = groups_allowed
+        if self_service_allowed is not None:
+            params['self_service_allowed'] = '1' if self_service_allowed else '0'
         response = self.json_api_call('POST',
                                       '/admin/v1/integrations',
                                       params)
@@ -1657,7 +1662,8 @@ class Admin(client.Client):
                            trusted_device_days=None,
                            ip_whitelist=None,
                            ip_whitelist_enroll_policy=None,
-                           groups_allowed=None):
+                           groups_allowed=None,
+                           self_service_allowed=None):
         """Updates an integration.
 
         integration_key - The key of the integration to update. (required)
@@ -1681,6 +1687,7 @@ class Admin(client.Client):
         adminapi_write_resource - True|False|None
         reset_secret_key - <any value>|None
         groups_allowed - <str: CSV list of gkeys of groups allowed to auth>
+        self_service_allowed - True|False|None
 
         If any value other than None is provided for 'reset_secret_key'
         (for example, 1), then a new secret key will be generated for the
@@ -1732,6 +1739,8 @@ class Admin(client.Client):
             params['reset_secret_key'] = '1'
         if groups_allowed is not None:
             params['groups_allowed'] = groups_allowed
+        if self_service_allowed is not None:
+            params['self_service_allowed'] = '1' if self_service_allowed else '0'
 
         if not params:
             raise TypeError("No new values were provided")

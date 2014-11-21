@@ -73,6 +73,37 @@ class TestAdmin(unittest.TestCase):
             util.params_to_dict(response['body']),
             {'account_id':[self.client.account_id]})
 
+    # GET with no params
+    def test_get_integrations(self):
+        response = self.client.get_integrations()
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(
+            response['uri'],
+            '/admin/v1/integrations?account_id=%s' % self.client.account_id)
+        self.assertEqual(response['body'], None)
+
+    # POST with no params
+    def test_create_integration(self):
+        response = self.client.create_integration('foo', 'unix')
+        self.assertEqual(response['method'], 'POST')
+        self.assertEqual(response['uri'], '/admin/v1/integrations')
+        self.assertEqual(
+            util.params_to_dict(response['body']),
+            {'name': ['foo'],
+             'type': ['unix'],
+             'account_id': [self.client.account_id]})
+
+    # POST with params
+    def test_update_integration(self):
+        response = self.client.update_integration('test_ikey',
+            self_service_allowed='1')
+        self.assertEqual(response['method'], 'POST')
+        self.assertEqual(response['uri'], '/admin/v1/integrations/test_ikey')
+        self.assertEqual(
+            util.params_to_dict(response['body']),
+            {'account_id': [self.client.account_id],
+             'self_service_allowed': ['1']})
+
 if __name__ == '__main__':
     unittest.main()
 
