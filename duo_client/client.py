@@ -14,6 +14,7 @@ import httplib
 import json
 import os
 import socket
+import ssl
 import sys
 import urllib
 
@@ -202,7 +203,12 @@ class Client(object):
         if self.ca_certs == 'HTTP':
             conn = httplib.HTTPConnection(host, port)
         elif self.ca_certs == 'DISABLE':
-            conn = httplib.HTTPSConnection(host, port)
+            kwargs = {}
+            if hasattr(ssl, '_create_unverified_context'):
+                # httplib.HTTPSConnection validates certificates by
+                # default in Python 2.7.9+.
+                kwargs['context'] = ssl._create_unverified_context()
+            conn = httplib.HTTPSConnection(host, port, **kwargs)
         else:
             conn = CertValidatingHTTPSConnection(host,
                                                  port,
