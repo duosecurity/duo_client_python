@@ -1217,7 +1217,8 @@ class Admin(client.Client):
                         voice_enabled=None,
                         sms_enabled=None,
                         mobile_otp_enabled=None,
-                        user_telephony_cost_max=None):
+                        u2f_enabled=None,
+                        user_telephony_cost_max=None,
                         minimum_password_length=None,
                         password_requires_upper_alpha=None,
                         password_requires_lower_alpha=None,
@@ -1244,6 +1245,7 @@ class Admin(client.Client):
         sms_enabled = True|False|None
         voice_enabled = True|False|None
         mobile_otp_enabled = True|False|None
+        u2f_enabled = True|False|None
         user_telephony_cost_max = <int:positive number of credits>
         minimum_password_length = <int:length>|None,
         password_requires_upper_alpha = True|False|None
@@ -1293,6 +1295,8 @@ class Admin(client.Client):
             params['voice_enabled'] = '1' if voice_enabled else '0'
         if mobile_otp_enabled is not None:
             params['mobile_otp_enabled'] = '1' if mobile_otp_enabled else '0'
+        if u2f_enabled is not None:
+            params['u2f_enabled'] = '1' if u2f_enabled else '0'
         if user_telephony_cost_max is not None:
             params['user_telephony_cost_max'] = str(user_telephony_cost_max)
         if minimum_password_length is not None:
@@ -1461,7 +1465,8 @@ class Admin(client.Client):
                     sms_enabled=None,
                     voice_enabled=None,
                     mobile_otp_enabled=None,
-                    ):
+                    u2f_enabled=None,
+    ):
         """
         Create a new group.
 
@@ -1488,6 +1493,8 @@ class Admin(client.Client):
             params['voice_enabled'] = '1' if voice_enabled else '0'
         if mobile_otp_enabled is not None:
             params['mobile_otp_enabled'] = '1' if mobile_otp_enabled else '0'
+        if u2f_enabled is not None:
+            params['u2f_enabled'] = '1' if u2f_enabled else '0'
         response = self.json_api_call(
             'POST',
             '/admin/v1/groups',
@@ -1513,7 +1520,9 @@ class Admin(client.Client):
                      push_enabled=None,
                      sms_enabled=None,
                      voice_enabled=None,
-                     mobile_otp_enabled=None):
+                     mobile_otp_enabled=None,
+                     u2f_enabled=None,
+    ):
         """
         Modify a group
 
@@ -1525,6 +1534,7 @@ class Admin(client.Client):
         sms_enabled - SMS factor restriction <True/False> (Optional)
         voice_enabled - Voice factor restriction <True/False> (Optional)
         mobile_otp_enabled - Mobile OTP restriction <True/False> (Optional)
+        u2f_enabled - u2f restriction <True/False> (Optional)
         """
         params = {}
         if name is not None:
@@ -1541,6 +1551,8 @@ class Admin(client.Client):
             params['voice_enabled'] = '1' if voice_enabled else '0'
         if mobile_otp_enabled is not None:
             params['mobile_otp_enabled'] = '1' if mobile_otp_enabled else '0'
+        if u2f_enabled is not None:
+            params['u2f_enabled'] = '1' if u2f_enabled else '0'
         response = self.json_api_call(
             'POST',
             '/admin/v1/groups/' + gkey,
