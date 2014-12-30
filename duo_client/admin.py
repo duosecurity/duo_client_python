@@ -1187,7 +1187,8 @@ class Admin(client.Client):
                         push_enabled=None,
                         voice_enabled=None,
                         sms_enabled=None,
-                        mobile_otp_enabled=None):
+                        mobile_otp_enabled=None,
+                        user_telephony_cost_max=None):
         """
         Update settings.
 
@@ -1209,6 +1210,7 @@ class Admin(client.Client):
         sms_enabled = True|False|None
         voice_enabled = True|False|None
         mobile_otp_enabled = True|False|None
+        user_telephony_cost_max = <int:positive number of credits>
 
         Returns updated settings object.
 
@@ -1252,6 +1254,8 @@ class Admin(client.Client):
             params['voice_enabled'] = '1' if voice_enabled else '0'
         if mobile_otp_enabled is not None:
             params['mobile_otp_enabled'] = '1' if mobile_otp_enabled else '0'
+        if user_telephony_cost_max is not None:
+            params['user_telephony_cost_max'] = str(user_telephony_cost_max)
 
         if not params:
             raise TypeError("No settings were provided")
