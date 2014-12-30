@@ -1208,6 +1208,7 @@ class Admin(client.Client):
                         sms_refresh=None,
                         sms_message=None,
                         fraud_email=None,
+                        fraud_email_enabled=None,
                         keypress_confirm=None,
                         keypress_fraud=None,
                         timezone=None,
@@ -1236,6 +1237,7 @@ class Admin(client.Client):
         sms_refresh - True|False|None
         sms_message - <str:message>|None
         fraud_email - <str:email address>|None
+        fraud_email_enabled - True|False|None
         keypress_confirm - <str:0-9, #, or *>|None
         keypress_fraud - <str:0-9, #, or *>|None
         timezone - <str:IANA timezone>|None
@@ -1277,6 +1279,8 @@ class Admin(client.Client):
             params['sms_message'] = sms_message
         if fraud_email is not None:
             params['fraud_email'] = fraud_email
+        if fraud_email_enabled is not None:
+            params['fraud_email_enabled'] = fraud_email_enabled
         if keypress_confirm is not None:
             params['keypress_confirm'] = keypress_confirm
         if keypress_fraud is not None:
