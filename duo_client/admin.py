@@ -1450,9 +1450,9 @@ class Admin(client.Client):
         voice_enabled - Voice factor restriction <True/False> (Optional)
         mobile_otp_enabled - Mobile OTP restriction <>True/False (Optional)
         """
-        params = {}
-        if name is not None:
-            params['name'] = name
+        params = {
+            'name': name,
+        }
         if desc is not None:
             params['desc'] = desc
         if status is not None:
