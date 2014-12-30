@@ -414,6 +414,29 @@ class Admin(client.Client):
         path = '/admin/v1/users/' + user_id
         self.json_api_call('DELETE', path, {})
 
+    def enroll_user(self, username, email, valid_secs=None):
+        """
+        Enroll a user and send them an enrollment email.
+
+        username - Username
+        email - Email address
+        valid_secs - Seconds before the enrollment link expires
+                     (if 0 it never expires)
+
+        Returns nothing.
+
+        Raises RuntimeError on error.
+        """
+        path = '/admin/v1/users/enroll'
+        params = {
+            'username': username,
+            'email': email,
+        }
+
+        if valid_secs is not None:
+            params['valid_secs'] = str(valid_secs)
+
+        return self.json_api_call('POST', path, params)
 
     def get_user_bypass_codes(self, user_id, count=None, valid_secs=None, remaining_uses=None, codes=None):
         """
