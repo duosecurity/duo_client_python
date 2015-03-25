@@ -104,7 +104,8 @@ class Client(object):
     def __init__(self, ikey, skey, host,
                  ca_certs=DEFAULT_CA_CERTS,
                  sig_timezone='UTC',
-                 user_agent=('Duo API Python/' + __version__)):
+                 user_agent=('Duo API Python/' + __version__),
+                 timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
         """
         ca_certs - Path to CA pem file.
         """
@@ -118,7 +119,12 @@ class Client(object):
         self.ca_certs = ca_certs
         self.user_agent = user_agent
         self.set_proxy(host=None, proxy_type=None)
-        self.timeout = socket._GLOBAL_DEFAULT_TIMEOUT
+
+        # Default timeout is a sentinel object
+        if timeout is socket._GLOBAL_DEFAULT_TIMEOUT:
+            self.timeout = timeout
+        else:
+            self.timeout = float(timeout)
 
     def set_proxy(self, host, port=None, headers=None,
                   proxy_type='CONNECT'):
