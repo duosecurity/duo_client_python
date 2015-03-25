@@ -21,7 +21,6 @@ PHONE5 = 'phone5'
 
 
 class AuthV1(client.Client):
-    sig_version = 1
     auth_details = False
 
     def ping(self):

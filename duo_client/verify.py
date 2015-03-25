@@ -6,8 +6,6 @@ Duo Security Verify API reference client implementation.
 import client
 
 class Verify(client.Client):
-    sig_version = 1
-
     def call(self, phone,
              extension=None,
              predelay=None,
