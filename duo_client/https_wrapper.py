@@ -118,7 +118,8 @@ class CertValidatingHTTPSConnection(httplib.HTTPConnection):
                                 ca_certs=self.ca_certs)
     if self.cert_reqs & ssl.CERT_REQUIRED:
       cert = self.sock.getpeercert()
-      hostname = self.host.split(':', 0)[0]
+      cert_validation_host = self._tunnel_host or self.host
+      hostname = cert_validation_host.split(':', 0)[0]
       if not self._ValidateCertificateHostname(cert, hostname):
         raise InvalidCertificateException(hostname, cert, 'hostname mismatch')
 
