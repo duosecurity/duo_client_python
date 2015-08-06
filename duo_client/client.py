@@ -285,6 +285,8 @@ class Client(object):
             error.reason = response.reason
             error.data = data
             raise error
+        if not isinstance(data, six.text_type):
+            data = data.decode('utf-8')
         if response.status != 200:
             try:
                 data = json.loads(data)
