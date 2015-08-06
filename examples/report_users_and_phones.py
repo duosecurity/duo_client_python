@@ -1,15 +1,18 @@
+from __future__ import absolute_import
+from __future__ import print_function
 #!/usr/bin/env python
 import csv
 import sys
 
 import duo_client
+from six.moves import input
 
 argv_iter = iter(sys.argv[1:])
 def get_next_arg(prompt):
     try:
-        return argv_iter.next()
+        return next(argv_iter)
     except StopIteration:
-        return raw_input(prompt)
+        return input(prompt)
 
 # Configuration and information about objects to create.
 admin_api = duo_client.Admin(
@@ -26,7 +29,7 @@ users = admin_api.get_users()
 # (If a user has multiple phones, there will be one line printed per
 # associated phone.)
 reporter = csv.writer(sys.stdout)
-print "[+] Report of all users and associated phones:"
+print("[+] Report of all users and associated phones:")
 reporter.writerow(('Username', 'Phone Number', 'Type', 'Platform'))
 for user in users:
     for phone in user["phones"]:

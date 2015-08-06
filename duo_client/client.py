@@ -1,6 +1,9 @@
 """
 Low level functions for generating Duo Web API calls and parsing results.
 """
+from __future__ import absolute_import
+from __future__ import print_function
+import six
 __version__ = '2.1'
 
 import base64
@@ -10,13 +13,13 @@ import datetime
 import email.utils
 import hashlib
 import hmac
-import httplib
+import six.moves.http_client
 import json
 import os
 import socket
 import ssl
 import sys
-import urllib
+import six.moves.urllib
 
 try:
     # For the optional demonstration CLI program.
@@ -31,7 +34,7 @@ try:
 except ImportError as e:
     pytz_error = e
 
-from https_wrapper import CertValidatingHTTPSConnection
+from .https_wrapper import CertValidatingHTTPSConnection
 
 DEFAULT_CA_CERTS = os.path.join(os.path.dirname(__file__), 'ca_certs.pem')
 
@@ -44,8 +47,8 @@ def canon_params(params):
     # http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2
     args = []
     for (key, vals) in sorted(
-        (urllib.quote(key, '~'), vals) for (key, vals) in params.items()):
-        for val in sorted(urllib.quote(val, '~') for val in vals):
+        (six.moves.urllib.parse.quote(key, '~'), vals) for (key, vals) in list(params.items())):
+        for val in sorted(six.moves.urllib.parse.quote(val, '~') for val in vals):
             args.append('%s=%s' % (key, val))
     return '&'.join(args)
 
@@ -73,11 +76,18 @@ def sign(ikey, skey, method, host, uri, date, sig_version, params):
     Return basic authorization header line with a Duo Web API signature.
     """
     canonical = canonicalize(method, host, uri, params, date, sig_version)
-    if isinstance(skey, unicode):
+    if isinstance(skey, six.text_type):
         skey = skey.encode('utf-8')
+    if isinstance(canonical, six.text_type):
+        canonical = canonical.encode('utf-8')
     sig = hmac.new(skey, canonical, hashlib.sha1)
     auth = '%s:%s' % (ikey, sig.hexdigest())
-    return 'Basic %s' % base64.b64encode(auth)
+    if isinstance(auth, six.text_type):
+        auth = auth.encode('utf-8')
+    b64 = base64.b64encode(auth)
+    if not isinstance(b64, six.text_type):
+        b64 = b64.decode('utf-8')
+    return 'Basic %s' % b64
 
 def normalize_params(params):
     """
@@ -87,16 +97,16 @@ def normalize_params(params):
     # urllib cannot handle unicode strings properly. quote() excepts,
     # and urlencode() replaces them with '?'.
     def encode(value):
-        if isinstance(value, unicode):
+        if isinstance(value, six.text_type):
             return value.encode("utf-8")
         return value
     def to_list(value):
-        if value is None or isinstance(value, basestring):
+        if value is None or isinstance(value, six.string_types):
             return [value]
         return value
     return dict(
         (encode(key), [encode(v) for v in to_list(value)])
-        for (key, value) in params.items())
+        for (key, value) in list(params.items()))
 
 class Client(object):
     sig_version = 2
@@ -178,11 +188,11 @@ class Client(object):
 
         if method in ['POST', 'PUT']:
             headers['Content-type'] = 'application/x-www-form-urlencoded'
-            body = urllib.urlencode(params, doseq=True)
+            body = six.moves.urllib.parse.urlencode(params, doseq=True)
             uri = path
         else:
             body = None
-            uri = path + '?' + urllib.urlencode(params, doseq=True)
+            uri = path + '?' + six.moves.urllib.parse.urlencode(params, doseq=True)
 
         return self._make_request(method, uri, body, headers)
 
@@ -207,14 +217,14 @@ class Client(object):
 
         # Create outer HTTP(S) connection.
         if self.ca_certs == 'HTTP':
-            conn = httplib.HTTPConnection(host, port)
+            conn = six.moves.http_client.HTTPConnection(host, port)
         elif self.ca_certs == 'DISABLE':
             kwargs = {}
             if hasattr(ssl, '_create_unverified_context'):
                 # httplib.HTTPSConnection validates certificates by
                 # default in Python 2.7.9+.
                 kwargs['context'] = ssl._create_unverified_context()
-            conn = httplib.HTTPSConnection(host, port, **kwargs)
+            conn = six.moves.http_client.HTTPSConnection(host, port, **kwargs)
         else:
             conn = CertValidatingHTTPSConnection(host,
                                                  port,
@@ -309,17 +319,17 @@ def output_response(response, data, headers=[]):
     """
     Print response, parsed, sorted, and pretty-printed if JSON
     """
-    print response.status, response.reason
+    print(response.status, response.reason)
     for header in headers:
         val = response.getheader(header)
         if val is not None:
-            print '%s: %s' % (header, val)
+            print('%s: %s' % (header, val))
     try:
         data = json.loads(data)
         data = json.dumps(data, sort_keys=True, indent=4)
     except ValueError:
         pass
-    print data
+    print(data)
 
 
 def main():
@@ -375,7 +385,7 @@ def main():
     if args.file_args:
         file_args = file_args.split(',')
 
-    for (k, v) in params.items():
+    for (k, v) in list(params.items()):
         if k in file_args:      # value is a filename, replace with contents
             if len(v) != 1:
                 # file arguments cannot have multiple values

@@ -1,14 +1,17 @@
+from __future__ import absolute_import
+from __future__ import print_function
 #!/usr/bin/python
 import sys
 
 import duo_client
+from six.moves import input
 
 argv_iter = iter(sys.argv[1:])
 def get_next_arg(prompt):
     try:
-        return argv_iter.next()
+        return next(argv_iter)
     except StopIteration:
-        return raw_input(prompt)
+        return input(prompt)
 
 # You can find this information in the integrations section
 # where you signed up for Duo.
@@ -23,9 +26,9 @@ verify_api = duo_client.Verify(
 PHONE_NUMBER = get_next_arg('phone number ("+1-313-555-5555"): ')
 
 (pin, txid) = verify_api.call(phone=PHONE_NUMBER)
-print 'Sent PIN: %s' % pin
+print('Sent PIN: %s' % pin)
 state = ''
 while state != 'ended':
     status_res = verify_api.status(txid=txid)
-    print status_res['event'], 'event:', status_res['info']
+    print(status_res['event'], 'event:', status_res['info'])
     state = status_res['state']
