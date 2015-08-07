@@ -3,7 +3,8 @@ Duo Security Verify API reference client implementation.
 
 <http://www.duosecurity.com/docs/duoverify>
 """
-import client
+from __future__ import absolute_import
+from . import client
 
 class Verify(client.Client):
     def call(self, phone,

@@ -1,15 +1,18 @@
+from __future__ import absolute_import
+from __future__ import print_function
 #!/usr/bin/python
 import pprint
 import sys
 
 import duo_client
+from six.moves import input
 
 argv_iter = iter(sys.argv[1:])
 def get_next_arg(prompt):
     try:
-        return argv_iter.next()
+        return next(argv_iter)
     except StopIteration:
-        return raw_input(prompt)
+        return input(prompt)
 
 # Configuration and information about objects to create.
 admin_api = duo_client.Admin(
@@ -32,7 +35,7 @@ user = admin_api.add_user(
     username=USERNAME,
     realname=REALNAME,
 )
-print 'Created user:'
+print('Created user:')
 pprint.pprint(user)
 
 # Create and return a new phone object.
@@ -41,7 +44,7 @@ phone = admin_api.add_phone(
     type=PHONE_TYPE,
     platform=PHONE_PLATFORM,
 )
-print 'Created phone:'
+print('Created phone:')
 pprint.pprint(phone)
 
 # Associate the user with the phone.
@@ -49,7 +52,7 @@ admin_api.add_user_phone(
     user_id=user['user_id'],
     phone_id=phone['phone_id'],
 )
-print 'Added phone', phone['number'], 'to user', user['username']
+print('Added phone', phone['number'], 'to user', user['username'])
 
 # Send two SMS messages to the phone with information about installing
 # the app for PHONE_PLATFORM and activating it with this Duo account.
@@ -57,5 +60,5 @@ act_sent = admin_api.send_sms_activation_to_phone(
     phone_id=phone['phone_id'],
     install='1',
 )
-print 'SMS activation sent to', phone['number'] + ':'
+print('SMS activation sent to', phone['number'] + ':')
 pprint.pprint(act_sent)

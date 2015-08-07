@@ -1,7 +1,9 @@
+from __future__ import absolute_import
 import unittest
-import urllib
+import six.moves.urllib
 import duo_client.client
-import util
+from . import util
+import base64
 
 
 class TestQueryParameters(unittest.TestCase):
@@ -145,7 +147,13 @@ class TestSign(unittest.TestCase):
             **test
         )
         expected = 'f01811cbbf9561623ab45b893096267fd46a5178'
-        expected = 'Basic ' + (ikey + ':' + expected).encode('base64').strip()
+        expected = ikey + ':' + expected
+        if isinstance(expected, six.text_type):
+            expected = expected.encode('utf-8')
+        expected = base64.b64encode(expected).strip()
+        if not isinstance(expected, six.text_type):
+            expected = expected.decode('utf-8')
+        expected = 'Basic ' + expected
         self.assertEqual(actual,
                          expected)
 
@@ -157,8 +165,8 @@ class TestRequest(unittest.TestCase):
         'foo':['bar'],
         'baz':['qux', 'quux=quuux', 'foobar=foobar&barbaz=barbaz']}
     args_out = dict(
-        (key, [urllib.quote(v) for v in val])
-        for (key, val) in args_in.items())
+        (key, [six.moves.urllib.parse.quote(v) for v in val])
+        for (key, val) in list(args_in.items()))
 
     def setUp(self):
         self.client = duo_client.client.Client(
