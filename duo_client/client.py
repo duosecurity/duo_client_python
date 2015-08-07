@@ -13,13 +13,12 @@ import datetime
 import email.utils
 import hashlib
 import hmac
-import six.moves.http_client
+import six
 import json
 import os
 import socket
 import ssl
 import sys
-import six.moves.urllib
 
 try:
     # For the optional demonstration CLI program.
@@ -52,6 +51,7 @@ def canon_params(params):
             args.append('%s=%s' % (key, val))
     return '&'.join(args)
 
+
 def canonicalize(method, host, uri, params, date, sig_version):
     """
     Return a canonical string version of the given request attributes.
@@ -71,6 +71,7 @@ def canonicalize(method, host, uri, params, date, sig_version):
     ]
     return '\n'.join(canon)
 
+
 def sign(ikey, skey, method, host, uri, date, sig_version, params):
     """
     Return basic authorization header line with a Duo Web API signature.
@@ -88,6 +89,7 @@ def sign(ikey, skey, method, host, uri, date, sig_version, params):
     if not isinstance(b64, six.text_type):
         b64 = b64.decode('utf-8')
     return 'Basic %s' % b64
+
 
 def normalize_params(params):
     """
@@ -107,6 +109,7 @@ def normalize_params(params):
     return dict(
         (encode(key), [encode(v) for v in to_list(value)])
         for (key, value) in list(params.items()))
+
 
 class Client(object):
     sig_version = 2
@@ -317,16 +320,20 @@ class Client(object):
             raise_error('Received bad response: %s' % data)
 
 
-def output_response(response, data, headers=[]):
+def output_response(response, data, headers=None):
     """
     Print response, parsed, sorted, and pretty-printed if JSON
     """
+    if not headers:
+        headers = []
     print(response.status, response.reason)
     for header in headers:
         val = response.getheader(header)
         if val is not None:
             print('%s: %s' % (header, val))
     try:
+        if not isinstance(data, six.text_type):
+            data = data.decode('utf-8')
         data = json.loads(data)
         data = json.dumps(data, sort_keys=True, indent=4)
     except ValueError:
