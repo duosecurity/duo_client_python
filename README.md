@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/joestump/django-ajax.png?branch=master)](https://travis-ci.org/joestump/django-ajax)
+
 # Overview
 
 **duo_client** - Demonstration client to call Duo API methods
