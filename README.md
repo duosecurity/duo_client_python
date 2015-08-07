@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/joestump/django-ajax.png?branch=master)](https://travis-ci.org/joestump/django-ajax)
+[![Build Status](https://travis-ci.org/duosecurity/duo_client_python.png?branch=master)](https://travis-ci.org/duosecurity/duo_client_python)
 
 # Overview
 
