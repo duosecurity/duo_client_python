@@ -1,5 +1,7 @@
+from __future__ import absolute_import
+from __future__ import print_function
 #!/usr/bin/python
-import ConfigParser
+import six.moves.configparser
 import optparse
 import os
 import sys
@@ -122,7 +124,7 @@ class AdministratorLog(BaseLog):
             if event['description']:
                 fmtstr += ', description="%(description)s"'
 
-            print fmtstr % event
+            print(fmtstr % event)
 
 
 class AuthenticationLog(BaseLog):
@@ -153,7 +155,7 @@ class AuthenticationLog(BaseLog):
                 'newenrollment="%(new_enrollment)s"'
             )
 
-            print fmtstr % event
+            print(fmtstr % event)
 
 
 class TelephonyLog(BaseLog):
@@ -181,7 +183,7 @@ class TelephonyLog(BaseLog):
                      'phone="%(phone)s", ' \
                      'credits="%(credits)s"'
 
-            print fmtstr % event
+            print(fmtstr % event)
 
 
 def admin_api_from_config(config_path):
@@ -189,7 +191,7 @@ def admin_api_from_config(config_path):
     Return a duo_client.Admin object created using the parameters
     stored in a config file.
     """
-    config = ConfigParser.ConfigParser()
+    config = six.moves.configparser.ConfigParser()
     config.read(config_path)
     config_d = dict(config.items('duo'))
     ca_certs = config_d.get("ca_certs", None)

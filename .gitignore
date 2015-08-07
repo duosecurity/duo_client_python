@@ -6,3 +6,6 @@
 MANIFEST
 build
 dist
+.idea
+env/
+py3env/

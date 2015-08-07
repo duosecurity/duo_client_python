@@ -3,8 +3,9 @@ Duo Security Auth API v1 reference client implementation.
 
 <http://www.duosecurity.com/docs/authapi-v1>
 """
+from __future__ import absolute_import
 
-import client
+from . import client
 
 
 FACTOR_AUTO = 'auto'

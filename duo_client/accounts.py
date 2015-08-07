@@ -3,7 +3,8 @@ Duo Security Accounts API reference client implementation.
 
 <http://www.duosecurity.com/docs/accountsapi>
 """
-import client
+from __future__ import absolute_import
+from . import client
 
 class Accounts(client.Client):
     def get_child_accounts(self):
