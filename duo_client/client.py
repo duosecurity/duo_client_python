@@ -13,7 +13,6 @@ import datetime
 import email.utils
 import hashlib
 import hmac
-import six
 import json
 import os
 import socket
