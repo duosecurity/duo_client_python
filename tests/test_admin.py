@@ -1,5 +1,6 @@
+from __future__ import absolute_import
 import unittest
-import util
+from . import util
 import duo_client.admin
 
 

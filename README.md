@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/duosecurity/duo_client_python.png?branch=master)](https://travis-ci.org/duosecurity/duo_client_python)
+
 # Overview
 
 **duo_client** - Demonstration client to call Duo API methods
