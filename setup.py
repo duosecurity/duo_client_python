@@ -1,11 +1,17 @@
 from __future__ import absolute_import
 from distutils.core import setup
 
-from duo_client import __version__
+import os.path
+
+requirements_filename = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), 'requirements.txt')
+
+with open(requirements_filename) as fd:
+    install_requires = [i.strip() for i in fd.readlines()]
 
 setup(
     name='duo_client',
-    version=__version__,
+    version='3.0',
     description='Reference client for Duo Security APIs',
     author='Duo Security, Inc.',
     author_email='support@duosecurity.com',
@@ -17,4 +23,5 @@ setup(
         'Programming Language :: Python',
         'License :: OSI Approved :: BSD License',
     ],
+    install_requires=install_requires,
 )
