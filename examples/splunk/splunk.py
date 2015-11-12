@@ -150,8 +150,9 @@ class AuthenticationLog(BaseLog):
                 'username="%(username)s", '
                 'factor="%(factor)s", '
                 'result="%(result)s", '
+                'reason="%(reason)s", '
                 'ip="%(ip)s", '
-                'integration="%(integration)s"'
+                'integration="%(integration)s", '
                 'newenrollment="%(new_enrollment)s"'
             )
 
