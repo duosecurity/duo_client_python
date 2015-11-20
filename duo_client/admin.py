@@ -408,13 +408,11 @@ class Admin(client.Client):
 
         user_id - User ID
 
-        Returns nothing.
-
         Raises RuntimeError on error.
         """
         user_id = six.moves.urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id
-        self.json_api_call('DELETE', path, {})
+        return self.json_api_call('DELETE', path, {})
 
     def enroll_user(self, username, email, valid_secs=None):
         """
@@ -771,14 +769,11 @@ class Admin(client.Client):
 
         phone_id - Phone ID.
 
-        Returns nothing.
-
         Raises RuntimeError on error.
         """
         path = '/admin/v1/phones/' + phone_id
         params = {}
-        self.json_api_call('DELETE', path,
-                             params)
+        return self.json_api_call('DELETE', path, params)
 
 
     def send_sms_activation_to_phone(self, phone_id,
@@ -938,7 +933,7 @@ class Admin(client.Client):
         """
         path = '/admin/v1/desktoptokens/' + six.moves.urllib.parse.quote_plus(desktoptoken_id)
         params = {}
-        self.json_api_call('DELETE', path, params)
+        return self.json_api_call('DELETE', path, params)
 
 
     def update_desktoptoken(self,
@@ -971,7 +966,6 @@ class Admin(client.Client):
     def activate_desktoptoken(self, desktoptoken_id, valid_secs=None):
         """
         Generates an activation code for a desktop token.
-
 
         Returns activation info like:
         {
@@ -1045,12 +1039,10 @@ class Admin(client.Client):
         Deletes a token. If the token is already deleted, does nothing.
 
         token_id - Token ID
-
-        Returns nothing on success.
         """
         token_id = six.moves.urllib.parse.quote_plus(str(token_id))
         path = '/admin/v1/tokens/' + token_id
-        self.json_api_call('DELETE', path, {})
+        return self.json_api_call('DELETE', path, {})
 
 
     def add_hotp6_token(self, serial, secret, counter=None):
@@ -1182,23 +1174,17 @@ class Admin(client.Client):
         token_id = six.moves.urllib.parse.quote_plus(str(token_id))
         path = '/admin/v1/tokens/' + token_id + '/resync'
         params = {'code1': code1, 'code2': code2, 'code3': code3}
-        self.json_api_call('POST', path, params)
-
+        return self.json_api_call('POST', path, params)
 
     def get_settings(self):
         """
         Returns customer settings.
 
-
         Returns a settings object.
 
         Raises RuntimeError on error.
         """
-
-        response = self.json_api_call('GET', '/admin/v1/settings', {})
-
-        return response
-
+        return self.json_api_call('GET', '/admin/v1/settings', {})
 
     def update_settings(self,
                         lockout_threshold=None,
@@ -1707,15 +1693,12 @@ class Admin(client.Client):
 
         integration_key - The integration key of the integration to delete.
 
-        Returns None.
-
         Raises RuntimeError on error.
 
         """
         integration_key = six.moves.urllib.parse.quote_plus(str(integration_key))
         path = '/admin/v1/integrations/%s' % integration_key
-        self.json_api_call('DELETE', path, {})
-        return None
+        return self.json_api_call('DELETE', path, {})
 
 
     def update_integration(self,
@@ -1914,13 +1897,11 @@ class Admin(client.Client):
 
         admin_id - The id of the administrator.
 
-        Returns None.
-
         Raises RuntimeError on error.
         """
         admin_id = six.moves.urllib.parse.quote_plus(str(admin_id))
         path = '/admin/v1/admins/%s' % admin_id
-        self.json_api_call('DELETE', path, {})
+        return self.json_api_call('DELETE', path, {})
 
 
     def reset_admin(self, admin_id):
@@ -1929,13 +1910,11 @@ class Admin(client.Client):
 
         admin_id - <int:admin id>
 
-        Returns None.
-
         Raises RuntimeError on error.
         """
         admin_id = six.moves.urllib.parse.quote_plus(str(admin_id))
         path = '/admin/v1/admins/%s/reset' % admin_id
-        self.json_api_call('POST', path, {})
+        return self.json_api_call('POST', path, {})
 
 
     def activate_admin(self, email,
@@ -2000,11 +1979,7 @@ class Admin(client.Client):
         params = {
             'logo': logo.encode('base64'),
         }
-        self.json_api_call('POST',
-                           '/admin/v1/logo',
-                           params)
+        return self.json_api_call('POST', '/admin/v1/logo', params)
 
     def delete_logo(self):
-        self.json_api_call('DELETE',
-                           '/admin/v1/logo',
-                           params={})
+        return self.json_api_call('DELETE', '/admin/v1/logo', params={})
