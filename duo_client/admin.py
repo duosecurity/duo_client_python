@@ -226,6 +226,7 @@ class Admin(client.Client):
                 {'timestamp': <int:unix timestamp>,
                  'eventtype': "authentication",
                  'host': <str:host>,
+                 'device': <str:device>,
                  'username': <str:username>,
                  'factor': <str:factor>,
                  'result': <str:result>,
