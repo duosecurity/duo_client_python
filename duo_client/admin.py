@@ -1837,14 +1837,15 @@ class Admin(client.Client):
         return response
 
 
-    def add_admin(self, name, email, phone, password):
+    def add_admin(self, name, email, phone, password, role=None):
         """
         Create an administrator and adds it to a customer.
 
         name - <str:the name of the administrator>
         email - <str:email address>
         phone - <str:phone number>
-        password - <str:pasword>
+        password - <str:password>
+        role - <str|None:role>
 
         Returns the added administrator.  See the adminapi docs.
 
@@ -1859,6 +1860,8 @@ class Admin(client.Client):
             params['phone'] = phone
         if password is not None:
             params['password'] = password
+        if role is not None:
+            params['role'] = role
         response = self.json_api_call('POST', '/admin/v1/admins', params)
         return response
 
