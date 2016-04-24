@@ -1,6 +1,6 @@
+#!/usr/bin/python
 from __future__ import absolute_import
 from __future__ import print_function
-#!/usr/bin/python
 import pprint
 import sys
 
