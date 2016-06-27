@@ -74,6 +74,15 @@ class TestAdmin(unittest.TestCase):
             util.params_to_dict(response['body']),
             {'account_id':[self.client.account_id]})
 
+    def test_get_endpoints(self):
+        response = self.client.get_endpoints()
+        self.assertEqual(response['method'], 'GET')
+        (uri, args) = response['uri'].split('?')
+        self.assertEqual(uri, '/admin/v1/endpoints')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {'account_id': [self.client.account_id]})
+
 if __name__ == '__main__':
     unittest.main()
 
