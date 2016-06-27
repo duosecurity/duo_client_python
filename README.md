@@ -2,44 +2,41 @@
 
 # Overview
 
-**duo_client** - Demonstration client to call Duo API methods
-with Python.
+**Auth** - https://www.duosecurity.com/docs/authapi
 
-# Duo Verify API
+**Verify** - https://www.duosecurity.com/docs/duoverify
 
-The Duo Verify API provides the ability to call or text (SMS) a phone
-number with a one-time PIN number.
+**Admin** - https://www.duosecurity.com/docs/adminapi
 
-For more information see the Duo Verify API guide:
+**Accounts** - https://www.duosecurity.com/docs/accountsapi
 
-<http://www.duosecurity.com/docs/duoverify>
+# Installing
 
-# Duo Auth API
+Development:
 
-The Duo Auth API provides a low-level API for adding strong two-factor
-authentication to applications that cannot directly display rich web
-content.
+```
+$ git clone https://github.com/duosecurity/duo_client_python.git
+$ cd duo_client_python
+$ pip install --requirement requirements.txt
+```
 
-For more information see the Duo Auth API guide:
+System:
 
-<http://www.duosecurity.com/docs/authapi>
+```
+$ pip install duo_client
+```
 
-# Duo Admin API
+# Using
 
-The Duo Admin API provides programmatic access to the administrative
-functionality of Duo Security's two-factor authentication platform.
-This feature is not available with all Duo accounts.
+See the `examples` folder for how to use this library.
 
-For more information see the Duo Admin API guide:
+# Testing
 
-<http://www.duosecurity.com/docs/adminapi>
+```
+$ nosetests tests/
+.......................
+----------------------------------------------------------------------
+Ran 23 tests in 0.005s
 
-# Duo Accounts API
-
-The Duo Accounts API allows a parent account to create, manage, and
-delete other Duo customer accounts. This feature is not available with
-all Duo accounts.
-
-For more information see the Duo Accounts API guide:
-
-<http://www.duosecurity.com/docs/accountsapi>
+OK
+```
