@@ -26,6 +26,29 @@ Note: USER_STATUS_LOCKED_OUT can only be set by the system. You cannot
       set a user to be in the USER_STATUS_LOCKED_OUT state.
 
 
+ENDPOINTS
+
+Endpoint objects are returned in the following format:
+
+    {"username": <str:username>,
+     "email": <str:email>,
+     "epkey": <str:epkey>,
+     "os family": <str:os family>,
+     "os version": <str:os version>,
+     "model": <str:model>,
+     "type": <str:type>,
+     "browsers": [<browser object, ...]}
+
+
+BROWSERS
+
+Browser objects are returned in the following format:
+    {"browser family": <str:browser family>,
+     "browser version": <str:browser version>,
+     "flash version": <str: flash version>,
+     "java version": <str: java version>}
+
+
 PHONES
 
 Phone objects are returned in the following format:
@@ -622,6 +645,15 @@ class Admin(client.Client):
         path = '/admin/v1/users/' + user_id + '/groups/' + group_id
         params = {}
         return self.json_api_call('DELETE', path, params)
+
+    def get_endpoints(self):
+        """
+        Returns list of endpoints.
+
+        Raises RuntimeError on error.
+        """
+        response = self.json_api_call('GET', '/admin/v1/endpoints', {})
+        return response
 
     def get_phones(self):
         """
