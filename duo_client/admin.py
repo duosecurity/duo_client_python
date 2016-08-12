@@ -255,8 +255,13 @@ class Admin(client.Client):
                  'result': <str:result>,
                  'ip': <str:ip address>,
                  'new_enrollment': <bool:if event corresponds to enrollment>,
-                 'integration': <str:integration>}, ...
-            ]
+                 'integration': <str:integration>,
+                 'location': {
+                     'state': '<str:state>',
+                     'city': '<str:city>',
+                     'country': '<str:country>'
+                 }
+             }]
 
         Raises RuntimeError on error.
         """
