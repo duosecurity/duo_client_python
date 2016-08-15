@@ -9,6 +9,12 @@ requirements_filename = os.path.join(
 with open(requirements_filename) as fd:
     install_requires = [i.strip() for i in fd.readlines()]
 
+requirements_dev_filename = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), 'requirements-dev.txt')
+
+with open(requirements_dev_filename) as fd:
+    tests_require = [i.strip() for i in fd.readlines()]
+
 setup(
     name='duo_client',
     version='3.0',
@@ -24,4 +30,5 @@ setup(
         'License :: OSI Approved :: BSD License',
     ],
     install_requires=install_requires,
+    tests_require=tests_require,
 )
