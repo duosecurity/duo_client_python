@@ -5,6 +5,7 @@ import csv
 import sys
 import duo_client
 import json
+from six.moves import input
 
 argv_iter = iter(sys.argv[1:])
 def get_next_arg(prompt):
@@ -31,8 +32,6 @@ for log in logs:
         counts[country] = counts.get(country, 0) + 1
 
 # Print CSV of country, auth count:
-#
-# In order, descending
 auths_descending = sorted(counts.items(), reverse=True)
 reporter = csv.writer(sys.stdout)
 print("[+] Report of auth counts by country:")
