@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/duosecurity/duo_client_python.png?branch=master)](https://travis-ci.org/duosecurity/duo_client_python)
-
 # Overview
 
 **Auth** - https://www.duosecurity.com/docs/authapi
@@ -18,6 +16,7 @@ Development:
 $ git clone https://github.com/duosecurity/duo_client_python.git
 $ cd duo_client_python
 $ pip install --requirement requirements.txt
+$ pip install --requirement requirements-dev.txt
 ```
 
 System:
@@ -33,10 +32,11 @@ See the `examples` folder for how to use this library.
 # Testing
 
 ```
-$ nosetests tests/
-.......................
-----------------------------------------------------------------------
-Ran 23 tests in 0.005s
+$ nose2
+```
 
-OK
+# Linting
+
+```
+$ flake8 --ignore=E501 duo_client/ tests/
 ```

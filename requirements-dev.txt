@@ -1,1 +1,2 @@
-nose
+nose2
+flake8
