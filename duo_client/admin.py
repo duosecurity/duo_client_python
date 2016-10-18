@@ -1283,7 +1283,7 @@ class Admin(client.Client):
         password_requires_numeric = True|False|None
         password_requires_special = True|False|None
         helpdesk_bypass - "allow"|"limit"|None
-        helpdesk_bypass_expiration - <int:seconds>|0
+        helpdesk_bypass_expiration - <int:minutes>|0
 
 
         Returns updated settings object.
