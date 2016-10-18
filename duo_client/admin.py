@@ -1250,7 +1250,9 @@ class Admin(client.Client):
                         password_requires_upper_alpha=None,
                         password_requires_lower_alpha=None,
                         password_requires_numeric=None,
-                        password_requires_special=None):
+                        password_requires_special=None,
+                        helpdesk_bypass=None,
+                        helpdesk_bypass_expiration=None):
         """
         Update settings.
 
@@ -1280,6 +1282,9 @@ class Admin(client.Client):
         password_requires_lower_alpha = True|False|None
         password_requires_numeric = True|False|None
         password_requires_special = True|False|None
+        helpdesk_bypass - "allow"|"limit"|None
+        helpdesk_bypass_expiration - <int:minutes>|0
+
 
         Returns updated settings object.
 
@@ -1343,6 +1348,10 @@ class Admin(client.Client):
         if password_requires_special is not None:
             params['password_requires_special'] = ('1' if
               password_requires_special else '0')
+        if helpdesk_bypass is not None:
+            params['helpdesk_bypass'] = str(helpdesk_bypass)
+        if helpdesk_bypass_expiration is not None:
+            params['helpdesk_bypass_expiration'] = str(helpdesk_bypass_expiration)
 
         if not params:
             raise TypeError("No settings were provided")
