@@ -6,6 +6,7 @@ import optparse
 import os
 import sys
 import time
+import json
 
 import duo_client
 
@@ -113,18 +114,13 @@ class AdministratorLog(BaseLog):
                 'user_update': "Update User",
                 'user_delete': "Delete User"}.get(
                 event['action'], event['action'])
+                
+            try:
+                event['description'] = json.loads(event['description'])
+            except ValueError:
+                pass
 
-            fmtstr = '%(timestamp)s,' \
-                     'host="%(host)s", ' \
-                     'eventtype="%(eventtype)s", ' \
-                     'username="%(username)s", ' \
-                     'action="%(actionlabel)s"'
-            if event['object']:
-                fmtstr += ', object="%(object)s"'
-            if event['description']:
-                fmtstr += ', description="%(description)s"'
-
-            print(fmtstr % event)
+            print(json.dumps(event))
 
 
 class AuthenticationLog(BaseLog):
@@ -143,20 +139,7 @@ class AuthenticationLog(BaseLog):
         for event in self.events:
             event['ctime'] = time.ctime(event['timestamp'])
 
-            fmtstr = (
-                '%(timestamp)s,'
-                'host="%(host)s", '
-                'eventtype="%(eventtype)s", '
-                'username="%(username)s", '
-                'factor="%(factor)s", '
-                'result="%(result)s", '
-                'reason="%(reason)s", '
-                'ip="%(ip)s", '
-                'integration="%(integration)s", '
-                'newenrollment="%(new_enrollment)s"'
-            )
-
-            print(fmtstr % event)
+            print(json.dumps(event))
 
 
 class TelephonyLog(BaseLog):
@@ -176,15 +159,7 @@ class TelephonyLog(BaseLog):
             event['ctime'] = time.ctime(event['timestamp'])
             event['host'] = self.admin_api.host
 
-            fmtstr = '%(timestamp)s,' \
-                     'host="%(host)s", ' \
-                     'eventtype="%(eventtype)s", ' \
-                     'context="%(context)s", ' \
-                     'type="%(type)s", ' \
-                     'phone="%(phone)s", ' \
-                     'credits="%(credits)s"'
-
-            print(fmtstr % event)
+            print(json.dumps(event))
 
 
 def admin_api_from_config(config_path):
