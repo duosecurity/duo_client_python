@@ -21,6 +21,10 @@ admin_api = duo_client.Admin(
     host=get_next_arg('API hostname ("api-....duosecurity.com"): '),
 )
 
-[ admin_api.delete_user(r['user_id']) for r in admin_api.get_users() ]
-[ admin_api.delete_group(r['group_id']) for r in admin_api.get_groups() ]
+confirm = get_next_arg('Are you sure you want to delete all users and groups? [Y/n]: ')
+if confirm.lower() == 'y':
+    [ admin_api.delete_user(r['user_id']) for r in admin_api.get_users() ]
+    [ admin_api.delete_group(r['group_id']) for r in admin_api.get_groups() ]
+else:
+    print('Exiting without deleting any users or groups.')
 
