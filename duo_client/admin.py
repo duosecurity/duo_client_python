@@ -33,20 +33,26 @@ Endpoint objects are returned in the following format:
     {"username": <str:username>,
      "email": <str:email>,
      "epkey": <str:epkey>,
-     "os family": <str:os family>,
-     "os version": <str:os version>,
+     "os_family": <str:os_family>,
+     "os_version": <str:os_version>,
      "model": <str:model>,
      "type": <str:type>,
-     "browsers": [<browser object, ...]}
+     "browsers": [<browser object, ...],
+     "trusted_endpoint": <str:trusted_endpoint>,
+     "device_identifier": <str:device_identifier>,
+     "device_username": <str:device_username>}
+
+Note: trusted_endpoint will one of the following values: 
+      ('', 'Yes, has a Duo certificate', 'No, doesn\'t have a Duo certificate', Unknown')
 
 
 BROWSERS
 
 Browser objects are returned in the following format:
-    {"browser family": <str:browser family>,
-     "browser version": <str:browser version>,
-     "flash version": <str: flash version>,
-     "java version": <str: java version>}
+    {"browser_family": <str:browser_family>,
+     "browser_version": <str:browser_version>,
+     "flash_version": <str: flash_version>,
+     "java_version": <str: java_version>}
 
 
 PHONES
