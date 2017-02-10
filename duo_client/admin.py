@@ -44,14 +44,18 @@ Endpoint objects are returned in the following format:
      "device_identifier_type": <str:device_identifier_type>,
      "device_username_type": <str:device_username_type>}
 
-Note: trusted_endpoint will one of the following values: 
+Note: The following fields will only be available with Duo Beyond edition:
+      trusted_endpoint, device_identifier, device_username, 
+      device_identifier_type, device_username_type
+
+      trusted_endpoint will one of the following values: 
       ('yes', 'no', 'unknown')
 
       device_identifier_type will be one of the following values:
-      ('udid', 'fqdn', 'hardware_serial')
+      ('udid', 'fqdn', 'hardware_serial', '')
 
       device_username_type will be one of the following values:
-      ('os_username', 'upn')
+      ('os_username', 'upn', '')
 
 
 BROWSERS
