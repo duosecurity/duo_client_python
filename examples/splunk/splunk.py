@@ -119,6 +119,8 @@ class AdministratorLog(BaseLog):
                 event['description'] = json.loads(event['description'])
             except ValueError:
                 pass
+            except TypeError:
+                pass
 
             print(json.dumps(event))
 
