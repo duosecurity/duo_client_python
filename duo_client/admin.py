@@ -1254,6 +1254,8 @@ class Admin(client.Client):
                         password_requires_special=None,
                         helpdesk_bypass=None,
                         helpdesk_bypass_expiration=None,
+                        reactivation_url=None,
+                        reactivation_integration_key=None,
                         security_checkup_enabled=None,
                         ):
         """
@@ -1287,6 +1289,8 @@ class Admin(client.Client):
         password_requires_special = True|False|None
         helpdesk_bypass - "allow"|"limit"|"deny"|None
         helpdesk_bypass_expiration - <int:minutes>|0
+        reactivation_url = <str: url>|None
+        reactivation_integration_key = <str: url>|None
         security_checkup_enabled = True|False|None
 
         Returns updated settings object.
@@ -1355,6 +1359,10 @@ class Admin(client.Client):
             params['helpdesk_bypass'] = str(helpdesk_bypass)
         if helpdesk_bypass_expiration is not None:
             params['helpdesk_bypass_expiration'] = str(helpdesk_bypass_expiration)
+        if reactivation_url is not None:
+            params['reactivation_url'] = reactivation_url
+        if reactivation_integration_key is not None:
+            params['reactivation_integration_key'] = reactivation_integration_key
         if security_checkup_enabled is not None:
             params['security_checkup_enabled'] = security_checkup_enabled
 
