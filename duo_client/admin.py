@@ -109,6 +109,7 @@ Settings objects are returned in the following format:
      'password_requires_lower_alpha': <bool:is lower alpha character required>,
      'password_requires_numeric': <bool:is numeric character required>,
      'password_requires_special': <bool:is special character required>,
+     'security_checkup_enabled': <bool:is the security checkup feature enabled>,
     }
 
 
@@ -1252,7 +1253,9 @@ class Admin(client.Client):
                         password_requires_numeric=None,
                         password_requires_special=None,
                         helpdesk_bypass=None,
-                        helpdesk_bypass_expiration=None):
+                        helpdesk_bypass_expiration=None,
+                        security_checkup_enabled=None,
+                        ):
         """
         Update settings.
 
@@ -1284,7 +1287,7 @@ class Admin(client.Client):
         password_requires_special = True|False|None
         helpdesk_bypass - "allow"|"limit"|"deny"|None
         helpdesk_bypass_expiration - <int:minutes>|0
-
+        security_checkup_enabled = True|False|None
 
         Returns updated settings object.
 
@@ -1352,6 +1355,8 @@ class Admin(client.Client):
             params['helpdesk_bypass'] = str(helpdesk_bypass)
         if helpdesk_bypass_expiration is not None:
             params['helpdesk_bypass_expiration'] = str(helpdesk_bypass_expiration)
+        if security_checkup_enabled is not None:
+            params['security_checkup_enabled'] = security_checkup_enabled
 
         if not params:
             raise TypeError("No settings were provided")
