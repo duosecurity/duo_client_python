@@ -4,7 +4,8 @@ Low level functions for generating Duo Web API calls and parsing results.
 from __future__ import absolute_import
 from __future__ import print_function
 import six
-__version__ = '3.0'
+
+__version__ = '3.1.0'
 
 import base64
 import collections
