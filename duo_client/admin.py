@@ -236,7 +236,6 @@ class Admin(client.Client):
             row['host'] = self.host
         return response
 
-
     def get_authentication_log(self,
                                mintime=0):
         """
@@ -281,7 +280,6 @@ class Admin(client.Client):
             row['host'] = self.host
         return response
 
-
     def get_telephony_log(self,
                           mintime=0):
         """
@@ -318,7 +316,6 @@ class Admin(client.Client):
             row['host'] = self.host
         return response
 
-
     def get_users(self):
         """
         Returns list of users.
@@ -330,7 +327,6 @@ class Admin(client.Client):
         """
         response = self.json_api_call('GET', '/admin/v1/users', {})
         return response
-
 
     def get_user_by_id(self, user_id):
         """
@@ -346,7 +342,6 @@ class Admin(client.Client):
         path = '/admin/v1/users/' + user_id
         response = self.json_api_call('GET', path, {})
         return response
-
 
     def get_users_by_name(self, username):
         """
@@ -365,7 +360,6 @@ class Admin(client.Client):
                                       '/admin/v1/users',
                                       params)
         return response
-
 
     def add_user(self, username, realname=None, status=None,
                  notes=None, email=None):
@@ -398,7 +392,6 @@ class Admin(client.Client):
                                       params)
         return response
 
-
     def update_user(self, user_id, username=None, realname=None,
                     status=None, notes=None, email=None):
         """
@@ -430,7 +423,6 @@ class Admin(client.Client):
             params['email'] = email
         response = self.json_api_call('POST', path, params)
         return response
-
 
     def delete_user(self, user_id):
         """
@@ -501,7 +493,6 @@ class Admin(client.Client):
 
         return self.json_api_call('POST', path, params)
 
-
     def get_user_phones(self, user_id):
         """
         Returns an array of phones associated with the user.
@@ -515,7 +506,6 @@ class Admin(client.Client):
         user_id = six.moves.urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/phones'
         return self.json_api_call('GET', path, {})
-
 
     def add_user_phone(self, user_id, phone_id):
         """
@@ -535,7 +525,6 @@ class Admin(client.Client):
         }
         return self.json_api_call('POST', path, params)
 
-
     def delete_user_phone(self, user_id, phone_id):
         """
         Dissociates a phone from a user.
@@ -553,7 +542,6 @@ class Admin(client.Client):
         return self.json_api_call('DELETE', path,
                                     params)
 
-
     def get_user_tokens(self, user_id):
         """
         Returns an array of hardware tokens associated with the user.
@@ -569,7 +557,6 @@ class Admin(client.Client):
         params = {}
         return self.json_api_call('GET', path,
                                     params)
-
 
     def add_user_token(self, user_id, token_id):
         """
@@ -588,7 +575,6 @@ class Admin(client.Client):
             'token_id': token_id,
         }
         return self.json_api_call('POST', path, params)
-
 
     def delete_user_token(self, user_id, token_id):
         """
@@ -673,7 +659,6 @@ class Admin(client.Client):
         response = self.json_api_call('GET', '/admin/v1/phones', {})
         return response
 
-
     def get_phone_by_id(self, phone_id):
         """
         Returns a phone specified by phone_id.
@@ -687,7 +672,6 @@ class Admin(client.Client):
         path = '/admin/v1/phones/' + phone_id
         response = self.json_api_call('GET', path, {})
         return response
-
 
     def get_phones_by_number(self, number, extension=None):
         """
@@ -707,7 +691,6 @@ class Admin(client.Client):
         response = self.json_api_call('GET', path,
                                         params)
         return response
-
 
     def add_phone(self,
                   number=None,
@@ -753,7 +736,6 @@ class Admin(client.Client):
         response = self.json_api_call('POST', path,
                                         params)
         return response
-
 
     def update_phone(self, phone_id,
                      number=None,
@@ -801,7 +783,6 @@ class Admin(client.Client):
                                         params)
         return response
 
-
     def delete_phone(self, phone_id):
         """
         Deletes a phone. If the phone has already been deleted, does nothing.
@@ -813,7 +794,6 @@ class Admin(client.Client):
         path = '/admin/v1/phones/' + phone_id
         params = {}
         return self.json_api_call('DELETE', path, params)
-
 
     def send_sms_activation_to_phone(self, phone_id,
                                      valid_secs=None,
@@ -958,7 +938,6 @@ class Admin(client.Client):
                                       params)
         return response
 
-
     def delete_desktoptoken(self, desktoptoken_id):
         """
         Deletes a desktop token. If the desktop token has already been deleted,
@@ -973,7 +952,6 @@ class Admin(client.Client):
         path = '/admin/v1/desktoptokens/' + six.moves.urllib.parse.quote_plus(desktoptoken_id)
         params = {}
         return self.json_api_call('DELETE', path, params)
-
 
     def update_desktoptoken(self,
                             desktoptoken_id,
@@ -1001,7 +979,6 @@ class Admin(client.Client):
                                       params)
         return response
 
-
     def activate_desktoptoken(self, desktoptoken_id, valid_secs=None):
         """
         Generates an activation code for a desktop token.
@@ -1024,7 +1001,6 @@ class Admin(client.Client):
             params)
         return response
 
-
     def get_tokens(self):
         """
         Returns list of tokens.
@@ -1038,7 +1014,6 @@ class Admin(client.Client):
             params
         )
         return response
-
 
     def get_token_by_id(self, token_id):
         """
@@ -1054,7 +1029,6 @@ class Admin(client.Client):
         response = self.json_api_call('GET', path,
                                         params)
         return response
-
 
     def get_tokens_by_serial(self, type, serial):
         """
@@ -1072,7 +1046,6 @@ class Admin(client.Client):
         response = self.json_api_call('GET', '/admin/v1/tokens', params)
         return response
 
-
     def delete_token(self, token_id):
         """
         Deletes a token. If the token is already deleted, does nothing.
@@ -1082,7 +1055,6 @@ class Admin(client.Client):
         token_id = six.moves.urllib.parse.quote_plus(str(token_id))
         path = '/admin/v1/tokens/' + token_id
         return self.json_api_call('DELETE', path, {})
-
 
     def add_hotp6_token(self, serial, secret, counter=None):
         """
@@ -1102,7 +1074,6 @@ class Admin(client.Client):
                                         params)
         return response
 
-
     def add_hotp8_token(self, serial, secret, counter=None):
         """
         Add a HOTP8 token.
@@ -1121,7 +1092,6 @@ class Admin(client.Client):
                                         params)
         return response
 
-
     def add_totp6_token(self, serial, secret, totp_step=None):
         """
         Add a TOTP6 token.
@@ -1139,7 +1109,6 @@ class Admin(client.Client):
         response = self.json_api_call('POST', path,
                                         params)
         return response
-
 
     def add_totp8_token(self, serial, secret, totp_step=None):
         """
@@ -1178,7 +1147,6 @@ class Admin(client.Client):
                                         params)
         return response
 
-
     def add_yubikey_token(self, serial, private_id, aes_key):
         """
         Add a Yubikey AES token.
@@ -1194,7 +1162,6 @@ class Admin(client.Client):
         response = self.json_api_call('POST', path,
                                         params)
         return response
-
 
     def resync_hotp_token(self, token_id, code1, code2, code3):
         """
@@ -1374,7 +1341,6 @@ class Admin(client.Client):
                                       params)
         return response
 
-
     def get_info_summary(self):
         """
         Returns a summary of objects in the account.
@@ -1389,7 +1355,6 @@ class Admin(client.Client):
             params
         )
         return response
-
 
     def get_info_telephony_credits_used(self,
                                         mintime=None,
@@ -1415,7 +1380,6 @@ class Admin(client.Client):
             params
         )
         return response
-
 
     def get_authentication_attempts(self,
                                     mintime=None,
@@ -1451,7 +1415,6 @@ class Admin(client.Client):
             params
         )
         return response
-
 
     def get_user_authentication_attempts(self,
                                          mintime=None,
@@ -1612,7 +1575,6 @@ class Admin(client.Client):
         )
         return response
 
-
     def get_integrations(self):
         """
         Returns list of integrations.
@@ -1629,7 +1591,6 @@ class Admin(client.Client):
             params
         )
         return response
-
 
     def get_integration(self, integration_key):
         """
@@ -1648,7 +1609,6 @@ class Admin(client.Client):
             params
         )
         return response
-
 
     def create_integration(self,
                            name,
@@ -1747,7 +1707,6 @@ class Admin(client.Client):
                                       params)
         return response
 
-
     def delete_integration(self, integration_key):
         """Deletes an integration.
 
@@ -1759,7 +1718,6 @@ class Admin(client.Client):
         integration_key = six.moves.urllib.parse.quote_plus(str(integration_key))
         path = '/admin/v1/integrations/%s' % integration_key
         return self.json_api_call('DELETE', path, {})
-
 
     def update_integration(self,
                            integration_key,
@@ -1866,7 +1824,6 @@ class Admin(client.Client):
         response = self.json_api_call('POST', path, params)
         return response
 
-
     def get_admins(self):
         """
         Returns list of administrators.
@@ -1878,7 +1835,6 @@ class Admin(client.Client):
         """
         response = self.json_api_call('GET', '/admin/v1/admins', {})
         return response
-
 
     def get_admin(self, admin_id):
         """
@@ -1894,7 +1850,6 @@ class Admin(client.Client):
         path = '/admin/v1/admins/%s' % admin_id
         response = self.json_api_call('GET', path, {})
         return response
-
 
     def add_admin(self, name, email, phone, password, role=None):
         """
@@ -1924,7 +1879,6 @@ class Admin(client.Client):
         response = self.json_api_call('POST', '/admin/v1/admins', params)
         return response
 
-
     def update_admin(self, admin_id,
                      name=None,
                      phone=None,
@@ -1953,7 +1907,6 @@ class Admin(client.Client):
         response = self.json_api_call('POST', path, params)
         return response
 
-
     def delete_admin(self, admin_id):
         """
         Deletes an administrator.
@@ -1966,7 +1919,6 @@ class Admin(client.Client):
         path = '/admin/v1/admins/%s' % admin_id
         return self.json_api_call('DELETE', path, {})
 
-
     def reset_admin(self, admin_id):
         """
         Resets the admin lockout.
@@ -1978,7 +1930,6 @@ class Admin(client.Client):
         admin_id = six.moves.urllib.parse.quote_plus(str(admin_id))
         path = '/admin/v1/admins/%s/reset' % admin_id
         return self.json_api_call('POST', path, {})
-
 
     def activate_admin(self, email,
                        send_email=False,

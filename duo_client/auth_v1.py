@@ -31,7 +31,6 @@ class AuthV1(client.Client):
         response = self.json_api_call('GET', '/rest/v1/ping', {})
         return response == 'pong'
 
-
     def check(self):
         """
         Returns True if and only if the integration key, secret key, and
@@ -39,7 +38,6 @@ class AuthV1(client.Client):
         """
         response = self.json_api_call('GET', '/rest/v1/check', {})
         return response == 'valid'
-
 
     def logo(self):
         """
@@ -54,8 +52,6 @@ class AuthV1(client.Client):
         else:
             return self.parse_json_response(response, data)
 
-
-
     def preauth(self, username,
                 ipaddr=None):
         params = {
@@ -65,7 +61,6 @@ class AuthV1(client.Client):
             params['ipaddr'] = ipaddr
         response = self.json_api_call('POST', '/rest/v1/preauth', params)
         return response
-
 
     def auth(self, username,
              factor=FACTOR_PHONE,
@@ -108,7 +103,6 @@ class AuthV1(client.Client):
         if async:
             return response['txid']
         return response['result'] == 'allow'
-
 
     def status(self, txid):
         """
