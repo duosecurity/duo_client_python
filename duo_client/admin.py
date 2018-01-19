@@ -592,6 +592,23 @@ class Admin(client.Client):
         path = '/admin/v1/users/' + user_id + '/tokens/' + token_id
         return self.json_api_call('DELETE', path, {})
 
+    def get_user_u2ftokens(self, user_id):
+        """ Returns an array of u2ftokens associated
+            with a user.
+
+            Params:
+                user_id (str) - The user id.
+
+            Returns:
+                An array of u2ftoken dicts.
+
+            Notes:
+                Raises RuntimeError on error.
+        """
+        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        path = '/admin/v1/users/' + user_id + '/u2ftokens'
+        return self.json_api_call('GET', path, {})
+
     def get_user_groups(self, user_id):
         """
         Returns an array of groups associated with the user.
@@ -1997,3 +2014,51 @@ class Admin(client.Client):
 
     def delete_logo(self):
         return self.json_api_call('DELETE', '/admin/v1/logo', params={})
+
+    def get_u2ftokens(self):
+        """ Returns a list of u2ftokens.
+
+            Returns:
+                Returns a list of u2ftoken dicts.
+
+            Notes:
+                Raises RuntimeError on error.
+        """
+        response = self.json_api_call('GET', '/admin/v1/u2ftokens', {})
+        return response
+
+    def get_u2ftoken_by_id(self, registration_id):
+        """ Returns u2ftoken specified by registration_id.
+
+            Params:
+                registration_id (str): The registration id of the
+                    u2ftoken to fetch.
+
+            Returns:
+                Returns a u2ftoken dict.
+
+            Notes:
+                Raises RuntimeError on error.
+        """
+        registration_id = \
+            six.moves.urllib.parse.quote_plus(str(registration_id))
+        path = '/admin/v1/u2ftokens/' + registration_id
+        response = self.json_api_call('GET', path, {})
+        return response
+
+    def delete_u2ftoken(self, registration_id):
+        """ Deletes a u2ftoken. If the u2ftoken is already
+            deleted, does nothing.
+
+            Params:
+                registration_id (str): The registration id of the
+                    u2ftoken.
+
+            Notes:
+                Raises RuntimeError on error.
+        """
+        registration_id = \
+            six.moves.urllib.parse.quote_plus(str(registration_id))
+        path = '/admin/v1/u2ftokens/' + registration_id
+        response = self.json_api_call('DELETE', path, {})
+        return response
