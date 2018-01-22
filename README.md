@@ -4,8 +4,6 @@
 
 **Auth** - https://www.duosecurity.com/docs/authapi
 
-**Verify** - https://www.duosecurity.com/docs/duoverify
-
 **Admin** - https://www.duosecurity.com/docs/adminapi
 
 **Accounts** - https://www.duosecurity.com/docs/accountsapi
