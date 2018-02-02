@@ -16,13 +16,23 @@ class MockHTTPConnection(object):
     """
     status = 200            # success!
 
+    def __init__(self, data_response_should_be_list=False):
+        # if a response object should be a list rather than
+        # a dict, then set this flag to true
+        self.data_response_should_be_list = data_response_should_be_list
+
     def dummy(self):
         return self
 
     _connect = _disconnect = close = getresponse = dummy
 
     def read(self):
-        return json.dumps({"stat":"OK", "response":self.__dict__})
+        response = self.__dict__
+
+        if self.data_response_should_be_list:
+            response = [self.__dict__]
+
+        return json.dumps({"stat":"OK", "response":response})
 
     def request(self, method, uri, body, headers):
         self.method = method
