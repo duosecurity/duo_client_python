@@ -1507,6 +1507,49 @@ class Admin(client.Client):
                                       params)
         return response
 
+    def set_allowed_admin_auth_methods(self,
+                                        push_enabled=None,
+                                        sms_enabled=None,
+                                        voice_enabled=None,
+                                        mobile_otp_enabled=None,
+                                        yubikey_enabled=None,
+                                        hardware_token_enabled=None,
+                                        ):
+        params = {}
+        if push_enabled is not None:
+            params['push_enabled'] = (
+                '1' if push_enabled else '0')
+        if sms_enabled is not None:
+            params['sms_enabled'] = (
+                '1' if sms_enabled else '0')
+        if mobile_otp_enabled is not None:
+            params['mobile_otp_enabled'] = (
+                '1' if mobile_otp_enabled else '0')
+        if hardware_token_enabled is not None:
+            params['hardware_token_enabled'] = (
+                '1' if hardware_token_enabled else '0')
+        if yubikey_enabled is not None:
+            params['yubikey_enabled'] = (
+                '1' if yubikey_enabled else '0')
+        if voice_enabled is not None:
+            params['voice_enabled'] = (
+                '1' if voice_enabled else '0')
+        response = self.json_api_call(
+            'POST',
+            '/admin/v1/admins/allowed_auth_methods',
+            params
+        )
+        return response
+
+    def get_allowed_admin_auth_methods(self):
+        params={}
+        response = self.json_api_call(
+            'GET',
+            '/admin/v1/admins/allowed_auth_methods',
+            params
+        )
+        return response
+
     def get_info_summary(self):
         """
         Returns a summary of objects in the account.
@@ -1671,67 +1714,6 @@ class Admin(client.Client):
                 'limit': str(limit),
                 'offset': str(offset),
             })
-
-    def set_allowed_admin_login_factors(
-            self,
-            push_enabled=None,
-            sms_enabled=None,
-            voice_enabled=None,
-            mobile_otp_enabled=None,
-            yubikey_enabled=None,
-            hardware_token_enabled=None,
-    ):
-        """
-        Set an admin's allowed login factors.
-
-        At least one factor must be set.
-
-        Args:
-            push_enabled (boolean, optional): Enable push as an allowed factor. False if not specified
-            sms_enabled (boolean, optional): Enable sms as an allowed factor. False if not specified
-            voice_enabled (boolean, optional): Enable voice as an allowed factor. False if not specified
-            mobile_otp_enabled (boolean, optional): Enable mobile otps as an allowed factor. False if not specified
-            yubikey_enabled (boolean, optional): Enable yubikey as an allowed factor. False if not specified
-            hardware_token_enabled (boolean, optional): Enable hardware tokens as an allowed factor. False if not specified
-
-        Returns:
-            Dictionary of allowed factors
-
-        """
-        params = {}
-        if push_enabled is not None:
-            params['push_enabled'] = (
-                '1' if push_enabled else '0')
-        if sms_enabled is not None:
-            params['sms_enabled'] = (
-                '1' if sms_enabled else '0')
-        if mobile_otp_enabled is not None:
-            params['mobile_otp_enabled'] = (
-                '1' if mobile_otp_enabled else '0')
-        if hardware_token_enabled is not None:
-            params['hardware_token_enabled'] = (
-                '1' if hardware_token_enabled else '0')
-        if yubikey_enabled is not None:
-            params['yubikey_enabled'] = (
-                '1' if yubikey_enabled else '0')
-        if voice_enabled is not None:
-            params['voice_enabled'] = (
-                '1' if voice_enabled else '0')
-        response = self.json_api_call(
-            'POST',
-            '/admin/v1/admins/allowed_auth_methods',
-            params
-        )
-        return response
-
-    def get_allowed_admin_login_factors(self):
-        params = {}
-        response = self.json_api_call(
-            'GET',
-            '/admin/v1/admins/login_policies',
-            params
-        )
-        return response
 
     def create_group(self, name,
                     desc=None,
