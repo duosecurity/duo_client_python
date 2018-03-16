@@ -1678,7 +1678,11 @@ class Admin(client.Client):
             sms_enabled=None,
             voice_enabled=None,
             mobile_otp_enabled=None,
+<<<<<<< HEAD
             u2f_enabled=None,
+=======
+            yubikey_enabled=None,
+>>>>>>> Adds admin login factor restriction
             hardware_token_enabled=None,
     ):
         """
@@ -1691,7 +1695,11 @@ class Admin(client.Client):
             sms_enabled (boolean, optional): Enable sms as an allowed factor. False if not specified
             voice_enabled (boolean, optional): Enable voice as an allowed factor. False if not specified
             mobile_otp_enabled (boolean, optional): Enable mobile otps as an allowed factor. False if not specified
+<<<<<<< HEAD
             u2f_enabled (boolean, optional): Enable yubikey as an allowed factor. False if not specified
+=======
+            yubikey_enabled (boolean, optional): Enable yubikey as an allowed factor. False if not specified
+>>>>>>> Adds admin login factor restriction
             hardware_token_enabled (boolean, optional): Enable hardware tokens as an allowed factor. False if not specified
 
         Returns:
@@ -1712,8 +1720,8 @@ class Admin(client.Client):
             params['hardware_token_enabled'] = (
                 '1' if hardware_token_enabled else '0')
         if yubikey_enabled is not None:
-            params['u2f_enabled'] = (
-                '1' if u2f_enabled else '0')
+            params['yubikey_enabled'] = (
+                '1' if yubikey_enabled else '0')
         if voice_enabled is not None:
             params['voice_enabled'] = (
                 '1' if voice_enabled else '0')
@@ -1725,10 +1733,11 @@ class Admin(client.Client):
         return response
 
     def get_allowed_admin_login_factors(self):
+        params = {}
         response = self.json_api_call(
             'GET',
             '/admin/v1/admins/login_policies',
-            {}
+            params
         )
         return response
 
