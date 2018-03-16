@@ -1678,11 +1678,7 @@ class Admin(client.Client):
             sms_enabled=None,
             voice_enabled=None,
             mobile_otp_enabled=None,
-<<<<<<< HEAD
-            u2f_enabled=None,
-=======
             yubikey_enabled=None,
->>>>>>> Adds admin login factor restriction
             hardware_token_enabled=None,
     ):
         """
@@ -1695,11 +1691,7 @@ class Admin(client.Client):
             sms_enabled (boolean, optional): Enable sms as an allowed factor. False if not specified
             voice_enabled (boolean, optional): Enable voice as an allowed factor. False if not specified
             mobile_otp_enabled (boolean, optional): Enable mobile otps as an allowed factor. False if not specified
-<<<<<<< HEAD
-            u2f_enabled (boolean, optional): Enable yubikey as an allowed factor. False if not specified
-=======
             yubikey_enabled (boolean, optional): Enable yubikey as an allowed factor. False if not specified
->>>>>>> Adds admin login factor restriction
             hardware_token_enabled (boolean, optional): Enable hardware tokens as an allowed factor. False if not specified
 
         Returns:
