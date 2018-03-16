@@ -511,7 +511,7 @@ class Admin(client.Client):
             params['email'] = email
         if firstname is not None:
             params['firstname'] = firstname
-        if lastname is not None: 
+        if lastname is not None:
             params['lastname'] = lastname
         response = self.json_api_call('POST',
                                       '/admin/v1/users',
@@ -552,7 +552,7 @@ class Admin(client.Client):
             params['email'] = email
         if firstname is not None:
             params['firstname'] = firstname
-        if lastname is not None: 
+        if lastname is not None:
             params['lastname'] = lastname
         response = self.json_api_call('POST', path, params)
         return response
@@ -1672,44 +1672,54 @@ class Admin(client.Client):
                 'offset': str(offset),
             })
 
-   def set_allowed_admin_login_factors(self,
-                                        push_enabled=None,
-                                        sms_enabled=None,
-                                        voice_enabled=None,
-                                        mobile_otp_enabled=None,
-                                        yubikey_enabled=None,
-                                        hardware_token_enabled=None,
-                                        ):
-        '''
+    def set_allowed_admin_login_factors(
+            self,
+            push_enabled=None,
+            sms_enabled=None,
+            voice_enabled=None,
+            mobile_otp_enabled=None,
+            u2f_enabled=None,
+            hardware_token_enabled=None,
+    ):
+        """
+        Set an admin's allowed login factors.
+
+        At least one factor must be set.
 
         Args:
             push_enabled (boolean, optional): Enable push as an allowed factor. False if not specified
             sms_enabled (boolean, optional): Enable sms as an allowed factor. False if not specified
             voice_enabled (boolean, optional): Enable voice as an allowed factor. False if not specified
             mobile_otp_enabled (boolean, optional): Enable mobile otps as an allowed factor. False if not specified
-            yubikey_enabled(boolean, optional): Enable yubikey as an allowed factor. False if not specified
+            u2f_enabled (boolean, optional): Enable yubikey as an allowed factor. False if not specified
             hardware_token_enabled (boolean, optional): Enable hardware tokens as an allowed factor. False if not specified
 
         Returns:
             Dictionary of allowed factors
 
-        '''
+        """
         params = {}
         if push_enabled is not None:
-            params['push_enabled'] = '1' if push_enabled else '0'
+            params['push_enabled'] = (
+                '1' if push_enabled else '0')
         if sms_enabled is not None:
-            params['sms_enabled'] = '1' if sms_enabled else '0'
+            params['sms_enabled'] = (
+                '1' if sms_enabled else '0')
         if mobile_otp_enabled is not None:
-            params['mobile_otp_enabled'] = '1' if mobile_otp_enabled else '0'
+            params['mobile_otp_enabled'] = (
+                '1' if mobile_otp_enabled else '0')
         if hardware_token_enabled is not None:
-            params['hardware_token_enabled'] = '1' if hardware_token_enabled else '0'
+            params['hardware_token_enabled'] = (
+                '1' if hardware_token_enabled else '0')
         if yubikey_enabled is not None:
-            params['u2f_enabled'] = '1' if u2f_enabled else '0'
+            params['u2f_enabled'] = (
+                '1' if u2f_enabled else '0')
         if voice_enabled is not None:
-            params['voice_enabled'] = '1' if voice_enabled else '0'
+            params['voice_enabled'] = (
+                '1' if voice_enabled else '0')
         response = self.json_api_call(
             'POST',
-            '/admin/v1/admins/login_policies',
+            '/admin/v1/admins/allowed_auth_methods',
             params
         )
         return response
