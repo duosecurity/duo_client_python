@@ -146,5 +146,24 @@ class TestAdmin(unittest.TestCase):
         self.assertEqual(util.params_to_dict(args),
                          {'account_id':[self.client.account_id]})
 
+    def test_update_login_factors_confirm_fail(self):
+        with self.assertRaises(RuntimeError):
+            self.admin_api.set_allowed_admin_login_factors()
+
+    def test_update_login_factors_confirm_pass(self):
+        res = self.admin_api.set_allowed_admin_login_factors(
+                push_enabled=True,
+                hardware_token_enabled=False,
+                )
+        expected_res = {
+                'push_enabled': 'true',
+                'hardware_token_enabled': 'true',
+                'yubikey_enabled': 'false',
+                'voice_enabled': 'false',
+                'sms_enabled': 'false',
+                'mobile_otp_enabled': 'false',
+                }
+        self.assertEqual(sorted(res), sorted(expected_res))
+
 if __name__ == '__main__':
     unittest.main()
