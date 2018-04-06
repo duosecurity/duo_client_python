@@ -460,7 +460,7 @@ class Admin(client.Client):
 
         return self.json_api_call('POST', path, params)
 
-    def get_user_bypass_codes(self, user_id, count=None, valid_secs=None, remaining_uses=None, codes=None):
+    def add_user_bypass_codes(self, user_id, count=None, valid_secs=None, remaining_uses=None, codes=None):
         """
         Replace a user's bypass codes with new codes.
 
@@ -492,6 +492,22 @@ class Admin(client.Client):
             params['codes'] = self._canonicalize_bypass_codes(codes)
 
         return self.json_api_call('POST', path, params)
+
+    def get_user_bypass_codes(self, user_id):
+        """ Gets a list of bypass codes associated with a user.
+
+            Params:
+                user_id (str) - The user id.
+
+            Returns:
+                A list of bypass code dicts.
+
+            Notes:
+                Raises RuntimeError on error.
+        """
+        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        path = '/admin/v1/users/' + user_id + '/bypass_codes'
+        return self.json_api_call('GET', path, {})
 
     def get_user_phones(self, user_id):
         """
@@ -2060,5 +2076,33 @@ class Admin(client.Client):
         registration_id = \
             six.moves.urllib.parse.quote_plus(str(registration_id))
         path = '/admin/v1/u2ftokens/' + registration_id
+        response = self.json_api_call('DELETE', path, {})
+        return response
+
+    def get_bypass_codes(self):
+        """ Gets a list of bypass codes.
+
+            Returns:
+                Returns a list of bypass code dicts.
+
+            Notes:
+                Raises RuntimeError on error.
+        """
+        response = self.json_api_call('GET', '/admin/v1/bypass_codes', {})
+        return response
+
+    def delete_bypass_code_by_id(self, bypass_code_id):
+        """ Deletes a bypass code. If the bypass code is already
+            deleted, does nothing.
+
+            Params:
+                bypass_code_id (str): The id of the bypass code.
+
+            Notes:
+                Raises RuntimeError on error.
+        """
+        registration_id = \
+            six.moves.urllib.parse.quote_plus(str(bypass_code_id))
+        path = '/admin/v1/bypass_codes/' + bypass_code_id
         response = self.json_api_call('DELETE', path, {})
         return response

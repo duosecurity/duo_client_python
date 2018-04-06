@@ -146,5 +146,40 @@ class TestAdmin(unittest.TestCase):
         self.assertEqual(util.params_to_dict(args),
                          {'account_id':[self.client.account_id]})
 
+    def test_get_user_bypass_codes(self):
+        """ Test to get bypass codes by user id.
+        """
+        response = self.client.get_user_bypass_codes('DU012345678901234567')
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(
+            uri,
+            '/admin/v1/users/DU012345678901234567/bypass_codes')
+        self.assertEqual(util.params_to_dict(args),
+                         {'account_id': [self.client.account_id]})
+
+    def test_get_bypass_codes(self):
+        """ Test to get bypass codes.
+        """
+        response = list(self.client_list.get_bypass_codes())[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/bypass_codes')
+        self.assertEqual(util.params_to_dict(args),
+                         {'account_id': [self.client_list.account_id]})
+
+    def test_delete_bypass_code_by_id(self):
+        """ Test to delete a bypass code by id.
+        """
+        response = self.client.delete_bypass_code_by_id('DU012345678901234567')
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'DELETE')
+        self.assertEqual(uri, '/admin/v1/bypass_codes/DU012345678901234567')
+        self.assertEqual(util.params_to_dict(args),
+                         {'account_id': [self.client.account_id]})
+
 if __name__ == '__main__':
     unittest.main()
