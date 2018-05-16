@@ -1,3 +1,4 @@
+# encoding=utf-8
 """
 Duo Security Administration API reference client implementation.
 
