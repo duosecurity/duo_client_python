@@ -362,7 +362,7 @@ class Admin(client.Client):
         return response
 
     def add_user(self, username, realname=None, status=None,
-                 notes=None, email=None):
+                 notes=None, email=None, firstname=None, lastname=None):
         """
         Adds a user.
 
@@ -371,6 +371,8 @@ class Admin(client.Client):
         status - User's status, defaults to USER_STATUS_ACTIVE
         notes - Comment field (optional)
         email - Email address (optional)
+        firstname - User’s given name (optional)
+        lastname - User’s surname (optional)
 
         Returns newly created user object.
 
@@ -387,13 +389,18 @@ class Admin(client.Client):
             params['notes'] = notes
         if email is not None:
             params['email'] = email
+        if firstname is not None:
+            params['firstname'] = firstname
+        if lastname is not None:
+            params['lastname'] = lastname
         response = self.json_api_call('POST',
                                       '/admin/v1/users',
                                       params)
         return response
 
     def update_user(self, user_id, username=None, realname=None,
-                    status=None, notes=None, email=None):
+                    status=None, notes=None, email=None, firstname=None,
+                    lastname=None):
         """
         Update username, realname, status, or notes for a user.
 
@@ -403,6 +410,8 @@ class Admin(client.Client):
         status - User's status, defaults to USER_STATUS_ACTIVE
         notes - Comment field (optional)
         email - Email address (optional)
+        firstname - User’s given name (optional)
+        lastname - User’s surname (optional)
 
         Returns updated user object.
 
@@ -421,6 +430,10 @@ class Admin(client.Client):
             params['notes'] = notes
         if email is not None:
             params['email'] = email
+        if firstname is not None:
+            params['firstname'] = firstname
+        if lastname is not None:
+            params['lastname'] = lastname
         response = self.json_api_call('POST', path, params)
         return response
 
