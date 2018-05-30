@@ -5,11 +5,10 @@ from __future__ import absolute_import
 from __future__ import print_function
 import six
 
-__version__ = '3.1.0'
+__version__ = '3.2.0'
 
 import base64
 import collections
-import copy
 import datetime
 import email.utils
 import hashlib
@@ -31,6 +30,7 @@ try:
     # Only needed if signing requests with timezones other than UTC.
     import pytz
 except ImportError as e:
+    pytz = None
     pytz_error = e
 
 from .https_wrapper import CertValidatingHTTPSConnection
@@ -55,24 +55,55 @@ def canon_params(params):
 def canonicalize(method, host, uri, params, date, sig_version):
     """
     Return a canonical string version of the given request attributes.
+
+    * method: string HTTP method
+    * host: string hostname
+    * uri: string uri path
+    * params: string containing request params
+    * date: date string for request
+    * sig_version: signature version integer
     """
     if sig_version == 1:
-        canon = []
+        canon = [
+            method.upper(),
+            host.lower(),
+            uri,
+            canon_params(params),
+        ]
     elif sig_version == 2:
-        canon = [date]
+        canon = [
+            date,
+            method.upper(),
+            host.lower(),
+            uri,
+            canon_params(params),
+        ]
+    elif sig_version == 3:
+        # sig_version 3 is json only
+        canon = [
+            date,
+            method.upper(),
+            host.lower(),
+            uri,
+            params,
+        ]
+    elif sig_version == 4:
+        # sig_version 4 is json only
+        canon = [
+            date,
+            method.upper(),
+            host.lower(),
+            uri,
+            '',
+            hashlib.sha512(params).hexdigest(),
+        ]
     else:
-        raise NotImplementedError(sig_version)
-
-    canon += [
-        method.upper(),
-        host.lower(),
-        uri,
-        canon_params(params),
-    ]
+        raise ValueError("Unknown signature version: {}".format(sig_version))
     return '\n'.join(canon)
 
 
-def sign(ikey, skey, method, host, uri, date, sig_version, params):
+def sign(ikey, skey, method, host, uri, date, sig_version, params,
+         digestmod=hashlib.sha1):
     """
     Return basic authorization header line with a Duo Web API signature.
     """
@@ -81,8 +112,10 @@ def sign(ikey, skey, method, host, uri, date, sig_version, params):
         skey = skey.encode('utf-8')
     if isinstance(canonical, six.text_type):
         canonical = canonical.encode('utf-8')
-    sig = hmac.new(skey, canonical, hashlib.sha1)
+
+    sig = hmac.new(skey, canonical, digestmod)
     auth = '%s:%s' % (ikey, sig.hexdigest())
+
     if isinstance(auth, six.text_type):
         auth = auth.encode('utf-8')
     b64 = base64.b64encode(auth)
@@ -112,13 +145,15 @@ def normalize_params(params):
 
 
 class Client(object):
-    sig_version = 2
 
     def __init__(self, ikey, skey, host,
                  ca_certs=DEFAULT_CA_CERTS,
                  sig_timezone='UTC',
                  user_agent=('Duo API Python/' + __version__),
-                 timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
+                 timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
+                 digestmod=hashlib.sha1,
+                 sig_version=2
+                 ):
         """
         ca_certs - Path to CA pem file.
         """
@@ -132,12 +167,17 @@ class Client(object):
         self.ca_certs = ca_certs
         self.user_agent = user_agent
         self.set_proxy(host=None, proxy_type=None)
+        self.digestmod = digestmod
+        self.sig_version = sig_version
 
         # Default timeout is a sentinel object
         if timeout is socket._GLOBAL_DEFAULT_TIMEOUT:
             self.timeout = timeout
         else:
             self.timeout = float(timeout)
+
+        if sig_version == 4 and digestmod != hashlib.sha512:
+            raise ValueError('sha512 required for sig_version 4')
 
     def set_proxy(self, host, port=None, headers=None,
                   proxy_type='CONNECT'):
@@ -154,15 +194,29 @@ class Client(object):
         self.proxy_port = port
         self.proxy_type = proxy_type
 
-    def api_call(self, method, path, params):
+    def api_call(self, method, path, params, make_json_request=False):
         """
         Call a Duo API method. Return a (response, data) tuple.
 
         * method: HTTP request method. E.g. "GET", "POST", or "DELETE".
         * path: Full path of the API endpoint. E.g. "/auth/v2/ping".
-        * params: dict mapping from parameter name to stringified value.
+        * params: dict mapping from parameter name to stringified value,
+            or a dict to be converted to json.
+        * make_json_request: DEPRECATED bool to force an application/json
+            request using sig_version 3.
         """
-        params = normalize_params(params)
+        request_sig_version = self.sig_version
+        if make_json_request:
+            if self.sig_version == 4:
+                raise ValueError('make_json_request is not compatible with sig_version 4')
+            request_sig_version = 3
+
+        if request_sig_version in (1, 2):
+            params = normalize_params(params)
+        elif request_sig_version in (3, 4):
+            # Raises if params are not a dict that can be converted
+            # to json.
+            params = self.canon_json(params)
 
         if self.sig_timezone == 'UTC':
             now = email.utils.formatdate()
@@ -178,8 +232,9 @@ class Client(object):
                     self.host,
                     path,
                     now,
-                    self.sig_version,
-                    params)
+                    request_sig_version,
+                    params,
+                    self.digestmod)
         headers = {
             'Authorization': auth,
             'Date': now,
@@ -190,14 +245,26 @@ class Client(object):
             headers['User-Agent'] = self.user_agent
 
         if method in ['POST', 'PUT']:
-            headers['Content-type'] = 'application/x-www-form-urlencoded'
-            body = six.moves.urllib.parse.urlencode(params, doseq=True)
+            if request_sig_version in (3,4):
+                headers['Content-type'] = 'application/json'
+                body = params
+            else:
+                headers['Content-type'] = 'application/x-www-form-urlencoded'
+                body = six.moves.urllib.parse.urlencode(params, doseq=True)
             uri = path
         else:
             body = None
             uri = path + '?' + six.moves.urllib.parse.urlencode(params, doseq=True)
 
-        return self._make_request(method, uri, body, headers)
+        encoded_headers = {}
+        for k, v in headers.items():
+            if isinstance(k, six.text_type):
+                k = k.encode('ascii')
+            if isinstance(v, six.text_type):
+                v = v.encode('ascii')
+            encoded_headers[k] = v
+
+        return self._make_request(method, uri, body, encoded_headers)
 
     def _connect(self):
         # Host and port for the HTTP(S) connection to the API server.
@@ -269,13 +336,13 @@ class Client(object):
     def _disconnect(self, conn):
         conn.close()
 
-    def json_api_call(self, method, path, params):
+    def json_api_call(self, method, path, params, make_json_request=False):
         """
         Call a Duo API method which is expected to return a JSON body
         with a 200 status. Return the response data structure or raise
         RuntimeError.
         """
-        (response, data) = self.api_call(method, path, params)
+        (response, data) = self.api_call(method, path, params, make_json_request)
         return self.parse_json_response(response, data)
 
     def parse_json_response(self, response, data):
@@ -318,6 +385,12 @@ class Client(object):
             return data['response']
         except (ValueError, KeyError, TypeError):
             raise_error('Received bad response: %s' % data)
+
+    @classmethod
+    def canon_json(cls, params):
+        if not isinstance(params, dict):
+            raise ValueError('JSON request must be an object.')
+        return json.dumps(params, sort_keys=True, separators=(',', ':'))
 
 
 def output_response(response, data, headers=None):
@@ -376,9 +449,9 @@ def main():
         skey=args.skey,
         host=args.host,
         ca_certs=args.ca,
+        sig_version=args.sig_version,
         sig_timezone=args.sig_timezone,
     )
-    client.sig_version = args.sig_version
 
     params = collections.defaultdict(list)
     for p in args.param:
