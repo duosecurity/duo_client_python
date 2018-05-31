@@ -150,8 +150,7 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual(actual, expected)
 
     def test_v4_with_json(self):
-        hashed_body = hashlib.sha512(
-            '{"alpha":["a","b","c","d"],"data":"abc123","info":{"another":2,"test":1}}').hexdigest()
+        hashed_body = hashlib.sha512(JSON_STRING.encode('utf-8')).hexdigest()
         expected = (
             'Tue, 04 Jul 2017 14:12:00\n'
             'POST\n'
@@ -171,7 +170,7 @@ class TestCanonicalize(unittest.TestCase):
                 'POST', 'foO.BaR52.cOm', '/Foo/BaR2/qux', params,
                 'Tue, 04 Jul 2017 14:12:00', sig_version=999)
         self.assertEqual(
-            e.exception.message,
+            e.exception.args[0],
             "Unknown signature version: {}".format(999))
 
 class TestSign(unittest.TestCase):
@@ -222,7 +221,11 @@ class TestSign(unittest.TestCase):
         )
 
         sig = '7bf8cf95d689091cf7fdb72178f16d1c19ef92c1'
-        expected = 'Basic ' + base64.b64encode(ikey + ':' + sig)
+        auth = '%s:%s' % (ikey, sig)
+        auth = auth.encode('utf-8')
+        b64 = base64.b64encode(auth)
+        b64 = b64.decode('utf-8')
+        expected = 'Basic %s' % b64
         self.assertEqual(actual, expected)
 
 class TestRequest(unittest.TestCase):
@@ -317,7 +320,7 @@ class TestJsonRequests(unittest.TestCase):
     def test_json_fails_with_bad_args(self):
         with self.assertRaises(ValueError) as e:
             (response, dummy) = self.client.api_call('POST', '/foo/bar', '')
-        self.assertEqual(e.exception.message, "JSON request must be an object.")
+        self.assertEqual(e.exception.args[0], "JSON request must be an object.")
 
     def test_json_put(self):
         (response, dummy) = self.client.api_call('PUT', '/foo/bar', JSON_BODY)

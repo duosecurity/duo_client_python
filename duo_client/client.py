@@ -95,7 +95,7 @@ def canonicalize(method, host, uri, params, date, sig_version):
             host.lower(),
             uri,
             '',
-            hashlib.sha512(params).hexdigest(),
+            hashlib.sha512(params.encode('utf-8')).hexdigest(),
         ]
     else:
         raise ValueError("Unknown signature version: {}".format(sig_version))
