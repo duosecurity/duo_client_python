@@ -171,11 +171,10 @@ TOKEN_YUBIKEY = 'yk'
 class Admin(client.Client):
     account_id = None
 
-    def api_call(self, method, path, params, make_json_request=False):
+    def api_call(self, method, path, params):
         if self.account_id is not None:
             params['account_id'] = self.account_id
-        return super(Admin, self).api_call(
-            method, path, params, make_json_request)
+        return super(Admin, self).api_call(method, path, params)
 
     @classmethod
     def _canonicalize_ip_whitelist(klass, ip_whitelist):
