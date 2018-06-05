@@ -194,7 +194,7 @@ class Client(object):
         self.proxy_port = port
         self.proxy_type = proxy_type
 
-    def api_call(self, method, path, params, make_json_request=False):
+    def api_call(self, method, path, params):
         """
         Call a Duo API method. Return a (response, data) tuple.
 
@@ -202,18 +202,10 @@ class Client(object):
         * path: Full path of the API endpoint. E.g. "/auth/v2/ping".
         * params: dict mapping from parameter name to stringified value,
             or a dict to be converted to json.
-        * make_json_request: DEPRECATED bool to force an application/json
-            request using sig_version 3.
         """
-        request_sig_version = self.sig_version
-        if make_json_request:
-            if self.sig_version == 4:
-                raise ValueError('make_json_request is not compatible with sig_version 4')
-            request_sig_version = 3
-
-        if request_sig_version in (1, 2):
+        if self.sig_version in (1, 2):
             params = normalize_params(params)
-        elif request_sig_version in (3, 4):
+        elif self.sig_version in (3, 4):
             # Raises if params are not a dict that can be converted
             # to json.
             params = self.canon_json(params)
@@ -232,7 +224,7 @@ class Client(object):
                     self.host,
                     path,
                     now,
-                    request_sig_version,
+                    self.sig_version,
                     params,
                     self.digestmod)
         headers = {
@@ -245,7 +237,7 @@ class Client(object):
             headers['User-Agent'] = self.user_agent
 
         if method in ['POST', 'PUT']:
-            if request_sig_version in (3,4):
+            if self.sig_version in (3,4):
                 headers['Content-type'] = 'application/json'
                 body = params
             else:
@@ -336,13 +328,13 @@ class Client(object):
     def _disconnect(self, conn):
         conn.close()
 
-    def json_api_call(self, method, path, params, make_json_request=False):
+    def json_api_call(self, method, path, params):
         """
         Call a Duo API method which is expected to return a JSON body
         with a 200 status. Return the response data structure or raise
         RuntimeError.
         """
-        (response, data) = self.api_call(method, path, params, make_json_request)
+        (response, data) = self.api_call(method, path, params)
         return self.parse_json_response(response, data)
 
     def parse_json_response(self, response, data):

@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 import hashlib
-import json
 import unittest
 import six.moves.urllib
 import duo_client.client
@@ -341,57 +340,6 @@ class TestJsonRequests(unittest.TestCase):
 
         (response, dummy) = client.api_call(
             'POST', '/foo/bar', JSON_BODY)
-
-        self.assertEqual(response.method, 'POST')
-        self.assertEqual(response.uri, '/foo/bar')
-        self.assertEqual(response.body, JSON_STRING)
-
-        self.assertIn('Content-type', response.headers)
-        self.assertEqual(response.headers['Content-type'], 'application/json')
-        self.assertIn('Authorization', response.headers)
-
-
-class TestMakeJsonRequests(unittest.TestCase):
-    def setUp(self):
-        self.client = duo_client.client.Client(
-            'test_ikey', 'test_akey', 'example.com', sig_timezone='America/Detroit',
-            sig_version=2)
-        # monkeypatch client's _connect()
-        self.client._connect = lambda: util.MockHTTPConnection()
-
-    def test_json_post(self):
-        (response, dummy) = self.client.api_call('POST', '/foo/bar', JSON_BODY,
-                                                 make_json_request=True)
-
-        self.assertEqual(response.method, 'POST')
-        self.assertEqual(response.uri, '/foo/bar')
-        self.assertEqual(response.body, JSON_STRING)
-
-        self.assertIn('Content-type', response.headers)
-        self.assertEqual(response.headers['Content-type'], 'application/json')
-        self.assertIn('Authorization', response.headers)
-
-    def test_json_put(self):
-        (response, dummy) = self.client.api_call('PUT', '/foo/bar', JSON_BODY, 
-                                                 make_json_request=True)
-
-        self.assertEqual(response.method, 'PUT')
-        self.assertEqual(response.uri, '/foo/bar')
-        self.assertEqual(response.body, JSON_STRING)
-
-        self.assertIn('Content-type', response.headers)
-        self.assertEqual(response.headers['Content-type'], 'application/json')
-        self.assertIn('Authorization', response.headers)
-
-    def test_json_request(self):
-        client = duo_client.client.Client(
-            'test_ikey', 'test_akey', 'example.com', sig_timezone='America/Detroit',
-            sig_version=2)
-        client._connect = lambda: util.MockHTTPConnection()
-
-        (response, dummy) = client.api_call(
-            'POST', '/foo/bar', JSON_BODY,
-            make_json_request=True)
 
         self.assertEqual(response.method, 'POST')
         self.assertEqual(response.uri, '/foo/bar')
