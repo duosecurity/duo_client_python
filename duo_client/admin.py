@@ -157,6 +157,7 @@ import six.moves.urllib
 
 from . import client
 import six
+import warnings
 
 USER_STATUS_ACTIVE = 'active'
 USER_STATUS_BYPASS = 'bypass'
@@ -1496,15 +1497,48 @@ class Admin(client.Client):
             {}
         )
 
-    def get_group(self, gkey):
+    def get_group(self, group_id, api_version=1):
         """
-        Returns a group by gkey.
+        Returns a group by the group id.
+
+        group_id - The id of group (Required)
+        api_version - The api version of the handler to use. Currently, the
+                      default api version is v1, but the v1 api will be
+                      deprecated in a future version of the Duo Admin API.
+                      Please migrate to the v2 api at your earliest convenience.
+                      For details on the differences between v1 and v2,
+                      please see Duo's Admin API documentation. (Optional)
+        """
+        if api_version == 1:
+            url = '/admin/v1/groups/'
+            warnings.warn(
+                'The v1 Admin API for group details will be deprecated '
+                'in a future release of the Duo Admin API. Please migrate to '
+                'the v2 API.',
+                DeprecationWarning)
+        elif api_version == 2:
+            url = '/admin/v2/groups/'
+        else:
+            raise ValueError('Invalid API Version')
+
+        return self.json_api_call('GET', url + group_id, {})
+
+    def get_group_users(self, group_id, limit=100, offset=0):
+        """
+        Get a paginated list of users associated with the specified
+        group.
+
+        group_id - The id of the group (Required)
+        limit - The maximum number of records to return. Maximum is 500. (Optional)
+        offset - The offset of the first record to return. (Optional)
         """
         return self.json_api_call(
             'GET',
-            '/admin/v1/groups/' + gkey,
-            {}
-        )
+            '/admin/v2/groups/' + group_id + '/users',
+            {
+                'limit': str(limit),
+                'offset': str(offset),
+            })
 
     def create_group(self, name,
                     desc=None,
@@ -1550,18 +1584,20 @@ class Admin(client.Client):
         )
         return response
 
-    def delete_group(self, gkey):
+    def delete_group(self, group_id):
         """
-        Delete a group by gkey
+        Delete a group by group_id
+
+        group_id - The id of the group (Required)
         """
         return self.json_api_call(
             'DELETE',
-            '/admin/v1/groups/' + gkey,
+            '/admin/v1/groups/' + group_id,
             {}
         )
 
     def modify_group(self,
-                     gkey,
+                     group_id,
                      name=None,
                      desc=None,
                      status=None,
@@ -1574,7 +1610,7 @@ class Admin(client.Client):
         """
         Modify a group
 
-        gkey - Group to modify (Required)
+        group_id - The id of the group to modify (Required)
         name - New group name (Optional)
         desc - New group description (Optional)
         status - Group authentication status <str: 'active'/'disabled'/'bypass'> (Optional)
@@ -1603,7 +1639,7 @@ class Admin(client.Client):
             params['u2f_enabled'] = '1' if u2f_enabled else '0'
         response = self.json_api_call(
             'POST',
-            '/admin/v1/groups/' + gkey,
+            '/admin/v1/groups/' + group_id,
             params
         )
         return response
