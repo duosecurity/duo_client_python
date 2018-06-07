@@ -55,7 +55,7 @@ class TestAdmin(unittest.TestCase):
     # POST with params
     def test_add_user(self):
         # all params given
-        response = self.client.add_user('foo', 'bar', 'active', 'notes')
+        response = self.client.add_user('foo', 'bar', 'active', 'notes', 'foobar@baz.com', 'fName', 'lName')
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(response['uri'], '/admin/v1/users')
         self.assertEqual(
@@ -64,6 +64,9 @@ class TestAdmin(unittest.TestCase):
              'notes':['notes'],
              'username':['foo'],
              'status':['active'],
+             'email':['foobar%40baz.com'],
+             'firstname':['fName'],
+             'lastname':['lName'],
              'account_id':[self.client.account_id]})
         # defaults
         response = self.client.add_user('bar')
