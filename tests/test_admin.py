@@ -22,6 +22,14 @@ class TestAdmin(unittest.TestCase):
         self.client_list._connect = \
             lambda: util.MockHTTPConnection(data_response_should_be_list=True)
 
+        # if you are wanting to get a response from a call to get
+        # authentication logs
+        self.client_authlog = duo_client.admin.Admin(
+            'test_ikey', 'test_akey', 'example.com')
+        self.client_authlog.account_id = 'DA012345678901234567'
+        self.client_authlog._connect = \
+            lambda: util.MockHTTPConnection(data_response_from_get_authlog=True)
+
     # GET with no params
     def test_get_users(self):
         response = self.client.get_users()
@@ -184,6 +192,30 @@ class TestAdmin(unittest.TestCase):
         self.assertEqual(uri, '/admin/v1/bypass_codes/DU012345678901234567')
         self.assertEqual(util.params_to_dict(args),
                          {'account_id': [self.client.account_id]})
+
+    def test_get_authentication_log_v1(self):
+        """ Test to get authentication log on version 1 api.
+        """
+        response = self.client_list.get_authentication_log(api_version=1)[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/logs/authentication')
+        self.assertEqual(
+            util.params_to_dict(args)['account_id'],
+            [self.client_list.account_id])
+
+    def test_get_authentication_log_v2(self):
+        """ Test to get authentication log on version 1 api.
+        """
+        response = self.client_authlog.get_authentication_log(api_version=2)
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v2/logs/authentication')
+        self.assertEqual(
+            util.params_to_dict(args)['account_id'],
+            [self.client_authlog.account_id])
 
     def test_get_groups(self):
         """ Test for getting list of all groups
