@@ -258,6 +258,13 @@ class Admin(client.Client):
         """
         Returns authentication log events.
 
+        api_version - The api version of the handler to use. Currently, the
+                      default api version is v1, but the v1 api will be
+                      deprecated in a future version of the Duo Admin API.
+                      Please migrate to the v2 api at your earliest convenience.
+                      For details on the differences between v1 and v2,
+                      please see Duo's Admin API documentation. (Optional)
+
         API Version v1:
 
         mintime - Fetch events only >= mintime (to avoid duplicate
