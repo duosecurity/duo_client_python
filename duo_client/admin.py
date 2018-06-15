@@ -158,6 +158,7 @@ import six.moves.urllib
 from . import client
 import six
 import warnings
+import time
 
 USER_STATUS_ACTIVE = 'active'
 USER_STATUS_BYPASS = 'bypass'
@@ -167,6 +168,22 @@ USER_STATUS_LOCKED_OUT = 'locked out'
 TOKEN_HOTP_6 = 'h6'
 TOKEN_HOTP_8 = 'h8'
 TOKEN_YUBIKEY = 'yk'
+
+VALID_AUTHLOG_REQUEST_PARAMS = [
+    'mintime',
+    'maxtime',
+    'limit',
+    'sort',
+    'next_offset',
+    'event_types',
+    'reasons',
+    'results',
+    'users',
+    'applications',
+    'groups',
+    'factors',
+    'api_version'
+]
 
 
 class Admin(client.Client):
@@ -237,10 +254,18 @@ class Admin(client.Client):
             row['host'] = self.host
         return response
 
-    def get_authentication_log(self,
-                               mintime=0):
+    def get_authentication_log(self, api_version=1, **kwargs):
         """
         Returns authentication log events.
+
+        api_version - The api version of the handler to use. Currently, the
+                      default api version is v1, but the v1 api will be
+                      deprecated in a future version of the Duo Admin API.
+                      Please migrate to the v2 api at your earliest convenience.
+                      For details on the differences between v1 and v2,
+                      please see Duo's Admin API documentation. (Optional)
+
+        API Version v1:
 
         mintime - Fetch events only >= mintime (to avoid duplicate
                   records that have already been fetched)
@@ -250,7 +275,6 @@ class Admin(client.Client):
                 {'timestamp': <int:unix timestamp>,
                  'eventtype': "authentication",
                  'host': <str:host>,
-                 'device': <str:device>,
                  'username': <str:username>,
                  'factor': <str:factor>,
                  'result': <str:result>,
@@ -265,20 +289,115 @@ class Admin(client.Client):
              }]
 
         Raises RuntimeError on error.
+
+        API Version v2:
+
+        mintime (required) - Unix timestamp in ms; fetch records >= mintime
+        maxtime (required) - Unix timestamp in ms; fetch records <= mintime
+        limit - Number of results to limit to
+        next_offset - Used to grab the next set of results from a previous response
+        sort - Sort order to be applied
+        users - List of user ids to filter on
+        groups - List of group ids to filter on
+        applications - List of application ids to filter on
+        results - List of results to filter to filter on
+        reasons - List of reasons to filter to filter on
+        factors - List of factors to filter on
+        event_types - List of event_types to filter on
+
+        Returns:
+            {
+                "authlogs": [
+                {
+                  "access_device": {
+                    "ip": <str:ip address>,
+                    "location": {
+                      "city": <str:city>,
+                      "state": <str:state>,
+                      "country": <str:country
+                    }
+                  },
+                  "application": {
+                    "key": <str:application id>,
+                    "name": <str:application name>
+                  },
+                  "auth_device": {
+                    "ip": <str:ip address>,
+                    "location": {
+                      "city": <str:city>,
+                      "state": <str:state>,
+                      "country": <str:country
+                    },
+                    "name": <str:device name>
+                  },
+                  "event_type": <str:type>,
+                  "factor": <str:factor,
+                  "reason": <str:reason>,
+                  "result": <str:result>,
+                  "timestamp": <int:unix timestamp>,
+                  "user": {
+                    "key": <str:user id>,
+                    "name": <str:user name>
+                  }
+                }
+              ],
+              "metadata": {
+                "next_offset": [
+                  <str>,
+                  <str>
+                ],
+                "total_objects": <int>
+              }
+            }
+
+        Raises RuntimeError on error.
         """
-        # Sanity check mintime as unix timestamp, then transform to string
-        mintime = str(int(mintime))
-        params = {
-            'mintime': mintime,
-        }
+
+        if api_version not in [1,2]:
+            raise ValueError("Invalid API Version")
+
+        params = {}
+
+        if api_version == 1: #v1
+            params['mintime'] = kwargs['mintime'] if 'mintime' in kwargs else 0;
+            # Sanity check mintime as unix timestamp, then transform to string
+            params['mintime'] = '{:d}'.format(int(params['mintime']))
+            warnings.warn(
+                'The v1 Admin API for retrieving authentication log events '
+                'will be deprecated in a future release of the Duo Admin API. '
+                'Please migrate to the v2 API.',
+            DeprecationWarning)
+        else: #v2
+            for k in kwargs:
+                if kwargs[k] is not None and k in VALID_AUTHLOG_REQUEST_PARAMS:
+                    params[k] = kwargs[k]
+
+            if 'mintime' not in params:
+                params['mintime'] = (int(time.time()) - 86400) * 1000
+            # Sanity check mintime as unix timestamp, then transform to string
+            params['mintime'] = '{:d}'.format(int(params['mintime']))
+
+
+            if 'maxtime' not in params:
+                params['maxtime'] = int(time.time()) * 1000
+            # Sanity check maxtime as unix timestamp, then transform to string
+            params['maxtime'] = '{:d}'.format(int(params['maxtime']))
+
+
         response = self.json_api_call(
             'GET',
-            '/admin/v1/logs/authentication',
+            '/admin/v{}/logs/authentication'.format(api_version),
             params,
         )
-        for row in response:
-            row['eventtype'] = 'authentication'
-            row['host'] = self.host
+
+        if api_version == 1:
+            for row in response:
+                row['eventtype'] = 'authentication'
+                row['host'] = self.host
+        else:
+            for row in response['authlogs']:
+                row['eventtype'] = 'authentication'
+                row['host'] = self.host
         return response
 
     def get_telephony_log(self,
