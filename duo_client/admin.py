@@ -2083,7 +2083,9 @@ class Admin(client.Client):
     def update_admin(self, admin_id,
                      name=None,
                      phone=None,
-                     password=None):
+                     password=None,
+                     password_change_required=None,
+                     ):
         """
         Update one or more attributes of an administrator.
 
@@ -2091,6 +2093,7 @@ class Admin(client.Client):
         name - <str:the name of the administrator> (optional)
         phone - <str:phone number> (optional)
         password - <str:password> (optional)
+        password_change_required - <bool|None:Whether admin is required to change their password at next login> (optional)
 
         Returns the updated administrator.  See the adminapi docs.
 
@@ -2105,6 +2108,8 @@ class Admin(client.Client):
             params['phone'] = phone
         if password is not None:
             params['password'] = password
+        if password_change_required is not None:
+            params['password_change_required'] = password_change_required
         response = self.json_api_call('POST', path, params)
         return response
 
