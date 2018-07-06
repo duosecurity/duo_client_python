@@ -393,7 +393,8 @@ class Admin(client.Client):
         return response
 
     def update_user(self, user_id, username=None, realname=None,
-                    status=None, notes=None, email=None, alias1=None):
+                    status=None, notes=None, email=None, alias1=None, 
+                    alias2=None,alias3=None,alias4=None):
         """
         Update username, realname, status, or notes for a user.
 
@@ -423,6 +424,12 @@ class Admin(client.Client):
             params['email'] = email
         if alias1 is not None:
             params['alias1'] = alias1
+        if alias2 is not None:
+            params['alias2'] = alias2
+        if alias3 is not None:
+            params['alias3'] = alias3
+        if alias4 is not None:
+            params['alias4'] = alias4
         response = self.json_api_call('POST', path, params)
         return response
 
