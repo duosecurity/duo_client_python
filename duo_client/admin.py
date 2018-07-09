@@ -511,7 +511,7 @@ class Admin(client.Client):
             params['email'] = email
         if firstname is not None:
             params['firstname'] = firstname
-        if lastname is not None: 
+        if lastname is not None:
             params['lastname'] = lastname
         response = self.json_api_call('POST',
                                       '/admin/v1/users',
@@ -552,7 +552,7 @@ class Admin(client.Client):
             params['email'] = email
         if firstname is not None:
             params['firstname'] = firstname
-        if lastname is not None: 
+        if lastname is not None:
             params['lastname'] = lastname
         response = self.json_api_call('POST', path, params)
         return response
@@ -1505,6 +1505,49 @@ class Admin(client.Client):
         response = self.json_api_call('POST',
                                       '/admin/v1/settings',
                                       params)
+        return response
+
+    def set_allowed_admin_auth_methods(self,
+                                        push_enabled=None,
+                                        sms_enabled=None,
+                                        voice_enabled=None,
+                                        mobile_otp_enabled=None,
+                                        yubikey_enabled=None,
+                                        hardware_token_enabled=None,
+                                        ):
+        params = {}
+        if push_enabled is not None:
+            params['push_enabled'] = (
+                '1' if push_enabled else '0')
+        if sms_enabled is not None:
+            params['sms_enabled'] = (
+                '1' if sms_enabled else '0')
+        if mobile_otp_enabled is not None:
+            params['mobile_otp_enabled'] = (
+                '1' if mobile_otp_enabled else '0')
+        if hardware_token_enabled is not None:
+            params['hardware_token_enabled'] = (
+                '1' if hardware_token_enabled else '0')
+        if yubikey_enabled is not None:
+            params['yubikey_enabled'] = (
+                '1' if yubikey_enabled else '0')
+        if voice_enabled is not None:
+            params['voice_enabled'] = (
+                '1' if voice_enabled else '0')
+        response = self.json_api_call(
+            'POST',
+            '/admin/v1/admins/allowed_auth_methods',
+            params
+        )
+        return response
+
+    def get_allowed_admin_auth_methods(self):
+        params={}
+        response = self.json_api_call(
+            'GET',
+            '/admin/v1/admins/allowed_auth_methods',
+            params
+        )
         return response
 
     def get_info_summary(self):
