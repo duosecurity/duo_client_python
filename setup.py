@@ -3,7 +3,7 @@ from distutils.core import setup
 
 import os.path
 
-import duo_client
+import duo_client.client
 
 requirements_filename = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), 'requirements.txt')
@@ -19,7 +19,7 @@ with open(requirements_dev_filename) as fd:
 
 setup(
     name='duo_client',
-    version=duo_client.__version__,
+    version=duo_client.client.__version__,
     description='Reference client for Duo Security APIs',
     author='Duo Security, Inc.',
     author_email='support@duosecurity.com',
