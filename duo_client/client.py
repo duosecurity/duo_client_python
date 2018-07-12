@@ -3,11 +3,7 @@ Low level functions for generating Duo Web API calls and parsing results.
 """
 from __future__ import absolute_import
 from __future__ import print_function
-try:
-    import six
-except ImportError:
-    # This fails in setup.py
-    pass
+import six
 
 __version__ = '3.1.0'
 
