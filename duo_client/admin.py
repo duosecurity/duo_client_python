@@ -518,11 +518,11 @@ class Admin(client.Client):
                                       params)
         return response
 
-    def update_user(self, user_id, username=None, realname=None,
-                    status=None, notes=None, email=None, firstname=None,
-                    lastname=None):
+    def update_user(self, user_id, username=None, realname=None, status=None, 
+                    notes=None, email=None, firstname=None, lastname=None, 
+                    alias1=None, alias2=None, alias3=None, alias4=None):
         """
-        Update username, realname, status, or notes for a user.
+        Update meta data for a given user_id.
 
         user_id - User ID
         username - Username (optional)
@@ -532,6 +532,7 @@ class Admin(client.Client):
         email - Email address (optional)
         firstname - User's given name for ID Proofing (optional)
         lastname - User's surname for ID Proofing (optional)
+        alias1..alias4 - A username alias for the user. Up to four aliases may be specified. Aliases must be unique amongst users. (optional)
 
         Returns updated user object.
 
@@ -540,6 +541,7 @@ class Admin(client.Client):
         user_id = six.moves.urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id
         params = {}
+        
         if username is not None:
             params['username'] = username
         if realname is not None:
@@ -554,6 +556,15 @@ class Admin(client.Client):
             params['firstname'] = firstname
         if lastname is not None:
             params['lastname'] = lastname
+        if alias1 is not None:
+            params['alias1'] = alias1
+        if alias2 is not None:
+            params['alias2'] = alias2
+        if alias3 is not None:
+            params['alias3'] = alias3
+        if alias4 is not None:
+            params['alias4'] = alias4
+            
         response = self.json_api_call('POST', path, params)
         return response
 
