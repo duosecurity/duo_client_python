@@ -157,6 +157,8 @@ import six.moves.urllib
 
 from . import client
 import six
+import warnings
+import time
 
 USER_STATUS_ACTIVE = 'active'
 USER_STATUS_BYPASS = 'bypass'
@@ -166,6 +168,22 @@ USER_STATUS_LOCKED_OUT = 'locked out'
 TOKEN_HOTP_6 = 'h6'
 TOKEN_HOTP_8 = 'h8'
 TOKEN_YUBIKEY = 'yk'
+
+VALID_AUTHLOG_REQUEST_PARAMS = [
+    'mintime',
+    'maxtime',
+    'limit',
+    'sort',
+    'next_offset',
+    'event_types',
+    'reasons',
+    'results',
+    'users',
+    'applications',
+    'groups',
+    'factors',
+    'api_version'
+]
 
 
 class Admin(client.Client):
@@ -236,10 +254,18 @@ class Admin(client.Client):
             row['host'] = self.host
         return response
 
-    def get_authentication_log(self,
-                               mintime=0):
+    def get_authentication_log(self, api_version=1, **kwargs):
         """
         Returns authentication log events.
+
+        api_version - The api version of the handler to use. Currently, the
+                      default api version is v1, but the v1 api will be
+                      deprecated in a future version of the Duo Admin API.
+                      Please migrate to the v2 api at your earliest convenience.
+                      For details on the differences between v1 and v2,
+                      please see Duo's Admin API documentation. (Optional)
+
+        API Version v1:
 
         mintime - Fetch events only >= mintime (to avoid duplicate
                   records that have already been fetched)
@@ -249,7 +275,6 @@ class Admin(client.Client):
                 {'timestamp': <int:unix timestamp>,
                  'eventtype': "authentication",
                  'host': <str:host>,
-                 'device': <str:device>,
                  'username': <str:username>,
                  'factor': <str:factor>,
                  'result': <str:result>,
@@ -264,20 +289,115 @@ class Admin(client.Client):
              }]
 
         Raises RuntimeError on error.
+
+        API Version v2:
+
+        mintime (required) - Unix timestamp in ms; fetch records >= mintime
+        maxtime (required) - Unix timestamp in ms; fetch records <= mintime
+        limit - Number of results to limit to
+        next_offset - Used to grab the next set of results from a previous response
+        sort - Sort order to be applied
+        users - List of user ids to filter on
+        groups - List of group ids to filter on
+        applications - List of application ids to filter on
+        results - List of results to filter to filter on
+        reasons - List of reasons to filter to filter on
+        factors - List of factors to filter on
+        event_types - List of event_types to filter on
+
+        Returns:
+            {
+                "authlogs": [
+                {
+                  "access_device": {
+                    "ip": <str:ip address>,
+                    "location": {
+                      "city": <str:city>,
+                      "state": <str:state>,
+                      "country": <str:country
+                    }
+                  },
+                  "application": {
+                    "key": <str:application id>,
+                    "name": <str:application name>
+                  },
+                  "auth_device": {
+                    "ip": <str:ip address>,
+                    "location": {
+                      "city": <str:city>,
+                      "state": <str:state>,
+                      "country": <str:country
+                    },
+                    "name": <str:device name>
+                  },
+                  "event_type": <str:type>,
+                  "factor": <str:factor,
+                  "reason": <str:reason>,
+                  "result": <str:result>,
+                  "timestamp": <int:unix timestamp>,
+                  "user": {
+                    "key": <str:user id>,
+                    "name": <str:user name>
+                  }
+                }
+              ],
+              "metadata": {
+                "next_offset": [
+                  <str>,
+                  <str>
+                ],
+                "total_objects": <int>
+              }
+            }
+
+        Raises RuntimeError on error.
         """
-        # Sanity check mintime as unix timestamp, then transform to string
-        mintime = str(int(mintime))
-        params = {
-            'mintime': mintime,
-        }
+
+        if api_version not in [1,2]:
+            raise ValueError("Invalid API Version")
+
+        params = {}
+
+        if api_version == 1: #v1
+            params['mintime'] = kwargs['mintime'] if 'mintime' in kwargs else 0;
+            # Sanity check mintime as unix timestamp, then transform to string
+            params['mintime'] = '{:d}'.format(int(params['mintime']))
+            warnings.warn(
+                'The v1 Admin API for retrieving authentication log events '
+                'will be deprecated in a future release of the Duo Admin API. '
+                'Please migrate to the v2 API.',
+            DeprecationWarning)
+        else: #v2
+            for k in kwargs:
+                if kwargs[k] is not None and k in VALID_AUTHLOG_REQUEST_PARAMS:
+                    params[k] = kwargs[k]
+
+            if 'mintime' not in params:
+                params['mintime'] = (int(time.time()) - 86400) * 1000
+            # Sanity check mintime as unix timestamp, then transform to string
+            params['mintime'] = '{:d}'.format(int(params['mintime']))
+
+
+            if 'maxtime' not in params:
+                params['maxtime'] = int(time.time()) * 1000
+            # Sanity check maxtime as unix timestamp, then transform to string
+            params['maxtime'] = '{:d}'.format(int(params['maxtime']))
+
+
         response = self.json_api_call(
             'GET',
-            '/admin/v1/logs/authentication',
+            '/admin/v{}/logs/authentication'.format(api_version),
             params,
         )
-        for row in response:
-            row['eventtype'] = 'authentication'
-            row['host'] = self.host
+
+        if api_version == 1:
+            for row in response:
+                row['eventtype'] = 'authentication'
+                row['host'] = self.host
+        else:
+            for row in response['authlogs']:
+                row['eventtype'] = 'authentication'
+                row['host'] = self.host
         return response
 
     def get_telephony_log(self,
@@ -362,7 +482,7 @@ class Admin(client.Client):
         return response
 
     def add_user(self, username, realname=None, status=None,
-                 notes=None, email=None):
+                 notes=None, email=None, firstname=None, lastname=None):
         """
         Adds a user.
 
@@ -371,6 +491,8 @@ class Admin(client.Client):
         status - User's status, defaults to USER_STATUS_ACTIVE
         notes - Comment field (optional)
         email - Email address (optional)
+        firstname - User's given name for ID Proofing (optional)
+        lastname - User's surname for ID Proofing (optional)
 
         Returns newly created user object.
 
@@ -387,16 +509,20 @@ class Admin(client.Client):
             params['notes'] = notes
         if email is not None:
             params['email'] = email
+        if firstname is not None:
+            params['firstname'] = firstname
+        if lastname is not None:
+            params['lastname'] = lastname
         response = self.json_api_call('POST',
                                       '/admin/v1/users',
                                       params)
         return response
 
-    def update_user(self, user_id, username=None, realname=None,
-                    status=None, notes=None, email=None, alias1=None, 
-                    alias2=None,alias3=None,alias4=None):
+    def update_user(self, user_id, username=None, realname=None, status=None, 
+                    notes=None, email=None, firstname=None, lastname=None, 
+                    alias1=None, alias2=None, alias3=None, alias4=None):
         """
-        Update username, realname, status, or notes for a user.
+        Update meta data for a given user_id.
 
         user_id - User ID
         username - Username (optional)
@@ -404,6 +530,9 @@ class Admin(client.Client):
         status - User's status, defaults to USER_STATUS_ACTIVE
         notes - Comment field (optional)
         email - Email address (optional)
+        firstname - User's given name for ID Proofing (optional)
+        lastname - User's surname for ID Proofing (optional)
+        alias1..alias4 - A username alias for the user. Up to four aliases may be specified. Aliases must be unique amongst users. (optional)
 
         Returns updated user object.
 
@@ -412,6 +541,7 @@ class Admin(client.Client):
         user_id = six.moves.urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id
         params = {}
+        
         if username is not None:
             params['username'] = username
         if realname is not None:
@@ -422,7 +552,11 @@ class Admin(client.Client):
             params['notes'] = notes
         if email is not None:
             params['email'] = email
-        if alias1 is not None:
+        if firstname is not None:
+            params['firstname'] = firstname
+        if lastname is not None:
+            params['lastname'] = lastname
+       if alias1 is not None:
             params['alias1'] = alias1
         if alias2 is not None:
             params['alias2'] = alias2
@@ -430,6 +564,7 @@ class Admin(client.Client):
             params['alias3'] = alias3
         if alias4 is not None:
             params['alias4'] = alias4
+            
         response = self.json_api_call('POST', path, params)
         return response
 
@@ -1383,6 +1518,49 @@ class Admin(client.Client):
                                       params)
         return response
 
+    def set_allowed_admin_auth_methods(self,
+                                        push_enabled=None,
+                                        sms_enabled=None,
+                                        voice_enabled=None,
+                                        mobile_otp_enabled=None,
+                                        yubikey_enabled=None,
+                                        hardware_token_enabled=None,
+                                        ):
+        params = {}
+        if push_enabled is not None:
+            params['push_enabled'] = (
+                '1' if push_enabled else '0')
+        if sms_enabled is not None:
+            params['sms_enabled'] = (
+                '1' if sms_enabled else '0')
+        if mobile_otp_enabled is not None:
+            params['mobile_otp_enabled'] = (
+                '1' if mobile_otp_enabled else '0')
+        if hardware_token_enabled is not None:
+            params['hardware_token_enabled'] = (
+                '1' if hardware_token_enabled else '0')
+        if yubikey_enabled is not None:
+            params['yubikey_enabled'] = (
+                '1' if yubikey_enabled else '0')
+        if voice_enabled is not None:
+            params['voice_enabled'] = (
+                '1' if voice_enabled else '0')
+        response = self.json_api_call(
+            'POST',
+            '/admin/v1/admins/allowed_auth_methods',
+            params
+        )
+        return response
+
+    def get_allowed_admin_auth_methods(self):
+        params={}
+        response = self.json_api_call(
+            'GET',
+            '/admin/v1/admins/allowed_auth_methods',
+            params
+        )
+        return response
+
     def get_info_summary(self):
         """
         Returns a summary of objects in the account.
@@ -1505,15 +1683,48 @@ class Admin(client.Client):
             {}
         )
 
-    def get_group(self, gkey):
+    def get_group(self, group_id, api_version=1):
         """
-        Returns a group by gkey.
+        Returns a group by the group id.
+
+        group_id - The id of group (Required)
+        api_version - The api version of the handler to use. Currently, the
+                      default api version is v1, but the v1 api will be
+                      deprecated in a future version of the Duo Admin API.
+                      Please migrate to the v2 api at your earliest convenience.
+                      For details on the differences between v1 and v2,
+                      please see Duo's Admin API documentation. (Optional)
+        """
+        if api_version == 1:
+            url = '/admin/v1/groups/'
+            warnings.warn(
+                'The v1 Admin API for group details will be deprecated '
+                'in a future release of the Duo Admin API. Please migrate to '
+                'the v2 API.',
+                DeprecationWarning)
+        elif api_version == 2:
+            url = '/admin/v2/groups/'
+        else:
+            raise ValueError('Invalid API Version')
+
+        return self.json_api_call('GET', url + group_id, {})
+
+    def get_group_users(self, group_id, limit=100, offset=0):
+        """
+        Get a paginated list of users associated with the specified
+        group.
+
+        group_id - The id of the group (Required)
+        limit - The maximum number of records to return. Maximum is 500. (Optional)
+        offset - The offset of the first record to return. (Optional)
         """
         return self.json_api_call(
             'GET',
-            '/admin/v1/groups/' + gkey,
-            {}
-        )
+            '/admin/v2/groups/' + group_id + '/users',
+            {
+                'limit': str(limit),
+                'offset': str(offset),
+            })
 
     def create_group(self, name,
                     desc=None,
@@ -1559,18 +1770,20 @@ class Admin(client.Client):
         )
         return response
 
-    def delete_group(self, gkey):
+    def delete_group(self, group_id):
         """
-        Delete a group by gkey
+        Delete a group by group_id
+
+        group_id - The id of the group (Required)
         """
         return self.json_api_call(
             'DELETE',
-            '/admin/v1/groups/' + gkey,
+            '/admin/v1/groups/' + group_id,
             {}
         )
 
     def modify_group(self,
-                     gkey,
+                     group_id,
                      name=None,
                      desc=None,
                      status=None,
@@ -1583,7 +1796,7 @@ class Admin(client.Client):
         """
         Modify a group
 
-        gkey - Group to modify (Required)
+        group_id - The id of the group to modify (Required)
         name - New group name (Optional)
         desc - New group description (Optional)
         status - Group authentication status <str: 'active'/'disabled'/'bypass'> (Optional)
@@ -1612,7 +1825,7 @@ class Admin(client.Client):
             params['u2f_enabled'] = '1' if u2f_enabled else '0'
         response = self.json_api_call(
             'POST',
-            '/admin/v1/groups/' + gkey,
+            '/admin/v1/groups/' + group_id,
             params
         )
         return response
@@ -1924,7 +2137,9 @@ class Admin(client.Client):
     def update_admin(self, admin_id,
                      name=None,
                      phone=None,
-                     password=None):
+                     password=None,
+                     password_change_required=None,
+                     ):
         """
         Update one or more attributes of an administrator.
 
@@ -1932,6 +2147,7 @@ class Admin(client.Client):
         name - <str:the name of the administrator> (optional)
         phone - <str:phone number> (optional)
         password - <str:password> (optional)
+        password_change_required - <bool|None:Whether admin is required to change their password at next login> (optional)
 
         Returns the updated administrator.  See the adminapi docs.
 
@@ -1946,6 +2162,8 @@ class Admin(client.Client):
             params['phone'] = phone
         if password is not None:
             params['password'] = password
+        if password_change_required is not None:
+            params['password_change_required'] = password_change_required
         response = self.json_api_call('POST', path, params)
         return response
 

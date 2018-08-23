@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import unittest
+import warnings
 from . import util
 import duo_client.admin
 
@@ -20,6 +21,14 @@ class TestAdmin(unittest.TestCase):
         self.client_list.account_id = 'DA012345678901234567'
         self.client_list._connect = \
             lambda: util.MockHTTPConnection(data_response_should_be_list=True)
+
+        # if you are wanting to get a response from a call to get
+        # authentication logs
+        self.client_authlog = duo_client.admin.Admin(
+            'test_ikey', 'test_akey', 'example.com')
+        self.client_authlog.account_id = 'DA012345678901234567'
+        self.client_authlog._connect = \
+            lambda: util.MockHTTPConnection(data_response_from_get_authlog=True)
 
     # GET with no params
     def test_get_users(self):
@@ -54,7 +63,7 @@ class TestAdmin(unittest.TestCase):
     # POST with params
     def test_add_user(self):
         # all params given
-        response = self.client.add_user('foo', 'bar', 'active', 'notes')
+        response = self.client.add_user('foo', 'bar', 'active', 'notes', 'foobar@baz.com', 'fName', 'lName')
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(response['uri'], '/admin/v1/users')
         self.assertEqual(
@@ -63,6 +72,9 @@ class TestAdmin(unittest.TestCase):
              'notes':['notes'],
              'username':['foo'],
              'status':['active'],
+             'email':['foobar%40baz.com'],
+             'firstname':['fName'],
+             'lastname':['lName'],
              'account_id':[self.client.account_id]})
         # defaults
         response = self.client.add_user('bar')
@@ -180,6 +192,108 @@ class TestAdmin(unittest.TestCase):
         self.assertEqual(uri, '/admin/v1/bypass_codes/DU012345678901234567')
         self.assertEqual(util.params_to_dict(args),
                          {'account_id': [self.client.account_id]})
+
+    def test_get_authentication_log_v1(self):
+        """ Test to get authentication log on version 1 api.
+        """
+        response = self.client_list.get_authentication_log(api_version=1)[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/logs/authentication')
+        self.assertEqual(
+            util.params_to_dict(args)['account_id'],
+            [self.client_list.account_id])
+
+    def test_get_authentication_log_v2(self):
+        """ Test to get authentication log on version 1 api.
+        """
+        response = self.client_authlog.get_authentication_log(api_version=2)
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v2/logs/authentication')
+        self.assertEqual(
+            util.params_to_dict(args)['account_id'],
+            [self.client_authlog.account_id])
+
+    def test_get_groups(self):
+        """ Test for getting list of all groups
+        """
+        response = self.client.get_groups()
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/groups')
+        self.assertEqual(util.params_to_dict(args),
+                         {'account_id': [self.client.account_id]})
+
+    def test_get_group_v1(self):
+        """ Test for v1 API of getting specific group details
+        """
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+
+            response = self.client.get_group('ABC123', api_version=1)
+            uri, args = response['uri'].split('?')
+
+            # Assert deprecation warning generated
+            self.assertEqual(len(w), 1)
+            self.assertTrue(issubclass(w[0].category, DeprecationWarning))
+            self.assertIn('Please migrate to the v2 API', str(w[0].message))
+
+            self.assertEqual(response['method'], 'GET')
+            self.assertEqual(uri, '/admin/v1/groups/ABC123')
+            self.assertEqual(util.params_to_dict(args),
+                             {'account_id': [self.client.account_id]})
+
+    def test_get_group_v2(self):
+        """ Test for v2 API of getting specific group details
+        """
+        response = self.client.get_group('ABC123', api_version=2)
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v2/groups/ABC123')
+        self.assertEqual(util.params_to_dict(args),
+                         {'account_id': [self.client.account_id]})
+
+    def test_get_group_users(self):
+        """ Test for getting list of users associated with a group
+        """
+        response = self.client.get_group_users('ABC123')
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v2/groups/ABC123/users')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client.account_id],
+                'limit': ['100'],
+                'offset': ['0'],
+            })
+
+    def test_delete_group(self):
+        """ Test for deleting a group
+        """
+        response = self.client.delete_group('ABC123')
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'DELETE')
+        self.assertEqual(uri, '/admin/v1/groups/ABC123')
+        self.assertEqual(util.params_to_dict(args),
+                         {'account_id': [self.client.account_id]})
+
+    def test_modify_group(self):
+        """ Test for modifying a group
+        """
+        response = self.client.modify_group('ABC123')
+        self.assertEqual(response['method'], 'POST')
+        self.assertEqual(response['uri'], '/admin/v1/groups/ABC123')
+        self.assertEqual(util.params_to_dict(response['body']),
+                         {'account_id': [self.client.account_id]})
+
 
 if __name__ == '__main__':
     unittest.main()

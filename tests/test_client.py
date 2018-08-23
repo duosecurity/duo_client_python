@@ -1,9 +1,20 @@
 from __future__ import absolute_import
+import hashlib
 import unittest
 import six.moves.urllib
 import duo_client.client
 from . import util
 import base64
+
+JSON_BODY = {
+            'data': 'abc123',
+            'alpha': ['a', 'b', 'c', 'd'],
+            'info': {
+                'test': 1,
+                'another': 2,
+            }
+        }
+JSON_STRING = '{"alpha":["a","b","c","d"],"data":"abc123","info":{"another":2,"test":1}}'
 
 
 class TestQueryParameters(unittest.TestCase):
@@ -122,6 +133,44 @@ class TestCanonicalize(unittest.TestCase):
                                                         **test),
                          'Fri, 07 Dec 2012 17:18:00 -0000\nPOST\nfoo.bar52.com\n/Foo/BaR2/qux\n%E4%9A%9A%E2%A1%BB%E3%97%90%E8%BB%B3%E6%9C%A7%E5%80%AA%E0%A0%90%ED%82%91%C3%88%EC%85%B0=%E0%BD%85%E1%A9%B6%E3%90%9A%E6%95%8C%EC%88%BF%E9%AC%89%EA%AF%A2%E8%8D%83%E1%AC%A7%E6%83%90&%E7%91%89%E7%B9%8B%EC%B3%BB%E5%A7%BF%EF%B9%9F%E8%8E%B7%EA%B7%8C%E9%80%8C%EC%BF%91%E7%A0%93=%E8%B6%B7%E5%80%A2%E9%8B%93%E4%8B%AF%E2%81%BD%E8%9C%B0%EA%B3%BE%E5%98%97%E0%A5%86%E4%B8%B0&%E7%91%B0%E9%8C%94%E9%80%9C%E9%BA%AE%E4%83%98%E4%88%81%E8%8B%98%E8%B1%B0%E1%B4%B1%EA%81%82=%E1%9F%99%E0%AE%A8%E9%8D%98%EA%AB%9F%EA%90%AA%E4%A2%BE%EF%AE%96%E6%BF%A9%EB%9F%BF%E3%8B%B3&%EC%8B%85%E2%B0%9D%E2%98%A0%E3%98%97%E9%9A%B3F%E8%98%85%E2%83%A8%EA%B0%A1%E5%A4%B4=%EF%AE%A9%E4%86%AA%EB%B6%83%E8%90%8B%E2%98%95%E3%B9%AE%E6%94%AD%EA%A2%B5%ED%95%ABU')
 
+    def test_v2_with_json(self):
+        expected = (
+            'Tue, 04 Jul 2017 14:12:00\n'
+            'POST\n'
+            'foo.bar52.com\n'
+            '/Foo/BaR2/qux\n'
+            '{"alpha":["a","b","c","d"],"data":"abc123","info":{"another":2,"test":1}}'
+        )
+        params = duo_client.client.Client.canon_json(JSON_BODY)
+        actual = duo_client.client.canonicalize(
+            'POST', 'foO.BaR52.cOm', '/Foo/BaR2/qux', params,
+            'Tue, 04 Jul 2017 14:12:00', sig_version=3)
+
+        self.assertEqual(actual, expected)
+
+    def test_v4_with_json(self):
+        hashed_body = hashlib.sha512(JSON_STRING.encode('utf-8')).hexdigest()
+        expected = (
+            'Tue, 04 Jul 2017 14:12:00\n'
+            'POST\n'
+            'foo.bar52.com\n'
+            '/Foo/BaR2/qux\n\n' + hashed_body)
+        params = duo_client.client.Client.canon_json(JSON_BODY)
+        actual = duo_client.client.canonicalize(
+            'POST', 'foO.BaR52.cOm', '/Foo/BaR2/qux', params,
+            'Tue, 04 Jul 2017 14:12:00', sig_version=4)
+
+        self.assertEqual(actual, expected)
+
+    def test_invalid_signature_version_raises(self):
+        params = duo_client.client.Client.canon_json(JSON_BODY)
+        with self.assertRaises(ValueError) as e:
+            duo_client.client.canonicalize(
+                'POST', 'foO.BaR52.cOm', '/Foo/BaR2/qux', params,
+                'Tue, 04 Jul 2017 14:12:00', sig_version=999)
+        self.assertEqual(
+            e.exception.args[0],
+            "Unknown signature version: {}".format(999))
 
 class TestSign(unittest.TestCase):
     """
@@ -157,6 +206,26 @@ class TestSign(unittest.TestCase):
         self.assertEqual(actual,
                          expected)
 
+    def test_hmac_sha1_json(self):
+        ikey = 'test_ikey'
+        actual = duo_client.client.sign(
+            sig_version=3,
+            ikey=ikey,
+            skey='gtdfxv9YgVBYcF6dl2Eq17KUQJN2PLM2ODVTkvoT',
+            date='Tue, 04 Jul 2017 14:12:00',
+            host='foO.BAr52.cOm',
+            method='POST',
+            params=duo_client.client.Client.canon_json(JSON_BODY),
+            uri='/Foo/BaR2/qux'
+        )
+
+        sig = '7bf8cf95d689091cf7fdb72178f16d1c19ef92c1'
+        auth = '%s:%s' % (ikey, sig)
+        auth = auth.encode('utf-8')
+        b64 = base64.b64encode(auth)
+        b64 = b64.decode('utf-8')
+        expected = 'Basic %s' % b64
+        self.assertEqual(actual, expected)
 
 class TestRequest(unittest.TestCase):
     """ Tests for the request created by api_call and json_api_call. """
@@ -226,6 +295,59 @@ class TestRequest(unittest.TestCase):
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(response['uri'], '/foo/bar')
         self.assertEqual(util.params_to_dict(response['body']), self.args_out)
+
+
+class TestJsonRequests(unittest.TestCase):
+    def setUp(self):
+        self.client = duo_client.client.Client(
+            'test_ikey', 'test_akey', 'example.com', sig_timezone='America/Detroit',
+            sig_version=3)
+        # monkeypatch client's _connect()
+        self.client._connect = lambda: util.MockHTTPConnection()
+
+    def test_json_post(self):
+        (response, dummy) = self.client.api_call('POST', '/foo/bar', JSON_BODY)
+
+        self.assertEqual(response.method, 'POST')
+        self.assertEqual(response.uri, '/foo/bar')
+        self.assertEqual(response.body, JSON_STRING)
+
+        self.assertIn('Content-type', response.headers)
+        self.assertEqual(response.headers['Content-type'], 'application/json')
+        self.assertIn('Authorization', response.headers)
+
+    def test_json_fails_with_bad_args(self):
+        with self.assertRaises(ValueError) as e:
+            (response, dummy) = self.client.api_call('POST', '/foo/bar', '')
+        self.assertEqual(e.exception.args[0], "JSON request must be an object.")
+
+    def test_json_put(self):
+        (response, dummy) = self.client.api_call('PUT', '/foo/bar', JSON_BODY)
+
+        self.assertEqual(response.method, 'PUT')
+        self.assertEqual(response.uri, '/foo/bar')
+        self.assertEqual(response.body, JSON_STRING)
+
+        self.assertIn('Content-type', response.headers)
+        self.assertEqual(response.headers['Content-type'], 'application/json')
+        self.assertIn('Authorization', response.headers)
+
+    def test_json_request(self):
+        client = duo_client.client.Client(
+            'test_ikey', 'test_akey', 'example.com', sig_timezone='America/Detroit',
+            sig_version=3)
+        client._connect = lambda: util.MockHTTPConnection()
+
+        (response, dummy) = client.api_call(
+            'POST', '/foo/bar', JSON_BODY)
+
+        self.assertEqual(response.method, 'POST')
+        self.assertEqual(response.uri, '/foo/bar')
+        self.assertEqual(response.body, JSON_STRING)
+
+        self.assertIn('Content-type', response.headers)
+        self.assertEqual(response.headers['Content-type'], 'application/json')
+        self.assertIn('Authorization', response.headers)
 
 
 if __name__ == '__main__':
