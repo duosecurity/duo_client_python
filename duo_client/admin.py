@@ -556,7 +556,7 @@ class Admin(client.Client):
             params['firstname'] = firstname
         if lastname is not None:
             params['lastname'] = lastname
-       if alias1 is not None:
+        if alias1 is not None:
             params['alias1'] = alias1
         if alias2 is not None:
             params['alias2'] = alias2
