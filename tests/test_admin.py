@@ -63,19 +63,28 @@ class TestAdmin(unittest.TestCase):
     # POST with params
     def test_add_user(self):
         # all params given
-        response = self.client.add_user('foo', 'bar', 'active', 'notes', 'foobar@baz.com', 'fName', 'lName')
+        response = self.client.add_user(
+            'foo', realname='bar', status='active', notes='notes',
+            email='foobar@baz.com', firstname='fName', lastname='lName',
+            alias1='alias1', alias2='alias2', alias3='alias3', alias4='alias4')
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(response['uri'], '/admin/v1/users')
         self.assertEqual(
             util.params_to_dict(response['body']),
-            {'realname':['bar'],
-             'notes':['notes'],
-             'username':['foo'],
-             'status':['active'],
-             'email':['foobar%40baz.com'],
-             'firstname':['fName'],
-             'lastname':['lName'],
-             'account_id':[self.client.account_id]})
+            {
+                'realname': ['bar'],
+                'notes': ['notes'],
+                'username': ['foo'],
+                'status': ['active'],
+                'email': ['foobar%40baz.com'],
+                'firstname': ['fName'],
+                'lastname': ['lName'],
+                'account_id': [self.client.account_id],
+                'alias1': ['alias1'],
+                'alias2': ['alias2'],
+                'alias3': ['alias3'],
+                'alias4': ['alias4'],
+            })
         # defaults
         response = self.client.add_user('bar')
         self.assertEqual(response['method'], 'POST')
@@ -84,15 +93,32 @@ class TestAdmin(unittest.TestCase):
             util.params_to_dict(response['body']),
             {'username':['bar'], 'account_id':[self.client.account_id]})
 
-    # POST with no params
     def test_update_user(self):
-        response = self.client.update_user('DU012345678901234567')
+        response = self.client.update_user(
+            'DU012345678901234567', username='foo', realname='bar',
+            status='active', notes='notes', email='foobar@baz.com',
+            firstname='fName', lastname='lName', alias1='alias1',
+            alias2='alias2', alias3='alias3', alias4='alias4')
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(
             response['uri'], '/admin/v1/users/DU012345678901234567')
         self.assertEqual(
             util.params_to_dict(response['body']),
-            {'account_id':[self.client.account_id]})
+            {
+                'account_id':[self.client.account_id],
+                'realname': ['bar'],
+                'notes': ['notes'],
+                'username': ['foo'],
+                'status': ['active'],
+                'email': ['foobar%40baz.com'],
+                'firstname': ['fName'],
+                'lastname': ['lName'],
+                'account_id': [self.client.account_id],
+                'alias1': ['alias1'],
+                'alias2': ['alias2'],
+                'alias3': ['alias3'],
+                'alias4': ['alias4'],
+            })
 
     def test_get_endpoints(self):
         response = self.client.get_endpoints()

@@ -482,7 +482,8 @@ class Admin(client.Client):
         return response
 
     def add_user(self, username, realname=None, status=None,
-                 notes=None, email=None, firstname=None, lastname=None):
+                 notes=None, email=None, firstname=None, lastname=None,
+                 alias1=None, alias2=None, alias3=None, alias4=None):
         """
         Adds a user.
 
@@ -493,6 +494,7 @@ class Admin(client.Client):
         email - Email address (optional)
         firstname - User's given name for ID Proofing (optional)
         lastname - User's surname for ID Proofing (optional)
+        alias1..alias4 - Aliases for the user's primary username (optional)
 
         Returns newly created user object.
 
@@ -513,14 +515,22 @@ class Admin(client.Client):
             params['firstname'] = firstname
         if lastname is not None:
             params['lastname'] = lastname
+        if alias1 is not None:
+            params['alias1'] = alias1
+        if alias2 is not None:
+            params['alias2'] = alias2
+        if alias3 is not None:
+            params['alias3'] = alias3
+        if alias4 is not None:
+            params['alias4'] = alias4
         response = self.json_api_call('POST',
                                       '/admin/v1/users',
                                       params)
         return response
 
-    def update_user(self, user_id, username=None, realname=None,
-                    status=None, notes=None, email=None, firstname=None,
-                    lastname=None):
+    def update_user(self, user_id, username=None, realname=None, status=None,
+                    notes=None, email=None, firstname=None, lastname=None,
+                    alias1=None, alias2=None, alias3=None, alias4=None):
         """
         Update username, realname, status, or notes for a user.
 
@@ -554,6 +564,14 @@ class Admin(client.Client):
             params['firstname'] = firstname
         if lastname is not None:
             params['lastname'] = lastname
+        if alias1 is not None:
+            params['alias1'] = alias1
+        if alias2 is not None:
+            params['alias2'] = alias2
+        if alias3 is not None:
+            params['alias3'] = alias3
+        if alias4 is not None:
+            params['alias4'] = alias4
         response = self.json_api_call('POST', path, params)
         return response
 
