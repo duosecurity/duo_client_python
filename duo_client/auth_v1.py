@@ -69,17 +69,17 @@ class AuthV1(client.Client):
              phone=PHONE1,
              pushinfo=None,
              ipaddr=None,
-             async=False):
+             async_txn=False):
         """
         Returns True if authentication was a success, else False.
 
-        If 'async' is True, returns txid of the authentication transaction.
+        If 'async_txn' is True, returns txid of the authentication transaction.
         """
         params = {
             'user': username,
             'factor': factor,
         }
-        if async:
+        if async_txn:
             params['async'] = '1'
         if pushinfo is not None:
             params['pushinfo'] = pushinfo
@@ -100,7 +100,7 @@ class AuthV1(client.Client):
         response = self.json_api_call('POST', '/rest/v1/auth', params)
         if self.auth_details:
             return response
-        if async:
+        if async_txn:
             return response['txid']
         return response['result'] == 'allow'
 

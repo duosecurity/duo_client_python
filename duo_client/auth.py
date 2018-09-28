@@ -112,7 +112,7 @@ class Auth(client.Client):
              username=None,
              user_id=None,
              ipaddr=None,
-             async=False,
+             async_txn=False,
              type=None,
              display_username=None,
              pushinfo=None,
@@ -121,7 +121,7 @@ class Auth(client.Client):
         """
         Perform second-factor authentication for a user.
 
-        If async is True, returns: {
+        If async_txn is True, returns: {
             'txid': <str: transaction ID for use with auth_status>,
         }
 
@@ -131,14 +131,14 @@ class Auth(client.Client):
             'status_msg': <str:human-readable>,
         }
 
-        If Trusted Devices is enabled, async is not True, and status is
+        If Trusted Devices is enabled, async_txn is not True, and status is
         'allow', another item is returned:
 
         * trusted_device_token: <str: device token for use with preauth>
         """
         params = {
             'factor': factor,
-            'async': str(int(bool(async))),
+            'async': str(int(async_txn)),
         }
         if username is not None:
             params['username'] = username
