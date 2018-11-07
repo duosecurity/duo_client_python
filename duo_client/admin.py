@@ -1185,14 +1185,19 @@ class Admin(client.Client):
             params)
         return response
 
-    def get_tokens(self):
+    def get_tokens(self, limit=100, offset=0):
         """
         Returns list of tokens.
 
+        limit - The maximum number of records to return. Maximum is 100. (Optional)
+        offset - The offset of the first record to return. (Optional)
 
         Returns list of token objects.
         """
-        params = {}
+        params = {
+            'limit': str(limit),
+            'offset': str(offset),
+        }
         response = self.json_api_call(
             'GET', '/admin/v1/tokens',
             params
