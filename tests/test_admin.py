@@ -320,6 +320,38 @@ class TestAdmin(unittest.TestCase):
         self.assertEqual(util.params_to_dict(response['body']),
                          {'account_id': [self.client.account_id]})
 
+    def test_get_tokens_without_params(self):
+        """ Test for getting tokens
+        """
+        response = self.client.get_tokens()
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/tokens')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client.account_id],
+                'limit': ['100'],
+                'offset': ['0'],
+            })
+
+    def test_get_tokens_with_params(self):
+        """ Test for getting tokens
+        """
+        response = self.client.get_tokens(limit=25, offset=3)
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/tokens')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client.account_id],
+                'limit': ['25'],
+                'offset': ['3'],
+            })
+
 
 if __name__ == '__main__':
     unittest.main()
