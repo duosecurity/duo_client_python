@@ -332,8 +332,6 @@ class TestAdmin(unittest.TestCase):
             util.params_to_dict(args),
             {
                 'account_id': [self.client.account_id],
-                'limit': ['100'],
-                'offset': ['0'],
             })
 
     def test_get_tokens_with_params(self):
