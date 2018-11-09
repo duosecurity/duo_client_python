@@ -783,12 +783,30 @@ class Admin(client.Client):
         path = '/admin/v1/users/' + user_id + '/tokens/' + token_id
         return self.json_api_call('DELETE', path, {})
 
-    def get_user_u2ftokens(self, user_id):
+    def get_user_u2ftokens_iterator(self, user_id):
+        """ Returns an iterator of u2ftokens associated with a user.
+
+            Params:
+                user_id (str) - The user id.
+
+            Returns:
+                A generator yielding u2ftoken dicts.
+
+            Notes:
+                Raises RuntimeError on error.
+        """
+        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        path = '/admin/v1/users/' + user_id + '/u2ftokens'
+        return self.json_paging_api_call('GET', path, {})
+
+    def get_user_u2ftokens(self, user_id, limit=None, offset=0):
         """ Returns an array of u2ftokens associated
             with a user.
 
             Params:
                 user_id (str) - The user id.
+                limit - The maximum number of records to return. (Optional)
+                offset - The offset of the first record to return. (Optional)
 
             Returns:
                 An array of u2ftoken dicts.
@@ -796,9 +814,14 @@ class Admin(client.Client):
             Notes:
                 Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
-        path = '/admin/v1/users/' + user_id + '/u2ftokens'
-        return self.json_api_call('GET', path, {})
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+            path = '/admin/v1/users/' + user_id + '/u2ftokens'
+            return self.json_api_call(
+                'GET', path, {'limit': limit, 'offset': offset})
+
+        return list(self.get_user_u2ftokens_iterator(user_id))
 
     def get_user_groups(self, user_id):
         """
