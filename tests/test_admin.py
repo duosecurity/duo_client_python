@@ -140,6 +140,48 @@ class TestAdmin(unittest.TestCase):
         self.assertEqual(util.params_to_dict(args),
                          {'account_id':[self.client.account_id]})
 
+    def test_get_admins(self):
+        response = self.client.get_admins()
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(
+            response['uri'],
+            '/admin/v1/admins?account_id=%s' % self.client.account_id)
+        self.assertEqual(response['body'], None)
+
+    def test_get_admins_with_limit(self):
+        response = self.client.get_admins(limit=20)
+        self.assertEqual(response['method'], 'GET')
+        (uri, args) = response['uri'].split('?')
+        self.assertEqual(uri, '/admin/v1/admins')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client.account_id],
+                'limit': ['20'],
+                'offset': ['0'],
+            })
+
+    def test_get_admins_with_limit_offset(self):
+        response = self.client.get_admins(limit=20, offset=2)
+        self.assertEqual(response['method'], 'GET')
+        (uri, args) = response['uri'].split('?')
+        self.assertEqual(uri, '/admin/v1/admins')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client.account_id],
+                'limit': ['20'],
+                'offset': ['2'],
+            })
+
+    def test_get_admins_with_offset(self):
+        response = self.client.get_admins()
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(
+            response['uri'],
+            '/admin/v1/admins?account_id=%s' % self.client.account_id)
+        self.assertEqual(response['body'], None)
+
     def test_get_u2ftokens_with_params(self):
         """ Test to get u2ftokens with params.
         """

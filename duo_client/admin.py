@@ -2086,7 +2086,7 @@ class Admin(client.Client):
         response = self.json_api_call('POST', path, params)
         return response
 
-    def get_admins(self):
+    def get_admins(self, limit=None, offset=None):
         """
         Returns list of administrators.
 
@@ -2095,7 +2095,16 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        response = self.json_api_call('GET', '/admin/v1/admins', {})
+        params = {}
+        if limit:
+            if offset is None:
+                offset = 0
+            params = {
+                'limit': str(limit),
+                'offset': str(offset),
+            }
+
+        response = self.json_api_call('GET', '/admin/v1/admins', params)
         return response
 
     def get_admin(self, admin_id):
