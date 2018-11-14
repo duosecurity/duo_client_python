@@ -175,7 +175,7 @@ class TestAdmin(unittest.TestCase):
             })
 
     def test_get_admins_with_offset(self):
-        response = self.client.get_admins()
+        response = self.client.get_admins(offset=9001)
         self.assertEqual(response['method'], 'GET')
         self.assertEqual(
             response['uri'],
