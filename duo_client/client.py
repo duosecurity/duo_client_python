@@ -337,6 +337,21 @@ class Client(object):
         (response, data) = self.api_call(method, path, params)
         return self.parse_json_response(response, data)
 
+    def json_paging_api_call(self, method, path, params):
+        objects = []
+        next_offset = 0
+
+        if 'limit' not in params and self.paging_limit:
+            params['limit'] = str(self.paging_limit)
+
+        while next_offset is not None:
+            params['offset'] = str(next_offset)
+            (response, data) = self.api_call(method, path, params)
+            (objects, metadata) = self.parse_json_response(response, data)
+            next_offset = metadata.get('next_offset', None)
+            for obj in objects:
+                yield obj
+
     def parse_json_response(self, response, data):
         """
         Return the parsed data structure or raise RuntimeError.

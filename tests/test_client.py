@@ -296,6 +296,39 @@ class TestRequest(unittest.TestCase):
         self.assertEqual(response['uri'], '/foo/bar')
         self.assertEqual(util.params_to_dict(response['body']), self.args_out)
 
+class TestPaging(unittest.TestCase):
+    def setUp(self):
+        self.client = util.CountingClient(
+            'test_ikey', 'test_akey', 'example.com', paging_limit=100)
+        self.objects = [util.MockJsonObject() for i in range(1000)]
+        self.client._connect = lambda: util.MockPagingHTTPConnection(self.objects)
+
+    def test_get_objects_paging(self):
+        response = self.client.json_paging_api_call(
+            'GET', '/admin/v1/objects', {})
+        self.assertEqual(len(self.objects), len(list(response)))
+        self.assertEqual(10, self.client.counter)
+
+    def test_get_no_objects_paging(self):
+        self.objects = []
+        self.client._connect = lambda: util.MockPagingHTTPConnection(self.objects)
+        response = self.client.json_paging_api_call(
+            'GET', '/admin/v1/objects', {})
+        self.assertEqual(len(self.objects), len(list(response)))
+        self.assertEqual(1, self.client.counter)
+
+    def test_get_objects_paging_limit(self):
+        response = self.client.json_paging_api_call(
+            'GET', '/admin/v1/objects', {'limit':'250'})
+        self.assertEqual(len(self.objects), len(list(response)))
+        self.assertEqual(4, self.client.counter)
+
+    def test_get_all_objects(self):
+        response = self.client.json_paging_api_call(
+            'GET', '/admin/v1/objects', {'limit':'1000'})
+        expected = [obj.to_json() for obj in self.objects]
+        self.assertListEqual(expected, list(response))
+        self.assertEqual(1, self.client.counter)
 
 class TestJsonRequests(unittest.TestCase):
     def setUp(self):
@@ -352,4 +385,3 @@ class TestJsonRequests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
