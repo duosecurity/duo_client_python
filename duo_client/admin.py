@@ -212,13 +212,20 @@ class Admin(client.Client):
     def get_administrative_units(self, admin_id=None, group_id=None,
                                  integration_key=None, limit=None, offset=0):
         """
-        Get a list of administrative units optionally filtered by admin,
-        group, or integration. At most one of admin_id, group_id, and
-        integration_key should be passed.
+        Retrieves a list of administrative units optionally filtered by admin,
+            group, or integration. At most one of admin_id, group_id, or
+            integration_key should be passed.
 
-        admin_id - <str: id of admin> (optional)
-        group_id - <str: id of group> (optional)
-        integration_key - <str: id of integration(optional)
+        Args:
+            admin_id(str): id of admin (optional)
+            group_id(str): id of group (optional)
+            integration_key(str): id of integration (optional)
+            limit: The max number of administrative units to fetch at once.
+                   Default None
+            offset: If a limit is passed, the offset to start retrieval.
+                    Default 0
+
+        Returns: list of administrative units
 
         Raises RuntimeError on error.
         """
