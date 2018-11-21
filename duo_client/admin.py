@@ -2125,12 +2125,16 @@ class Admin(client.Client):
 
     def get_admins(self, limit=None, offset=0):
         """
-        Returns list of administrators.
+        Retrieves a list of administrators.
+        Args:
+            limit: The max number of admins to fetch at once. Default None
+            offset: If a limit is passed, the offset to start retrieval.
+                    Default 0
 
-
-        Returns list of administrator objects.  See the adminapi docs.
+        Returns: list of administrators. See the adminapi docs.
 
         Raises RuntimeError on error.
+
         """
 
         (limit, offset) = self.normalize_paging_args(limit, offset)
