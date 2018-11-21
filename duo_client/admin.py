@@ -209,6 +209,43 @@ class Admin(client.Client):
         else:
             return ','.join([str(int(code)) for code in codes])
 
+    def get_administrative_units(self, admin_id=None, group_id=None,
+                                 integration_key=None, limit=None, offset=0):
+        """
+        Get a list of administrative units optionally filtered by admin,
+        group, or integration. At most one of admin_id, group_id, and
+        integration_key should be passed.
+
+        admin_id - <str: id of admin> (optional)
+        group_id - <str: id of group> (optional)
+        integration_key - <str: id of integration(optional)
+
+        Raises RuntimeError on error.
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+
+        params = {}
+        if admin_id is not None:
+            params['admin_id'] = admin_id
+        if group_id is not None:
+            params['group_id'] = group_id
+        if integration_key is not None:
+            params['integration_key'] = integration_key
+
+        if limit:
+            params['limit'] = limit
+            params['offset'] = offset
+
+            return self.json_api_call('GET',
+                                      '/admin/v1/administrative_units',
+                                      params)
+
+        generator = self.json_paging_api_call('GET',
+                                              '/admin/v1/administrative_units',
+                                              params)
+
+        return list(generator)
+
     def get_administrator_log(self,
                               mintime=0):
         """
