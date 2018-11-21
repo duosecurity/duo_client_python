@@ -200,14 +200,19 @@ class TestAdmin(unittest.TestCase):
     def test_get_u2ftokens_with_params(self):
         """ Test to get u2ftokens with params.
         """
-        response = list(self.client_list.get_u2ftokens())[0]
+        response = list(self.client_list.get_u2ftokens(limit=8))[0]
         uri, args = response['uri'].split('?')
 
         self.assertEqual(response['method'], 'GET')
         self.assertEqual(uri, '/admin/v1/u2ftokens')
         self.assertEqual(util.params_to_dict(args),
-                         {'account_id':[self.client_list.account_id]})
+                         {
+                             'account_id':[self.client_list.account_id],
+                             'limit': ['8'],
+                             'offset': ['0'],
+                         })
 
+    # uses underlying
     def test_get_u2ftokens_without_params(self):
         """ Test to get u2ftokens without params.
         """
@@ -217,7 +222,22 @@ class TestAdmin(unittest.TestCase):
         self.assertEqual(response['method'], 'GET')
         self.assertEqual(uri, '/admin/v1/u2ftokens')
         self.assertEqual(util.params_to_dict(args),
-                         {'account_id':[self.client_list.account_id]})
+                         {
+                             'account_id': [self.client_list.account_id],
+                             'limit': ['100'],
+                             'offset': ['0'],
+                         })
+
+    def test_get_u2ftokens_with_offset(self):
+        response = list(self.client_list.get_u2ftokens(limit=2, offset=3))[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/u2ftokens')
+        self.assertEqual(util.params_to_dict(args),
+                         {'account_id':[self.client_list.account_id],
+                          'limit': ['2'],
+                          'offset': ['3']})
 
     def test_get_u2ftoken_by_id(self):
         """ Test to get u2ftoken by registration id.
