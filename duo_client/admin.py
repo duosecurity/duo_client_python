@@ -2086,7 +2086,7 @@ class Admin(client.Client):
         response = self.json_api_call('POST', path, params)
         return response
 
-    def get_admins(self, limit=None, offset=None):
+    def get_admins(self, limit=None, offset=0):
         """
         Returns list of administrators.
 
@@ -2095,17 +2095,18 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        params = {}
-        if limit:
-            if offset is None:
-                offset = 0
-            params = {
-                'limit': str(limit),
-                'offset': str(offset),
-            }
 
-        response = self.json_api_call('GET', '/admin/v1/admins', params)
-        return response
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call(
+                'GET',
+                '/admin/v1/admins',
+                {'limit': limit, 'offset': offset}
+            )
+
+        generator = self.json_paging_api_call('GET', '/admin/v1/admins', {})
+
+        return list(generator)
 
     def get_admin(self, admin_id):
         """
