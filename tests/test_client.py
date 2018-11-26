@@ -5,6 +5,7 @@ import six.moves.urllib
 import duo_client.client
 from . import util
 import base64
+import collections
 
 JSON_BODY = {
             'data': 'abc123',
