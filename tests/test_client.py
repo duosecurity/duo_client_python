@@ -467,7 +467,7 @@ class TestParseJsonResponseAndMetadata(unittest.TestCase):
         data, metadata = self.client.parse_json_response_and_metadata(api_res, json.dumps(res_body))
 
         self.assertEqual(data, expected_data)
-        self.assertEqual(metadata, {}})
+        self.assertEqual(metadata, {})
 
     def test_response_contains_invalid_json(self):
         api_res = self.APIResponse(200, 'Fake reason')
