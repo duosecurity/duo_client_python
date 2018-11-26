@@ -6,6 +6,7 @@ import duo_client.client
 from . import util
 import base64
 import collections
+import json
 
 JSON_BODY = {
             'data': 'abc123',
@@ -409,7 +410,7 @@ class TestParseJsonResponse(unittest.TestCase):
         api_res = self.APIResponse(200, 'Fake reason')
 
         response = 'Bad JSON'
-        with self.assertRaises(duo_client.client.BadResponseError) as e:
+        with self.assertRaises(RuntimeError) as e:
             self.client.parse_json_response(api_res, response)
 
         self.assertEqual(e.exception.status, api_res.status)
@@ -426,7 +427,7 @@ class TestParseJsonResponse(unittest.TestCase):
             'stat': 'FAIL'
         }
 
-        with self.assertRaises(duo_client.client.BadResponseError) as e:
+        with self.assertRaises(RuntimeError) as e:
             self.client.parse_json_response(api_res, json.dumps(res_body))
 
         self.assertEqual(e.exception.status, api_res.status)
@@ -440,7 +441,7 @@ class TestParseJsonResponse(unittest.TestCase):
                 'response': 'some message',
                 'stat': 'OK'
             }
-            with self.assertRaises(duo_client.client.HttpError) as e:
+            with self.assertRaises(RuntimeError) as e:
                 self.client.parse_json_response(api_res, json.dumps(res_body))
 
             self.assertEqual(e.exception.status, api_res.status)
@@ -474,7 +475,7 @@ class TestParseJsonResponseAndMetadata(unittest.TestCase):
         api_res = self.APIResponse(200, 'Fake reason')
 
         response = 'Bad JSON'
-        with self.assertRaises(duo_client.client.BadResponseError) as e:
+        with self.assertRaises(RuntimeError) as e:
             self.client.parse_json_response_and_metadata(api_res, response)
 
         self.assertEqual(e.exception.status, api_res.status)
@@ -491,7 +492,7 @@ class TestParseJsonResponseAndMetadata(unittest.TestCase):
             'stat': 'FAIL'
         }
 
-        with self.assertRaises(duo_client.client.BadResponseError) as e:
+        with self.assertRaises(RuntimeError) as e:
             self.client.parse_json_response_and_metadata(api_res, json.dumps(res_body))
 
         self.assertEqual(e.exception.status, api_res.status)
@@ -505,7 +506,7 @@ class TestParseJsonResponseAndMetadata(unittest.TestCase):
                 'response': 'some message',
                 'stat': 'OK'
             }
-            with self.assertRaises(duo_client.client.HttpError) as e:
+            with self.assertRaises(RuntimeError) as e:
                 self.client.parse_json_response_and_metadata(api_res, json.dumps(res_body))
 
             self.assertEqual(e.exception.status, api_res.status)
