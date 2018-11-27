@@ -5,6 +5,8 @@ import six.moves.urllib
 import duo_client.client
 from . import util
 import base64
+import collections
+import json
 
 JSON_BODY = {
             'data': 'abc123',
@@ -296,6 +298,39 @@ class TestRequest(unittest.TestCase):
         self.assertEqual(response['uri'], '/foo/bar')
         self.assertEqual(util.params_to_dict(response['body']), self.args_out)
 
+class TestPaging(unittest.TestCase):
+    def setUp(self):
+        self.client = util.CountingClient(
+            'test_ikey', 'test_akey', 'example.com', paging_limit=100)
+        self.objects = [util.MockJsonObject() for i in range(1000)]
+        self.client._connect = lambda: util.MockPagingHTTPConnection(self.objects)
+
+    def test_get_objects_paging(self):
+        response = self.client.json_paging_api_call(
+            'GET', '/admin/v1/objects', {})
+        self.assertEqual(len(self.objects), len(list(response)))
+        self.assertEqual(10, self.client.counter)
+
+    def test_get_no_objects_paging(self):
+        self.objects = []
+        self.client._connect = lambda: util.MockPagingHTTPConnection(self.objects)
+        response = self.client.json_paging_api_call(
+            'GET', '/admin/v1/objects', {})
+        self.assertEqual(len(self.objects), len(list(response)))
+        self.assertEqual(1, self.client.counter)
+
+    def test_get_objects_paging_limit(self):
+        response = self.client.json_paging_api_call(
+            'GET', '/admin/v1/objects', {'limit':'250'})
+        self.assertEqual(len(self.objects), len(list(response)))
+        self.assertEqual(4, self.client.counter)
+
+    def test_get_all_objects(self):
+        response = self.client.json_paging_api_call(
+            'GET', '/admin/v1/objects', {'limit':'1000'})
+        expected = [obj.to_json() for obj in self.objects]
+        self.assertListEqual(expected, list(response))
+        self.assertEqual(1, self.client.counter)
 
 class TestJsonRequests(unittest.TestCase):
     def setUp(self):
@@ -349,7 +384,134 @@ class TestJsonRequests(unittest.TestCase):
         self.assertEqual(response.headers['Content-type'], 'application/json')
         self.assertIn('Authorization', response.headers)
 
+class TestParseJsonResponse(unittest.TestCase):
+    APIResponse = collections.namedtuple('APIResponse', 'status reason')
+
+    def setUp(self):
+        self.client = duo_client.client.Client(
+            'test_ikey', 'test_akey', 'example.com', sig_timezone='America/Detroit',
+            sig_version=2)
+
+    def test_good_response(self):
+        api_res = self.APIResponse(200, '')
+        expected_data = {
+            'foo': 'bar'
+        }
+        res_body = {
+            'response': expected_data,
+            'stat': 'OK'
+        }
+
+        data = self.client.parse_json_response(api_res, json.dumps(res_body))
+
+        self.assertEqual(data, expected_data)
+
+    def test_response_contains_invalid_json(self):
+        api_res = self.APIResponse(200, 'Fake reason')
+
+        response = 'Bad JSON'
+        with self.assertRaises(RuntimeError) as e:
+            self.client.parse_json_response(api_res, response)
+
+        self.assertEqual(e.exception.status, api_res.status)
+        self.assertEqual(e.exception.reason, api_res.reason)
+        self.assertEqual(e.exception.data, response)
+
+    def test_response_stat_isnot_OK(self):
+        api_res = self.APIResponse(200, 'Fake reason')
+
+        res_body = {
+                'response': {
+                'foo': 'bar'
+            },
+            'stat': 'FAIL'
+        }
+
+        with self.assertRaises(RuntimeError) as e:
+            self.client.parse_json_response(api_res, json.dumps(res_body))
+
+        self.assertEqual(e.exception.status, api_res.status)
+        self.assertEqual(e.exception.reason, api_res.reason)
+        self.assertEqual(e.exception.data, res_body)
+
+    def test_response_is_http_error(self):
+        for code in range(201, 600):
+            api_res = self.APIResponse(code, 'fake reason')
+            res_body = {
+                'response': 'some message',
+                'stat': 'OK'
+            }
+            with self.assertRaises(RuntimeError) as e:
+                self.client.parse_json_response(api_res, json.dumps(res_body))
+
+            self.assertEqual(e.exception.status, api_res.status)
+            self.assertEqual(e.exception.reason, api_res.reason)
+            self.assertEqual(e.exception.data, res_body)
+
+class TestParseJsonResponseAndMetadata(unittest.TestCase):
+    APIResponse = collections.namedtuple('APIResponse', 'status reason')
+
+    def setUp(self):
+        self.client = duo_client.client.Client(
+            'test_ikey', 'test_akey', 'example.com', sig_timezone='America/Detroit',
+            sig_version=2)
+
+    def test_good_response(self):
+        api_res = self.APIResponse(200, '')
+        expected_data = {
+            'foo': 'bar'
+        }
+        res_body = {
+            'response': expected_data,
+            'stat': 'OK'
+        }
+
+        data, metadata = self.client.parse_json_response_and_metadata(api_res, json.dumps(res_body))
+
+        self.assertEqual(data, expected_data)
+        self.assertEqual(metadata, {})
+
+    def test_response_contains_invalid_json(self):
+        api_res = self.APIResponse(200, 'Fake reason')
+
+        response = 'Bad JSON'
+        with self.assertRaises(RuntimeError) as e:
+            self.client.parse_json_response_and_metadata(api_res, response)
+
+        self.assertEqual(e.exception.status, api_res.status)
+        self.assertEqual(e.exception.reason, api_res.reason)
+        self.assertEqual(e.exception.data, response)
+
+    def test_response_stat_isnot_OK(self):
+        api_res = self.APIResponse(200, 'Fake reason')
+
+        res_body = {
+                'response': {
+                'foo': 'bar'
+            },
+            'stat': 'FAIL'
+        }
+
+        with self.assertRaises(RuntimeError) as e:
+            self.client.parse_json_response_and_metadata(api_res, json.dumps(res_body))
+
+        self.assertEqual(e.exception.status, api_res.status)
+        self.assertEqual(e.exception.reason, api_res.reason)
+        self.assertEqual(e.exception.data, res_body)
+
+    def test_response_is_http_error(self):
+        for code in range(201, 600):
+            api_res = self.APIResponse(code, 'fake reason')
+            res_body = {
+                'response': 'some message',
+                'stat': 'OK'
+            }
+            with self.assertRaises(RuntimeError) as e:
+                self.client.parse_json_response_and_metadata(api_res, json.dumps(res_body))
+
+            self.assertEqual(e.exception.status, api_res.status)
+            self.assertEqual(e.exception.reason, api_res.reason)
+            self.assertEqual(e.exception.data, res_body)
 
 if __name__ == '__main__':
     unittest.main()
-

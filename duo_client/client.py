@@ -151,6 +151,7 @@ class Client(object):
                  sig_timezone='UTC',
                  user_agent=('Duo API Python/' + __version__),
                  timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
+                 paging_limit=100,
                  digestmod=hashlib.sha1,
                  sig_version=2
                  ):
@@ -167,6 +168,7 @@ class Client(object):
         self.ca_certs = ca_certs
         self.user_agent = user_agent
         self.set_proxy(host=None, proxy_type=None)
+        self.paging_limit = paging_limit
         self.digestmod = digestmod
         self.sig_version = sig_version
 
@@ -337,9 +339,37 @@ class Client(object):
         (response, data) = self.api_call(method, path, params)
         return self.parse_json_response(response, data)
 
+    def json_paging_api_call(self, method, path, params):
+        """
+        Call a Duo API method which is expected to return a JSON body
+        with a 200 status. Return a generator that can be used to get
+        response data or raise a RuntimeError.
+        """
+        objects = []
+        next_offset = 0
+
+        if 'limit' not in params and self.paging_limit:
+            params['limit'] = str(self.paging_limit)
+
+        while next_offset is not None:
+            params['offset'] = str(next_offset)
+            (response, data) = self.api_call(method, path, params)
+            (objects, metadata) = self.parse_json_response_and_metadata(response, data)
+            next_offset = metadata.get('next_offset', None)
+            for obj in objects:
+                yield obj
+
     def parse_json_response(self, response, data):
         """
         Return the parsed data structure or raise RuntimeError.
+        """
+        (response, metadata) = self.parse_json_response_and_metadata(response, data)
+
+        return response
+
+    def parse_json_response_and_metadata(self, response, data):
+        """
+        Return the parsed data structure and metadata as a tuple or raise RuntimeError.
         """
         def raise_error(msg):
             error = RuntimeError(msg)
@@ -374,7 +404,7 @@ class Client(object):
             data = json.loads(data)
             if data['stat'] != 'OK':
                 raise_error('Received error response: %s' % data)
-            return data['response']
+            return (data['response'], data.get('metadata', {}))
         except (ValueError, KeyError, TypeError):
             raise_error('Received bad response: %s' % data)
 
