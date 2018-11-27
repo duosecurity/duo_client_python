@@ -846,14 +846,30 @@ class Admin(client.Client):
         params = {}
         return self.json_api_call('DELETE', path, params)
 
-    def get_endpoints(self):
+    def get_endpoints_iterator(self):
         """
-        Returns list of endpoints.
+        Returns iterator of endpoints objects.
 
         Raises RuntimeError on error.
         """
-        response = self.json_api_call('GET', '/admin/v1/endpoints', {})
-        return response
+        return self.json_paging_api_call('GET', '/admin/v1/endpoints', {})
+
+    def get_endpoints(self, limit=None, offset=0):
+        """
+        Returns a list of endpoints.
+
+        Params:
+            limit - The maximum number of records to return. (Optional)
+            offset - The offset of the first record to return. (Optional)
+
+        Raises RuntimeError on error.
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call('GET', '/admin/v1/endpoints',
+                                      {'limit': limit, 'offset': offset})
+
+        return list(self.get_endpoints_iterator())
 
     def get_phones_generator(self):
         """
