@@ -1074,16 +1074,38 @@ class Admin(client.Client):
             params['installation_msg'] = installation_msg
         return self.json_api_call('POST', path, params)
 
-    def get_desktoptokens(self):
+    def get_desktoptokens_generator(self):
         """
-        Returns list of desktop tokens.
+        Returns a generator yielding desktoptokens.
+        """
+        return self.json_paging_api_call(
+            'GET',
+            '/admin/v1/desktoptokens',
+            {}
+        )
 
-        Returns list of desktop token objects.
+    def get_desktoptokens(self, limit=None, offset=0):
+        """
+        Retrieves a list of desktoptokens.
+        Args:
+            limit: The max number of admins to fetch at once. Default None
+            offset: If a limit is passed, the offset to start retrieval.
+                    Default 0
+
+        Returns: list of desktoptokens
 
         Raises RuntimeError on error.
+
         """
-        response = self.json_api_call('GET', '/admin/v1/desktoptokens', {})
-        return response
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call(
+                'GET',
+                '/admin/v1/desktoptokens',
+                {'limit': limit, 'offset': offset}
+            )
+
+        return list(self.get_desktoptokens_generator())
 
     def get_desktoptoken_by_id(self, desktoptoken_id):
         """
@@ -1686,15 +1708,38 @@ class Admin(client.Client):
         )
         return response
 
-    def get_groups(self):
+    def get_groups_generator(self):
         """
-        Returns a list of groups.
+        Returns a generator yielding groups.
         """
-        return self.json_api_call(
+        return self.json_paging_api_call(
             'GET',
             '/admin/v1/groups',
             {}
         )
+
+    def get_groups(self, limit=None, offset=0):
+        """
+        Retrieves a list of groups.
+        Args:
+            limit: The max number of admins to fetch at once. Default None
+            offset: If a limit is passed, the offset to start retrieval.
+                    Default 0
+
+        Returns: list of groups
+
+        Raises RuntimeError on error.
+
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call(
+                'GET',
+                '/admin/v1/groups',
+                {'limit': limit, 'offset': offset}
+            )
+
+        return list(self.get_groups_generator())
 
     def get_group(self, group_id, api_version=1):
         """
@@ -2319,17 +2364,38 @@ class Admin(client.Client):
         response = self.json_api_call('DELETE', path, {})
         return response
 
-    def get_bypass_codes(self):
-        """ Gets a list of bypass codes.
-
-            Returns:
-                Returns a list of bypass code dicts.
-
-            Notes:
-                Raises RuntimeError on error.
+    def get_bypass_codes_generator(self):
         """
-        response = self.json_api_call('GET', '/admin/v1/bypass_codes', {})
-        return response
+        Returns a generator yielding bypass codes.
+        """
+        return self.json_paging_api_call(
+            'GET',
+            '/admin/v1/bypass_codes',
+            {}
+        )
+
+    def get_bypass_codes(self, limit=None, offset=0):
+        """
+        Retrieves a list of bypass codes.
+        Args:
+            limit: The max number of admins to fetch at once. Default None
+            offset: If a limit is passed, the offset to start retrieval.
+                    Default 0
+
+        Returns: list of bypass codes
+
+        Raises RuntimeError on error.
+
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call(
+                'GET',
+                '/admin/v1/bypass_codes',
+                {'limit': limit, 'offset': offset}
+            )
+
+        return list(self.get_bypass_codes_generator())
 
     def delete_bypass_code_by_id(self, bypass_code_id):
         """ Deletes a bypass code. If the bypass code is already
