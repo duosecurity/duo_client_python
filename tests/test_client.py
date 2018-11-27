@@ -174,6 +174,43 @@ class TestCanonicalize(unittest.TestCase):
             e.exception.args[0],
             "Unknown signature version: {}".format(999))
 
+
+class TestNormalizePageArgs(unittest.TestCase):
+
+    def setUp(self):
+        self.client = duo_client.client.Client(
+            'test_ikey', 'test_akey', 'example.com')
+
+    def test_normalize_page_args(self):
+
+        tests = [
+            (
+                {},
+                (None, '0')
+            ),
+            (
+                {'offset': 9001},
+                (None, '9001'),
+            ),
+            (
+                {'limit': 2},
+                ('2', '0'),
+            ),
+            (
+                {'limit': '3'},
+                ('3', '0'),
+            ),
+            (
+                {'limit': 5, 'offset': 9002},
+                ('5', '9002')
+            )
+        ]
+
+        for (input, expected) in tests:
+            output = self.client.normalize_paging_args(**input)
+            self.assertEqual(output, expected)
+
+
 class TestSign(unittest.TestCase):
     """
     Tests for proper signature creation for a request.
