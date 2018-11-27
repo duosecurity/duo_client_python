@@ -328,6 +328,14 @@ class Client(object):
     def _disconnect(self, conn):
         conn.close()
 
+    def normalize_paging_args(self, limit=None, offset=0):
+        if limit:
+            limit = '{}'.format(limit)
+
+        offset = '{}'.format(offset)
+
+        return (limit, offset)
+
     def json_api_call(self, method, path, params):
         """
         Call a Duo API method which is expected to return a JSON body
