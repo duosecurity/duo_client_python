@@ -447,7 +447,7 @@ class TestAdmin(unittest.TestCase):
 
     def test_get_desktoptokens_generator(self):
         """ Test to get desktop tokens generator.
-                """
+        """
         generator = self.client_list.get_desktoptokens_generator()
         response = generator.next()
         uri, args = response['uri'].split('?')
@@ -464,7 +464,7 @@ class TestAdmin(unittest.TestCase):
 
     def test_get_desktoptokens(self):
         """ Test to get desktop tokens without params.
-                """
+        """
         response = self.client_list.get_desktoptokens()[0]
         uri, args = response['uri'].split('?')
 
@@ -480,7 +480,7 @@ class TestAdmin(unittest.TestCase):
 
     def test_get_desktoptokens_limit(self):
         """ Test to get desktop tokens with limit.
-                        """
+        """
         response = self.client_list.get_desktoptokens(limit='20')[0]
         uri, args = response['uri'].split('?')
 
@@ -496,7 +496,7 @@ class TestAdmin(unittest.TestCase):
 
     def test_get_desktoptokens_offset(self):
         """ Test to get desktop tokens with offset.
-                        """
+        """
         response = self.client_list.get_desktoptokens(offset='20')[0]
         uri, args = response['uri'].split('?')
 
@@ -512,7 +512,7 @@ class TestAdmin(unittest.TestCase):
 
     def test_get_desktoptokens_limit_offset(self):
         """ Test to get desktop tokens with limit and offset.
-                        """
+        """
         response = self.client_list.get_desktoptokens(limit='20', offset='2')[0]
         uri, args = response['uri'].split('?')
 
@@ -528,7 +528,7 @@ class TestAdmin(unittest.TestCase):
 
     def test_get_groups_generator(self):
         """ Test to get groups generator.
-                                """
+        """
         generator = self.client_list.get_groups_generator()
         response = generator.next()
         uri, args = response['uri'].split('?')
@@ -545,7 +545,7 @@ class TestAdmin(unittest.TestCase):
 
     def test_get_groups(self):
         """ Test to get groups without params.
-                                """
+        """
         response = self.client_list.get_groups()[0]
         uri, args = response['uri'].split('?')
 
@@ -561,7 +561,7 @@ class TestAdmin(unittest.TestCase):
 
     def test_get_groups_limit(self):
         """ Test to get groups with limit.
-                                        """
+        """
         response = self.client_list.get_groups(limit='20')[0]
         uri, args = response['uri'].split('?')
 
@@ -577,7 +577,7 @@ class TestAdmin(unittest.TestCase):
 
     def test_get_groups_offset(self):
         """ Test to get groups with offset.
-                                        """
+        """
         response = self.client_list.get_groups(offset='2')[0]
         uri, args = response['uri'].split('?')
 
@@ -593,7 +593,7 @@ class TestAdmin(unittest.TestCase):
 
     def test_get_groups_limit_offset(self):
         """ Test to get groups with limit and offset.
-                                        """
+        """
         response = self.client_list.get_groups(limit='20', offset='2')[0]
         uri, args = response['uri'].split('?')
 
