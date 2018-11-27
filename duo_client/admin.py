@@ -831,17 +831,37 @@ class Admin(client.Client):
         response = self.json_api_call('GET', '/admin/v1/endpoints', {})
         return response
 
-    def get_phones(self):
+    def get_phones_generator(self):
         """
-        Returns list of phones.
+        Returns a generator yielding phones.
+        """
+        return self.json_paging_api_call(
+            'GET',
+            '/admin/v1/phones',
+            {}
+        )
 
+    def get_phones(self, limit=None, offset=0):
+        """
+        Retrieves a list of phones.
+        Args:
+            limit: The max number of admins to fetch at once. Default None
+            offset: If a limit is passed, the offset to start retrieval.
+                    Default 0
 
-        Returns list of phone objects.
+        Returns: list of phones
 
         Raises RuntimeError on error.
         """
-        response = self.json_api_call('GET', '/admin/v1/phones', {})
-        return response
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call(
+                'GET',
+                '/admin/v1/phones',
+                {'limit': limit, 'offset': offset}
+            )
+
+        return list(self.get_phones_generator())
 
     def get_phone_by_id(self, phone_id):
         """
@@ -1185,25 +1205,37 @@ class Admin(client.Client):
             params)
         return response
 
+    def get_tokens_generator(self):
+        """
+        Returns a generator yielding tokens.
+        """
+        return self.json_paging_api_call(
+            'GET',
+            '/admin/v1/tokens',
+            {}
+        )
+
     def get_tokens(self, limit=None, offset=0):
         """
-        Returns list of tokens.
+        Retrieves a list of tokens.
+        Args:
+            limit: The max number of admins to fetch at once. Default None
+            offset: If a limit is passed, the offset to start retrieval.
+                    Default 0
 
-        limit - The maximum number of records to return. Maximum is 100. (Optional)
-        offset - The offset of the first record to return. (Optional)
+        Returns: list of tokens
 
-        Returns list of token objects.
+        Raises RuntimeError on error.
         """
-        params = {}
-        if limit is not None:
-            params['limit'] = str(limit)
-            params['offset'] = str(offset)
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call(
+                'GET',
+                '/admin/v1/tokens',
+                {'limit': limit, 'offset': offset}
+            )
 
-        response = self.json_api_call(
-            'GET', '/admin/v1/tokens',
-            params
-        )
-        return response
+        return list(self.get_tokens_generator())
 
     def get_token_by_id(self, token_id):
         """
@@ -1843,22 +1875,37 @@ class Admin(client.Client):
         )
         return response
 
-    def get_integrations(self):
+    def get_integrations_generator(self):
         """
-        Returns list of integrations.
+        Returns a generator yielding integrations.
+        """
+        return self.json_paging_api_call(
+            'GET',
+            '/admin/v1/integrations',
+            {}
+        )
 
+    def get_integrations(self, limit=None, offset=0):
+        """
+        Retrieves a list of integrations.
+        Args:
+            limit: The max number of admins to fetch at once. Default None
+            offset: If a limit is passed, the offset to start retrieval.
+                    Default 0
 
-        Returns list of integration objects.
+        Returns: list of integrations
 
         Raises RuntimeError on error.
         """
-        params = {}
-        response = self.json_api_call(
-            'GET',
-            '/admin/v1/integrations',
-            params
-        )
-        return response
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call(
+                'GET',
+                '/admin/v1/integrations',
+                {'limit': limit, 'offset': offset}
+            )
+
+        return list(self.get_integrations_generator())
 
     def get_integration(self, integration_key):
         """
