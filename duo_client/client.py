@@ -329,6 +329,16 @@ class Client(object):
         conn.close()
 
     def normalize_paging_args(self, limit=None, offset=0):
+        """
+        Converts paging arguments to a format the rest of the client expects.
+
+        :param limit: The number of objects requested of a paginated api
+                      endpoint. If it looks falsy, it is is not changed.
+                      Default None
+        :param offset: The offset to start retrieval. Default 0
+        :return: tuple after the form of (limit, offset)
+        """
+
         if limit:
             limit = '{}'.format(limit)
 
