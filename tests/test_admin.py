@@ -368,7 +368,7 @@ class TestAdmin(unittest.TestCase):
         """ Test to get bypass codes generator.
         """
         generator = self.client_list.get_bypass_codes_generator()
-        response = generator.next()
+        response = next(generator)
         uri, args = response['uri'].split('?')
 
         self.assertEqual(response['method'], 'GET')
@@ -449,7 +449,7 @@ class TestAdmin(unittest.TestCase):
         """ Test to get desktop tokens generator.
         """
         generator = self.client_list.get_desktoptokens_generator()
-        response = generator.next()
+        response = next(generator)
         uri, args = response['uri'].split('?')
 
         self.assertEqual(response['method'], 'GET')
@@ -530,7 +530,7 @@ class TestAdmin(unittest.TestCase):
         """ Test to get groups generator.
         """
         generator = self.client_list.get_groups_generator()
-        response = generator.next()
+        response = next(generator)
         uri, args = response['uri'].split('?')
 
         self.assertEqual(response['method'], 'GET')
