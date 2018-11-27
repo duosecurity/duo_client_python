@@ -350,7 +350,7 @@ class TestAdmin(unittest.TestCase):
                 'offset': ['3'],
             })
 
-        def test_get_user_bypass_codes(self):
+    def test_get_user_bypass_codes(self):
         """ Test to get bypass codes by user id.
         """
         response = self.client.get_user_bypass_codes('DU012345678901234567')
