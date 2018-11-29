@@ -212,6 +212,18 @@ class TestAdmin(unittest.TestCase):
                              'offset': ['0'],
                          })
 
+    def test_get_u2ftokens_iterator(self):
+        response = self.client_list.get_u2ftokens_iterator()
+        response = next(response)
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/u2ftokens')
+        self.assertEqual(util.params_to_dict(args),
+                         {'account_id': [self.client_list.account_id],
+                          'limit': ['100'],
+                          'offset': ['0']})
+
     # uses underlying
     def test_get_u2ftokens_without_params(self):
         """ Test to get u2ftokens without params.

@@ -2298,8 +2298,20 @@ class Admin(client.Client):
                                       '/admin/v1/u2ftokens',
                                       {'limit': limit, 'offset': offset})
 
-        generator = self.json_paging_api_call('GET', '/admin/v1/u2ftokens', {})
-        return list(generator)
+        iterator = self.get_u2ftokens_iterator()
+        return list(iterator)
+
+    def get_u2ftokens_iterator(self):
+        """
+        Provides a generator which u2ftokens. Under the hood, this generator
+        uses pagination, so it will only store one page of administrative_units
+        at a time in memory.
+
+        Returns: A generator which produces u2ftokens.
+
+        Raises RuntimeError on error.
+        """
+        return self.json_paging_api_call('GET', '/admin/v1/u2ftokens', {})
 
     def get_u2ftoken_by_id(self, registration_id):
         """ Returns u2ftoken specified by registration_id.
