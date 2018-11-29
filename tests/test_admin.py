@@ -174,6 +174,46 @@ class TestAdmin(unittest.TestCase):
                 'offset': ['0'],
             })
 
+    def test_get_administrative_units_iterator(self):
+        expected_path = '/admin/v1/administrative_units'
+        expected_method = 'GET'
+
+        tests = [
+            {
+                'admin_id': 'aaaa',
+                'group_id': '1234',
+                'integration_key': 'aaaaaaaaaaaaaaaaaaaa',
+            },
+            {
+                'admin_id': 'aaaa',
+                'group_id': '1234',
+            },
+            {
+                'admin_id': 'aaaa',
+            },
+            {}
+        ]
+
+        for test in tests:
+            response = (
+                self.client_list.get_administrative_units_iterator(**test)
+            )
+            response = next(response)
+            self.assertEqual(response['method'], expected_method)
+            (uri, args) = response['uri'].split('?')
+            self.assertEqual(uri, expected_path)
+            expected_params = {
+                key: [value] for (key, value) in test.iteritems()
+            }
+            expected_params.update(
+                {
+                    'account_id': [self.client.account_id],
+                    'limit': ['100'],
+                    'offset': ['0'],
+                }
+            )
+            self.assertEqual(util.params_to_dict(args), expected_params)
+
     # POST with params
     def test_add_user(self):
         # all params given

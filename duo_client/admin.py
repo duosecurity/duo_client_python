@@ -247,11 +247,32 @@ class Admin(client.Client):
                                       '/admin/v1/administrative_units',
                                       params)
 
-        generator = self.json_paging_api_call('GET',
-                                              '/admin/v1/administrative_units',
-                                              params)
+        iterator = self.get_administrative_units_iterator(
+            admin_id, group_id, integration_key)
 
-        return list(generator)
+        return list(iterator)
+
+    def get_administrative_units_iterator(self, admin_id=None, group_id=None,
+                                          integration_key=None, ):
+        """
+        Provides a generator which produces administrative_units. Under the
+        hood, this generator uses pagination, so it will only store one page of
+        administrative_units at a time in memory.
+
+        Returns: A generator which produces administrative_units.
+
+        Raises RuntimeError on error.
+        """
+        params = {}
+        if admin_id is not None:
+            params['admin_id'] = admin_id
+        if group_id is not None:
+            params['group_id'] = group_id
+        if integration_key is not None:
+            params['integration_key'] = integration_key
+        return self.json_paging_api_call('GET',
+                                         '/admin/v1/administrative_units',
+                                         params)
 
     def get_administrator_log(self,
                               mintime=0):
