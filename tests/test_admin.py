@@ -117,6 +117,20 @@ class TestAdmin(unittest.TestCase):
                 'offset': ['0'],
             })
 
+    def test_get_admins_iterator(self):
+        response = self.client_list.get_admins_iterator()
+        response = next(response)
+        self.assertEqual(response['method'], 'GET')
+        (uri, args) = response['uri'].split('?')
+        self.assertEqual(uri, '/admin/v1/admins')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client.account_id],
+                'limit': ['100'],
+                'offset': ['0'],
+            })
+
     # POST with params
     def test_add_user(self):
         # all params given
