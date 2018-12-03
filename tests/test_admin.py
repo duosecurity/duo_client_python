@@ -203,7 +203,7 @@ class TestAdmin(unittest.TestCase):
             (uri, args) = response['uri'].split('?')
             self.assertEqual(uri, expected_path)
             expected_params = {
-                key: [value] for (key, value) in test.iteritems()
+                key: [value] for (key, value) in test.items()
             }
             expected_params.update(
                 {
