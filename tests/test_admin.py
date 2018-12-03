@@ -60,7 +60,7 @@ class TestAdmin(unittest.TestCase):
              'account_id':[self.client.account_id]})
         self.assertEqual(response['body'], None)
 
-    # Uses underlynig paging
+    # Uses underlying paging
     def test_get_admins(self):
         response = self.client_list.get_admins()
         response = response[0]
