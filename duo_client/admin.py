@@ -2114,9 +2114,21 @@ class Admin(client.Client):
                 {'limit': limit, 'offset': offset}
             )
 
-        generator = self.json_paging_api_call('GET', '/admin/v1/admins', {})
+        iterator = self.get_admins_iterator()
 
-        return list(generator)
+        return list(iterator)
+
+    def get_admins_iterator(self):
+        """
+        Provides a generator which produces admins. Under the hood, this
+        generator uses pagination, so it will only store one page of admins at a
+        time in memory.
+
+        Returns: A generator which produces admins.
+
+        Raises RuntimeError on error.
+        """
+        return self.json_paging_api_call('GET', '/admin/v1/admins', {})
 
     def get_admin(self, admin_id):
         """
