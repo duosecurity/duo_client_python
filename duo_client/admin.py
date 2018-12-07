@@ -746,21 +746,40 @@ class Admin(client.Client):
         return self.json_api_call('DELETE', path,
                                     params)
 
-    def get_user_tokens(self, user_id):
+    def get_user_tokens_iterator(self, user_id):
         """
-        Returns an array of hardware tokens associated with the user.
+        Returns an iterator of hardware tokens associated with the user.
 
         user_id - User ID
 
-        Returns list of hardware token objects.
+        Returns iterator of hardware token objects.
 
         Raises RuntimeError on error.
         """
         user_id = six.moves.urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/tokens'
-        params = {}
-        return self.json_api_call('GET', path,
-                                    params)
+        return self.json_paging_api_call('GET', path, {})
+
+    def get_user_tokens(self, user_id, limit=None, offset=0):
+        """
+        Returns an array of hardware tokens associated with the user.
+
+        user_id - User ID
+        limit - The maximum number of records to return. (Optional)
+        offset - The offset of the first record to return. (Optional)
+
+        Returns list of hardware token objects.
+
+        Raises RuntimeError on error.
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+            path = '/admin/v1/users/' + user_id + '/tokens'
+            return self.json_api_call(
+                'GET', path, {'limit': limit, 'offset': offset})
+
+        return list(self.get_user_tokens_iterator(user_id))
 
     def add_user_token(self, user_id, token_id):
         """
