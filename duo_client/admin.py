@@ -644,21 +644,45 @@ class Admin(client.Client):
 
         return self.json_api_call('POST', path, params)
 
-    def get_user_bypass_codes(self, user_id):
-        """ Gets a list of bypass codes associated with a user.
+    def get_user_bypass_codes_iterator(self, user_id):
+        """ Returns an iterator of bypass codes associated with a user.
 
             Params:
                 user_id (str) - The user id.
 
             Returns:
-                A list of bypass code dicts.
+                A iterator yielding bypass code dicts.
 
             Notes:
                 Raises RuntimeError on error.
         """
         user_id = six.moves.urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/bypass_codes'
-        return self.json_api_call('GET', path, {})
+        return self.json_paging_api_call('GET', path, {})
+
+
+    def get_user_bypass_codes(self, user_id, limit=None, offset=0):
+        """ Returns a list of bypass codes associated with a user.
+
+            Params:
+                user_id (str) - The user id.
+                limit - The maximum number of records to return. (Optional)
+                offset - The offset of the first record to return. (Optional)
+
+            Returns:
+                An array of bypass code dicts.
+
+            Notes:
+                Raises RuntimeError on error.
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+            path = '/admin/v1/users/' + user_id + '/bypass_codes'
+            return self.json_api_call(
+                'GET', path, {'limit': limit, 'offset': offset})
+
+        return list(self.get_user_bypass_codes_iterator(user_id))
 
     def get_user_phones(self, user_id):
         """
