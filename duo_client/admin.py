@@ -436,17 +436,30 @@ class Admin(client.Client):
             row['host'] = self.host
         return response
 
-    def get_users(self):
+    def get_users_iterator(self):
         """
-        Returns list of users.
-
-
-        Returns list of user objects.
+        Returns iterator of user objects.
 
         Raises RuntimeError on error.
         """
-        response = self.json_api_call('GET', '/admin/v1/users', {})
-        return response
+        return self.json_paging_api_call('GET', '/admin/v1/users', {})
+
+    def get_users(self, limit=None, offset=0):
+        """
+        Returns a list of user objects.
+
+        Params:
+            limit - The maximum number of records to return. (Optional)
+            offset - The offset of the first record to return. (Optional)
+
+        Raises RuntimeError on error.
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call(
+                'GET', '/admin/v1/users', {'limit': limit, 'offset': offset})
+
+        return list(self.get_users_iterator())
 
     def get_user_by_id(self, user_id):
         """

@@ -4,14 +4,81 @@ from .base import TestAdmin
 
 
 class TestUsers(TestAdmin):
-    # GET with no params
-    def test_get_users(self):
-        response = self.client.get_users()
+    def test_get_users_generator(self):
+        """ Test to get users iterator.
+        """
+        iterator = self.client_list.get_users_iterator()
+        response = next(iterator)
         self.assertEqual(response['method'], 'GET')
+        (uri, args) = response['uri'].split('?')
+        self.assertEqual(uri, '/admin/v1/users')
         self.assertEqual(
-            response['uri'],
-            '/admin/v1/users?account_id=%s' % self.client.account_id)
-        self.assertEqual(response['body'], None)
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client.account_id],
+                'limit': ['100'],
+                'offset': ['0'],
+            })
+
+    def test_get_users(self):
+        """ Test to get users.
+        """
+        response = self.client_list.get_users()[0]
+        self.assertEqual(response['method'], 'GET')
+        (uri, args) = response['uri'].split('?')
+        self.assertEqual(uri, '/admin/v1/users')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client.account_id],
+                'limit': ['100'],
+                'offset': ['0'],
+            })
+
+    def test_get_users_offset(self):
+        """ Test to get users with pagination params.
+        """
+        response = self.client_list.get_users(offset=30)[0]
+        self.assertEqual(response['method'], 'GET')
+        (uri, args) = response['uri'].split('?')
+        self.assertEqual(uri, '/admin/v1/users')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client.account_id],
+                'limit': ['100'],
+                'offset': ['0'],
+            })
+
+    def test_get_users_limit(self):
+        """ Test to get users with pagination params.
+        """
+        response = self.client_list.get_users(limit=30)[0]
+        self.assertEqual(response['method'], 'GET')
+        (uri, args) = response['uri'].split('?')
+        self.assertEqual(uri, '/admin/v1/users')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client.account_id],
+                'limit': ['30'],
+                'offset': ['0'],
+            })
+
+    def test_get_users_limit_and_offset(self):
+        """ Test to get users with pagination params.
+        """
+        response = self.client_list.get_users(limit=20, offset=30)[0]
+        self.assertEqual(response['method'], 'GET')
+        (uri, args) = response['uri'].split('?')
+        self.assertEqual(uri, '/admin/v1/users')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client.account_id],
+                'limit': ['20'],
+                'offset': ['30'],
+            })
 
     # GET with params
     def test_get_users_by_name(self):
