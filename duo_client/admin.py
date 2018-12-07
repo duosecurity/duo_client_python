@@ -855,19 +855,40 @@ class Admin(client.Client):
 
         return list(self.get_user_u2ftokens_iterator(user_id))
 
-    def get_user_groups(self, user_id):
+    def get_user_groups_iterator(self, user_id):
         """
-        Returns an array of groups associated with the user.
+        Returns an iterator of groups associated with the user.
 
         user_id - User ID
 
-        Returns list of groups objects.
+        Returns iterator of groups objects.
 
         Raises RuntimeError on error.
         """
         user_id = six.moves.urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/groups'
-        return self.json_api_call('GET', path, {})
+        return self.json_paging_api_call('GET', path, {})
+
+    def get_user_groups(self, user_id, limit=None, offset=0):
+        """
+        Returns an array of groups associated with the user.
+
+        user_id - User ID
+        limit - The maximum number of records to return. (Optional)
+        offset - The offset of the first record to return. (Optional)
+
+        Returns list of groups objects.
+
+        Raises RuntimeError on error.
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+            path = '/admin/v1/users/' + user_id + '/groups'
+            return self.json_api_call(
+                'GET', path, {'limit': limit, 'offset': offset})
+
+        return list(self.get_user_groups_iterator(user_id))
 
     def add_user_group(self, user_id, group_id):
         """
