@@ -43,7 +43,6 @@ class TestUserBypassCodes(TestAdmin):
                 'offset': ['0'],
             })
 
-
     def test_get_user_bypass_codes_with_offset(self):
         """ Test to get bypass codes by user id with pagination params.
         """
