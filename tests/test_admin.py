@@ -350,6 +350,263 @@ class TestAdmin(unittest.TestCase):
                 'offset': ['3'],
             })
 
+    def test_get_user_bypass_codes(self):
+        """ Test to get bypass codes by user id.
+        """
+        response = self.client.get_user_bypass_codes('DU012345678901234567')
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(
+            uri,
+            '/admin/v1/users/DU012345678901234567/bypass_codes')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {'account_id': [self.client.account_id]})
+
+    def test_get_bypass_codes_generator(self):
+        """ Test to get bypass codes generator.
+        """
+        generator = self.client_list.get_bypass_codes_generator()
+        response = next(generator)
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/bypass_codes')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client_list.account_id],
+                'limit': ['100'],
+                'offset': ['0'],
+             })
+
+    def test_get_bypass_codes(self):
+        """ Test to get bypass codes without params.
+        """
+        response = self.client_list.get_bypass_codes()[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/bypass_codes')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client_list.account_id],
+                'limit': ['100'],
+                'offset': ['0'],
+             })
+
+    def test_get_bypass_codes_limit(self):
+        """ Test to get bypass codes with limit.
+        """
+        response = self.client_list.get_bypass_codes(limit='20')[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/bypass_codes')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client_list.account_id],
+                'limit': ['20'],
+                'offset': ['0'],
+            })
+
+    def test_get_bypass_codes_offset(self):
+        """ Test to get bypass codes with offset.
+        """
+        response = self.client_list.get_bypass_codes(offset='20')[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/bypass_codes')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client_list.account_id],
+                'limit': ['100'],
+                'offset': ['0'],
+            })
+
+    def test_get_bypass_codes_limit_offset(self):
+        """ Test to get bypass codes with limit and offset.
+        """
+        response = self.client_list.get_bypass_codes(limit='20', offset='2')[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/bypass_codes')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client_list.account_id],
+                'limit': ['20'],
+                'offset': ['2'],
+            })
+
+    def test_get_desktoptokens_generator(self):
+        """ Test to get desktop tokens generator.
+        """
+        generator = self.client_list.get_desktoptokens_generator()
+        response = next(generator)
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/desktoptokens')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client_list.account_id],
+                'limit': ['100'],
+                'offset': ['0'],
+            })
+
+    def test_get_desktoptokens(self):
+        """ Test to get desktop tokens without params.
+        """
+        response = self.client_list.get_desktoptokens()[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/desktoptokens')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client_list.account_id],
+                'limit': ['100'],
+                'offset': ['0'],
+            })
+
+    def test_get_desktoptokens_limit(self):
+        """ Test to get desktop tokens with limit.
+        """
+        response = self.client_list.get_desktoptokens(limit='20')[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/desktoptokens')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client_list.account_id],
+                'limit': ['20'],
+                'offset': ['0'],
+            })
+
+    def test_get_desktoptokens_offset(self):
+        """ Test to get desktop tokens with offset.
+        """
+        response = self.client_list.get_desktoptokens(offset='20')[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/desktoptokens')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client_list.account_id],
+                'limit': ['100'],
+                'offset': ['0'],
+            })
+
+    def test_get_desktoptokens_limit_offset(self):
+        """ Test to get desktop tokens with limit and offset.
+        """
+        response = self.client_list.get_desktoptokens(limit='20', offset='2')[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/desktoptokens')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client_list.account_id],
+                'limit': ['20'],
+                'offset': ['2'],
+            })
+
+    def test_get_groups_generator(self):
+        """ Test to get groups generator.
+        """
+        generator = self.client_list.get_groups_generator()
+        response = next(generator)
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/groups')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client_list.account_id],
+                'limit': ['100'],
+                'offset': ['0'],
+            })
+
+    def test_get_groups(self):
+        """ Test to get groups without params.
+        """
+        response = self.client_list.get_groups()[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/groups')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client_list.account_id],
+                'limit': ['100'],
+                'offset': ['0'],
+            })
+
+    def test_get_groups_limit(self):
+        """ Test to get groups with limit.
+        """
+        response = self.client_list.get_groups(limit='20')[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/groups')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client_list.account_id],
+                'limit': ['20'],
+                'offset': ['0'],
+            })
+
+    def test_get_groups_offset(self):
+        """ Test to get groups with offset.
+        """
+        response = self.client_list.get_groups(offset='2')[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/groups')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client_list.account_id],
+                'limit': ['100'],
+                'offset': ['0'],
+            })
+
+    def test_get_groups_limit_offset(self):
+        """ Test to get groups with limit and offset.
+        """
+        response = self.client_list.get_groups(limit='20', offset='2')[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/groups')
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client_list.account_id],
+                'limit': ['20'],
+                'offset': ['2'],
+            })
+
 
 if __name__ == '__main__':
     unittest.main()
