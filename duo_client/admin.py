@@ -209,6 +209,71 @@ class Admin(client.Client):
         else:
             return ','.join([str(int(code)) for code in codes])
 
+    def get_administrative_units(self, admin_id=None, group_id=None,
+                                 integration_key=None, limit=None, offset=0):
+        """
+        Retrieves a list of administrative units optionally filtered by admin,
+            group, or integration. At most one of admin_id, group_id, or
+            integration_key should be passed.
+
+        Args:
+            admin_id(str): id of admin (optional)
+            group_id(str): id of group (optional)
+            integration_key(str): id of integration (optional)
+            limit: The max number of administrative units to fetch at once.
+                   Default None
+            offset: If a limit is passed, the offset to start retrieval.
+                    Default 0
+
+        Returns: list of administrative units
+
+        Raises RuntimeError on error.
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+
+        params = {}
+        if admin_id is not None:
+            params['admin_id'] = admin_id
+        if group_id is not None:
+            params['group_id'] = group_id
+        if integration_key is not None:
+            params['integration_key'] = integration_key
+
+        if limit:
+            params['limit'] = limit
+            params['offset'] = offset
+
+            return self.json_api_call('GET',
+                                      '/admin/v1/administrative_units',
+                                      params)
+
+        iterator = self.get_administrative_units_iterator(
+            admin_id, group_id, integration_key)
+
+        return list(iterator)
+
+    def get_administrative_units_iterator(self, admin_id=None, group_id=None,
+                                          integration_key=None, ):
+        """
+        Provides a generator which produces administrative_units. Under the
+        hood, this generator uses pagination, so it will only store one page of
+        administrative_units at a time in memory.
+
+        Returns: A generator which produces administrative_units.
+
+        Raises RuntimeError on error.
+        """
+        params = {}
+        if admin_id is not None:
+            params['admin_id'] = admin_id
+        if group_id is not None:
+            params['group_id'] = group_id
+        if integration_key is not None:
+            params['integration_key'] = integration_key
+        return self.json_paging_api_call('GET',
+                                         '/admin/v1/administrative_units',
+                                         params)
+
     def get_administrator_log(self,
                               mintime=0):
         """
