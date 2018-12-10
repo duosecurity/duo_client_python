@@ -2526,17 +2526,39 @@ class Admin(client.Client):
     def delete_logo(self):
         return self.json_api_call('DELETE', '/admin/v1/logo', params={})
 
-    def get_u2ftokens(self):
-        """ Returns a list of u2ftokens.
-
-            Returns:
-                Returns a list of u2ftoken dicts.
-
-            Notes:
-                Raises RuntimeError on error.
+    def get_u2ftokens(self, limit=None, offset=0):
         """
-        response = self.json_api_call('GET', '/admin/v1/u2ftokens', {})
-        return response
+        Retrieves a list of u2ftokens
+        Args:
+            limit: The max number of u2ftokens to fetch at once. Default None
+            offset: If a limit is passed, the offset to start retrieval.
+                    Default 0
+
+        Returns: A list of u2ftokens
+
+        Notes: Raises RuntimeError on error.
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+
+        if limit:
+            return self.json_api_call('GET',
+                                      '/admin/v1/u2ftokens',
+                                      {'limit': limit, 'offset': offset})
+
+        iterator = self.get_u2ftokens_iterator()
+        return list(iterator)
+
+    def get_u2ftokens_iterator(self):
+        """
+        Provides a generator which u2ftokens. Under the hood, this generator
+        uses pagination, so it will only store one page of administrative_units
+        at a time in memory.
+
+        Returns: A generator which produces u2ftokens.
+
+        Raises RuntimeError on error.
+        """
+        return self.json_paging_api_call('GET', '/admin/v1/u2ftokens', {})
 
     def get_u2ftoken_by_id(self, registration_id):
         """ Returns u2ftoken specified by registration_id.
