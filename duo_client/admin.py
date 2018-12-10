@@ -2321,17 +2321,43 @@ class Admin(client.Client):
         response = self.json_api_call('POST', path, params)
         return response
 
-    def get_admins(self):
+    def get_admins(self, limit=None, offset=0):
         """
-        Returns list of administrators.
+        Retrieves a list of administrators.
+        Args:
+            limit: The max number of admins to fetch at once. Default None
+            offset: If a limit is passed, the offset to start retrieval.
+                    Default 0
 
+        Returns: list of administrators. See the adminapi docs.
 
-        Returns list of administrator objects.  See the adminapi docs.
+        Raises RuntimeError on error.
+
+        """
+
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call(
+                'GET',
+                '/admin/v1/admins',
+                {'limit': limit, 'offset': offset}
+            )
+
+        iterator = self.get_admins_iterator()
+
+        return list(iterator)
+
+    def get_admins_iterator(self):
+        """
+        Provides a generator which produces admins. Under the hood, this
+        generator uses pagination, so it will only store one page of admins at a
+        time in memory.
+
+        Returns: A generator which produces admins.
 
         Raises RuntimeError on error.
         """
-        response = self.json_api_call('GET', '/admin/v1/admins', {})
-        return response
+        return self.json_paging_api_call('GET', '/admin/v1/admins', {})
 
     def get_admin(self, admin_id):
         """
