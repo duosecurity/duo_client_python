@@ -2,6 +2,7 @@ include apache-license-2.0.txt
 include LICENSE
 recursive-include examples *
 include tests/*.py
+include tests/admin/*.py
 include README.md
 include duo_client/ca_certs.pem
 include requirements.txt
