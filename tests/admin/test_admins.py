@@ -3,8 +3,8 @@ import duo_client.admin
 from .base import TestAdmin
 
 
-class TestEndpoints(TestAdmin):
-# Uses underlying paging
+class TestAdmins(TestAdmin):
+    # Uses underlying paging
     def test_get_admins(self):
         response = self.client_list.get_admins()
         response = response[0]
