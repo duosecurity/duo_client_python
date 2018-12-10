@@ -2,7 +2,7 @@ from .. import util
 from .base import TestAdmin
 
 
-class TestAdmins(TestAdmin):
+class TestAdminUnits(TestAdmin):
     # Uses underlying paging
     def test_get_administratrive_units(self):
         response = self.client_list.get_administrative_units()
