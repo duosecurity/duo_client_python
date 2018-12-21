@@ -2709,3 +2709,22 @@ class Admin(client.Client):
         path = '/admin/v1/bypass_codes/' + bypass_code_id
         response = self.json_api_call('DELETE', path, {})
         return response
+
+    def sync_user(self, username, directory_key):
+        """ Syncronize a single user immediately with a specified directory.
+
+        Params:
+            username (str) - The username of the user to be synchronized.
+            directory_key (str) - The unique id of the directory.
+
+        Notes:
+            Raises RuntimeError on error.
+        """
+        params = {
+            'username': username,
+        }
+        directory_key = six.moves.urllib.parse.quote_plus(directory_key)
+        path = (
+            '/admin/v1/users/directorysync/{directory_key}/syncuser').format(
+                directory_key=directory_key)
+        return self.json_api_call('POST', path, params)
