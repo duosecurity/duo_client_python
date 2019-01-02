@@ -160,3 +160,14 @@ class TestUsers(TestAdmin):
                 'alias3': ['alias3'],
                 'alias4': ['alias4'],
             })
+
+    def test_sync_user(self):
+        """ Test to synchronize a single user in a directory for a username.
+        """
+        response = self.client.sync_user('foo', 'test_dir_key')
+        self.assertEqual(response['method'], 'POST')
+        self.assertEqual(response['uri'],
+                         '/admin/v1/users/directorysync/test_dir_key/syncuser')
+        self.assertEqual(
+            util.params_to_dict(response['body']),
+            {'username': ['foo'], 'account_id': [self.client.account_id]})
