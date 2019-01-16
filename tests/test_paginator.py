@@ -2,10 +2,15 @@ from __future__ import absolute_import, print_function
 import unittest
 import json
 from copy import deepcopy
-from mock import patch
+import six
 from duo_client.admin import Admin
 from duo_client.paginator import Paginator
 from duo_client.exceptions import MaxRequestAttemptsReached
+
+if six.PY2:
+    from mock import patch
+elif six.PY3:
+    from unittest.mock import patch
 
 
 DEFAULT_IKEY = "SAMPLEIKEY12345"
