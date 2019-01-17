@@ -22,7 +22,7 @@ class Paginator(object):
     """Class will retry rate limited requests + chain paginated requests."""
 
     DEFAULT_MAX_ATTEMPTS = 4
-    DEFAULT_MIN_WAIT_SECONDS = 5
+    DEFAULT_MIN_WAIT_SECONDS = 1
     DEFAULT_WAIT_CONST = 5
     DEFAULT_BACKOFF_FUNC = get_backoff_seconds_exp
     DEFAULT_ALL_PAGES = -1
