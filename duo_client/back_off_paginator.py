@@ -18,7 +18,7 @@ def get_backoff_seconds_exp(wait_const, min_wait_seconds, max_attempts):
         yield (attempt, max(wait_const**attempt, min_wait_seconds))
 
 
-class Paginator(object):
+class BackOffPaginator(object):
     """Class will retry rate limited requests + chain paginated requests."""
 
     DEFAULT_MAX_ATTEMPTS = 4
@@ -26,7 +26,7 @@ class Paginator(object):
     DEFAULT_WAIT_CONST = 5
     DEFAULT_BACKOFF_FUNC = get_backoff_seconds_exp
     DEFAULT_ALL_PAGES = -1
-    DEFAULT_META_OFFSET_NAME = "next_offset"
+    DEFAULT_META_OFFSET_NAME = "offset"
     DEFAULT_STATUSES_TO_RETRY_ON = (429,)
 
     def __init__(
@@ -36,9 +36,9 @@ class Paginator(object):
         wait_const=DEFAULT_WAIT_CONST,
         min_wait_seconds=DEFAULT_MIN_WAIT_SECONDS,
         backoff_func=DEFAULT_BACKOFF_FUNC,
-        statues_to_retry_on=DEFAULT_STATUSES_TO_RETRY_ON
+        statuses_to_retry_on=DEFAULT_STATUSES_TO_RETRY_ON
     ):
-        """Initializes the Paginator class with some boiler-plate configs.
+        """Initializes the BackOffPaginator class with some boiler-plate configs.
 
         :param duo_client: Duo Admin/Auth client
         :param max_attempts: (optional) max attempts for each HTTP request
@@ -54,7 +54,7 @@ class Paginator(object):
         self._wait_const = wait_const
         self._min_wait_seconds = min_wait_seconds
         self._backoff_func = backoff_func
-        self._statuses_to_retry_on = statues_to_retry_on
+        self._statuses_to_retry_on = statuses_to_retry_on
 
     def _next_offset_from_metadata(self, metadata):
         """Returns the next offset from the metadata that comes from some API
@@ -170,29 +170,3 @@ class Paginator(object):
                 params[meta_offset_name] = next_offset
             else:
                 break
-
-    def request_all_pages(
-        self,
-        method,
-        path,
-        params,
-        meta_offset_name=DEFAULT_META_OFFSET_NAME,
-        max_pages=DEFAULT_ALL_PAGES
-    ):
-        """Attempt to exhaust all pages from the API response and return a the
-        results in a list.
-
-        :param method: The method for the HTTP call ("GET", "POST", etc...)
-        :param path: The path to make the request on ("/sample/route", "/data"...)
-        :param params: Parameters (dict) to use in the request
-        :param meta_offset_name: The name of the subsequent param used to request the next page
-        :param max_pages: The number of pages to fetch (-1 means all pages)
-        :returns: A list of paginated responses.
-        :rtype: list
-        """
-
-        return [
-            d for d in self.request(
-                method, path, params, max_pages=max_pages, meta_offset_name=meta_offset_name
-            )
-        ]
