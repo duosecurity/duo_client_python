@@ -55,7 +55,7 @@ class CertValidatingHTTPSConnection(six.moves.http_client.HTTPConnection):
   default_port = six.moves.http_client.HTTPS_PORT
 
   def __init__(self, host, port=None, key_file=None, cert_file=None,
-               ca_certs=None, strict=None, unsafe_enable_sslv3=False, **kwargs):
+               ca_certs=None, strict=None, **kwargs):
     """Constructor.
 
     Args:
@@ -69,20 +69,17 @@ class CertValidatingHTTPSConnection(six.moves.http_client.HTTPConnection):
           can't be parsed as a valid HTTP/1.0 or 1.1 status line.
     """
     six.moves.http_client.HTTPConnection.__init__(self, host, port, strict, **kwargs)
-    self.key_file = key_file
-    self.cert_file = cert_file
-    self.ca_certs = ca_certs
-    if self.ca_certs:
-      self.cert_reqs = ssl.CERT_REQUIRED
-    else:
-      self.cert_reqs = ssl.CERT_NONE
-
     context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-    context.options |= ssl.OP_NO_SSLv2
-    self.add_option_to_ssl_context(context, ssl.OP_NO_SSLv2)
-    if not unsafe_enable_sslv3:
-        # By default we disable sslv2 and sslv3.
-        self.add_option_to_ssl_context(context, ssl.OP_NO_SSLv3)
+    if cert_file:
+        context.load_cert_chain(cert_file, key_file)
+    if ca_certs:
+      context.verify_mode = ssl.CERT_REQUIRED
+      context.load_verify_locations(cafile=ca_certs)
+    else:
+      context.verify_mode = ssl.CERT_NONE
+
+    ssl_version_blacklist = ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3
+    context.options |= ssl_version_blacklist
     self.default_ssl_context = context
 
   def _GetValidHostsForCert(self, cert):
@@ -121,29 +118,13 @@ class CertValidatingHTTPSConnection(six.moves.http_client.HTTPConnection):
                                          self.timeout)
     if self._tunnel_host:
       self._tunnel()
-    self.sock = ssl.wrap_socket(self.sock, keyfile=self.key_file,
-                                certfile=self.cert_file,
-                                cert_reqs=self.cert_reqs,
-                                ca_certs=self.ca_certs,
-                                ssl_version=self.default_ssl_context)
-    if self.cert_reqs & ssl.CERT_REQUIRED:
+    self.sock = self.default_ssl_context.wrap_socket(self.sock)
+    if self.default_ssl_context.verify_mode == ssl.CERT_REQUIRED:
       cert = self.sock.getpeercert()
       cert_validation_host = self._tunnel_host or self.host
       hostname = cert_validation_host.split(':', 0)[0]
       if not self._ValidateCertificateHostname(cert, hostname):
         raise InvalidCertificateException(hostname, cert, 'hostname mismatch')
-
-  @staticmethod
-  def add_option_to_ssl_context(context, option):
-      """ Returns the same context with new option added
-      Args:
-          context: An SSL Context
-          option: An SSL option
-      Returns:
-          context
-      """
-      context.options |= option
-      return context
 
 
 class CertValidatingHTTPSHandler(six.moves.urllib.request.HTTPSHandler):

@@ -1,4 +1,3 @@
 nose2
 flake8
 pytz
-mock==2.0.0

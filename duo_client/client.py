@@ -153,12 +153,10 @@ class Client(object):
                  timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
                  paging_limit=100,
                  digestmod=hashlib.sha1,
-                 sig_version=2,
-                 unsafe_enable_sslv3=False,
+                 sig_version=2
                  ):
         """
         ca_certs - Path to CA pem file.
-        unsafe_enable_sslv3 - Allow sslv3 for HTTPS connections. Only works if underlying OpenSSL also allows sslv3.
         """
         self.ikey = ikey
         self.skey = skey
@@ -173,8 +171,6 @@ class Client(object):
         self.paging_limit = paging_limit
         self.digestmod = digestmod
         self.sig_version = sig_version
-        self.unsafe_enable_sslv3 = unsafe_enable_sslv3
-
 
         # Default timeout is a sentinel object
         if timeout is socket._GLOBAL_DEFAULT_TIMEOUT:
@@ -296,8 +292,7 @@ class Client(object):
         else:
             conn = CertValidatingHTTPSConnection(host,
                                                  port,
-                                                 ca_certs=self.ca_certs,
-                                                 unsafe_enable_sslv3=self.unsafe_enable_sslv3)
+                                                 ca_certs=self.ca_certs)
 
         # Override default socket timeout if requested.
         conn.timeout = self.timeout
@@ -474,7 +469,6 @@ def main():
                         help='HTTP request method')
     parser.add_argument('--path', required=True,
                         help='API endpoint path')
-    parser.add_argument('--unsafe-enable-sslv3', default=False)
     parser.add_argument('--ca', default=DEFAULT_CA_CERTS)
     parser.add_argument('--sig-version', type=int, default=2)
     parser.add_argument('--sig-timezone', default='UTC')
@@ -497,7 +491,6 @@ def main():
         ca_certs=args.ca,
         sig_version=args.sig_version,
         sig_timezone=args.sig_timezone,
-        unsafe_enable_sslv3=args.unsafe_enable_sslv3,
     )
 
     params = collections.defaultdict(list)

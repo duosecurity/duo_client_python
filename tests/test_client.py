@@ -3,13 +3,10 @@ import hashlib
 import unittest
 import six.moves.urllib
 import duo_client.client
-from duo_client.https_wrapper import CertValidatingHTTPSConnection
 from . import util
 import base64
 import collections
 import json
-import ssl
-import mock
 
 JSON_BODY = {
             'data': 'abc123',
@@ -552,42 +549,6 @@ class TestParseJsonResponseAndMetadata(unittest.TestCase):
             self.assertEqual(e.exception.status, api_res.status)
             self.assertEqual(e.exception.reason, api_res.reason)
             self.assertEqual(e.exception.data, res_body)
-
-
-class TestSSLConfig(unittest.TestCase):
-    """ Tests the ability to specify override our default ssl context and use sslv3 """
-    def argument_used(self, call_args_list, expected_arg):
-        """ Assert that an argument is used at least once in any of the calls to a function"""
-        for call in call_args_list:
-            args, kwargs = call
-            if expected_arg in args:
-                return True
-        return False
-
-    @mock.patch('duo_client.https_wrapper.CertValidatingHTTPSConnection.add_option_to_ssl_context')
-    def test_safe_default_https_wrapper(self, mock_add_option):
-        """ sslv2 and sslv3 are off """
-        mock_add_option.return_value = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-        CertValidatingHTTPSConnection('fake host')
-
-        arg_used = self.argument_used(mock_add_option.call_args_list, ssl.OP_NO_SSLv2)
-        self.assertTrue(arg_used)
-
-        arg_used = self.argument_used(mock_add_option.call_args_list, ssl.OP_NO_SSLv3)
-        self.assertTrue(arg_used)
-
-    @mock.patch('duo_client.https_wrapper.CertValidatingHTTPSConnection.add_option_to_ssl_context')
-    def test_unsafe_ssl3_https_wrapper(self, mock_add_option):
-        """ sslv2 off. sslv3 and above are on. """
-        mock_add_option.return_value = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-        CertValidatingHTTPSConnection('fake host', unsafe_enable_sslv3=True)
-
-        arg_used = self.argument_used(mock_add_option.call_args_list, ssl.OP_NO_SSLv2)
-        self.assertTrue(arg_used)
-
-        arg_used = self.argument_used(mock_add_option.call_args_list, ssl.OP_NO_SSLv3)
-        self.assertFalse(arg_used)
-
 
 if __name__ == '__main__':
     unittest.main()
