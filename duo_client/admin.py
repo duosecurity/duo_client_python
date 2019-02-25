@@ -2016,8 +2016,8 @@ class Admin(client.Client):
                 'GET',
                 '/admin/v2/groups/' + group_id + '/users',
                 {
-                    'limit': str(limit),
-                    'offset': str(offset),
+                    'limit': limit,
+                    'offset': offset,
                 })
         return list(self.get_group_users_iterator(group_id))
 
