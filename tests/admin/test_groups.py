@@ -119,7 +119,7 @@ class TestGroups(TestAdmin):
     def test_get_group_users(self):
         """ Test for getting list of users associated with a group
         """
-        response = self.client.get_group_users('ABC123')
+        response = self.client_list.get_group_users('ABC123')[0]
         uri, args = response['uri'].split('?')
 
         self.assertEqual(response['method'], 'GET')
@@ -131,6 +131,69 @@ class TestGroups(TestAdmin):
                 'limit': ['100'],
                 'offset': ['0'],
             })
+
+    def test_get_group_users_with_offset(self):
+        """Test to get users by group id with pagination params
+        """
+        response = self.client_list.get_group_users('ABC123', offset=30)[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v2/groups/ABC123/users')
+        self.assertEqual(util.params_to_dict(args),
+                         {
+                            'account_id':[self.client.account_id],
+                            'limit': ['100'],
+                            'offset': ['0'],
+                         })
+
+    def test_get_group_users_with_limit(self):
+        """Test to get users by group id with pagination params
+        """
+        response = self.client_list.get_group_users('ABC123', limit=30)[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v2/groups/ABC123/users')
+        self.assertEqual(util.params_to_dict(args),
+                         {
+                            'account_id':[self.client.account_id],
+                            'limit': ['30'],
+                            'offset': ['0'],
+                         })
+
+    def test_get_group_users_with_limit_and_offset(self):
+        """Test to get users by group id with pagination params
+        """
+        response = self.client_list.get_group_users(
+            'ABC123', limit=30, offset=60)[0]
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v2/groups/ABC123/users')
+        self.assertEqual(util.params_to_dict(args),
+                         {
+                            'account_id':[self.client.account_id],
+                            'limit': ['30'],
+                            'offset': ['60'],
+                         })
+
+    def test_get_group_users_iterator(self):
+        """Test to get user iterator by group id
+        """
+        iterator = self.client_list.get_group_users_iterator(
+            'ABC123')
+        response = next(iterator)
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v2/groups/ABC123/users')
+        self.assertEqual(util.params_to_dict(args),
+                         {
+                            'account_id':[self.client.account_id],
+                            'limit': ['100'],
+                            'offset': ['0'],
+                         })
 
     def test_delete_group(self):
         """ Test for deleting a group

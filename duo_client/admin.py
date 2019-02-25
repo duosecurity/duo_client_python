@@ -2001,7 +2001,7 @@ class Admin(client.Client):
 
         return self.json_api_call('GET', url + group_id, {})
 
-    def get_group_users(self, group_id, limit=100, offset=0):
+    def get_group_users(self, group_id, limit=None, offset=0):
         """
         Get a paginated list of users associated with the specified
         group.
@@ -2010,13 +2010,28 @@ class Admin(client.Client):
         limit - The maximum number of records to return. Maximum is 500. (Optional)
         offset - The offset of the first record to return. (Optional)
         """
-        return self.json_api_call(
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call(
+                'GET',
+                '/admin/v2/groups/' + group_id + '/users',
+                {
+                    'limit': limit,
+                    'offset': offset,
+                })
+        return list(self.get_group_users_iterator(group_id))
+
+    def get_group_users_iterator(self, group_id):
+        """
+        Returns an iterator of users associated with the specified group.
+
+        group_id - The id of the group (Required)
+        """
+        return self.json_paging_api_call(
             'GET',
             '/admin/v2/groups/' + group_id + '/users',
-            {
-                'limit': str(limit),
-                'offset': str(offset),
-            })
+            {}
+        )
 
     def create_group(self, name,
                     desc=None,
