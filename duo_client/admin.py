@@ -2575,6 +2575,103 @@ class Admin(client.Client):
                                       params)
         return response
 
+    def create_activation(self, email,
+                       send_email=False,
+                       valid_days=None,
+                       admin_role=None):
+        """
+        Create a link to the activation form for a new administrator with email
+        address email. The administrator will not actually be created until the
+        activation form is completed with further information (like the
+        administrator’s name and phone number).
+
+        email - <str:email address of administrator>
+        valid_days - <int:number of days> (optional)
+        send_email - <bool: True if email should be sent> (optional)
+        admin_role - <str: one of ["Owner", "Administrator", "Application Manager",
+         "User Manager", "Help Desk", "Billing", "Phishing Manager", "Read-only"]>
+         (optional, defaults to "Owner")
+
+        Returns {
+            "admin_activation_id": <str: ID of administrator activation link>,
+            "admin_role": <str: administrator role assigned to the new admin>,
+            "code": <str: activation code used to create this activation link and message>,
+            "email": <str:email for admin/message>,
+            "email_sent": <bool:true if email was sent, false otherwise>,
+            "expires": <int:unix timestamp of activation link's expiration>,
+            "link": <str:activation link>,
+            "message": <str:introductory message body>,
+            "subject": <str:introductory message subject>,
+            "valid_days": <int:number of days before the activation link expires>
+        }
+
+        See the adminapi docs for updated return values.
+
+        Raises RuntimeError on error.
+        """
+        params = {}
+        if email is not None:
+            params['email'] = email
+        if send_email is not None:
+            params['send_email'] = '1' if send_email else '0'
+        if valid_days is not None:
+            params['valid_days'] = str(valid_days)
+        if admin_role is not None:
+            params['admin_role'] = admin_role
+        response = self.json_api_call('POST',
+                                      '/admin/v1/admins/activations',
+                                      params)
+        return response
+
+    def delete_pending_activation(self, admin_activation_id):
+        """
+        Delete the pending admin activation with ID <admin_activation_id> from the system.
+
+        Params:
+            admin_activation_id (str): The id of the pending activation
+
+        Notes:
+            Raises RuntimeError on error.
+        """
+        path = '/admin/v1/admins/activations/' + admin_activation_id
+        response = self.json_api_call('DELETE', path, {})
+        return response
+
+    def get_pending_activations_iterator(self):
+        """
+        Provides a generator which produces pending admin activations. Under the
+        hood, this generator uses pagination, so it will only store one page of
+        pending activations at a time in memory.
+
+        Returns: A generator which produces pending admin activations.
+
+        Raises RuntimeError on error.
+        """
+        return self.json_paging_api_call('GET', '/admin/v1/admins/activations/', {})
+
+    def get_pending_activations(self, limit=None, offset=0):
+        """
+        Retrieves a list of pending admin activations
+
+        Args:
+            limit: The max number of records returned. Default: 100; Max: 500
+            offset: If a limit is passed, the offset to start retrieval.
+                    Default 0
+
+        Returns: A list of pending admin activations. See the adminapi docs.
+
+        Notes: Raises RuntimeError on error.
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call(
+                'GET',
+                '/admin/v1/admins/activations/',
+                {'limit': limit, 'offset': offset}
+            )
+        iterator = self.get_pending_activations_iterator()
+        return list(iterator)
+
     def get_logo(self):
         """
         Returns current logo's PNG data or raises an error if none is set.
