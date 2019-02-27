@@ -2583,7 +2583,7 @@ class Admin(client.Client):
         Create a link to the activation form for a new administrator with email
         address email. The administrator will not actually be created until the
         activation form is completed with further information (like the
-        administrator’s name and phone number).
+        administrator's name and phone number).
 
         email - <str:email address of administrator>
         valid_days - <int:number of days> (optional)
