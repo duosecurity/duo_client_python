@@ -2647,7 +2647,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        return self.json_paging_api_call('GET', '/admin/v1/admins/activations/', {})
+        return self.json_paging_api_call('GET', '/admin/v1/admins/activations', {})
 
     def get_pending_activations(self, limit=None, offset=0):
         """
@@ -2666,7 +2666,7 @@ class Admin(client.Client):
         if limit:
             return self.json_api_call(
                 'GET',
-                '/admin/v1/admins/activations/',
+                '/admin/v1/admins/activations',
                 {'limit': limit, 'offset': offset}
             )
         iterator = self.get_pending_activations_iterator()
