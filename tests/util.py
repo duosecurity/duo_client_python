@@ -109,3 +109,23 @@ class MockPagingHTTPConnection(MockHTTPConnection):
 
         self.limit = int(params['limit'][0])
         self.offset = int(params['offset'][0])
+
+
+class MockMultipleRequestHTTPConnection(MockHTTPConnection):
+    def __init__(self, statuses):
+        super(MockMultipleRequestHTTPConnection, self).__init__()
+        self.statuses = statuses
+        self.status_iterator = iter(statuses)
+        self.requests = 0
+        self.status = None
+
+    def read(self):
+        response = {'foo': 'bar'}
+        return json.dumps({"stat":"OK", "response":response},
+                              cls=MockObjectJsonEncoder)
+
+    def request(self, method, uri, body, headers):
+        self.requests += 1
+        self.status = next(self.status_iterator)
+        super(MockMultipleRequestHTTPConnection, self).request(
+            method, uri, body, headers)

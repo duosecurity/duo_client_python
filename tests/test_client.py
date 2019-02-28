@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import hashlib
+import mock
 import unittest
 import six.moves.urllib
 import duo_client.client
@@ -549,6 +550,70 @@ class TestParseJsonResponseAndMetadata(unittest.TestCase):
             self.assertEqual(e.exception.status, api_res.status)
             self.assertEqual(e.exception.reason, api_res.reason)
             self.assertEqual(e.exception.data, res_body)
+
+@mock.patch('duo_client.client.sleep')
+class TestRetryRequests(unittest.TestCase):
+    def setUp(self):
+        self.client = duo_client.client.Client(
+            'test_ikey', 'test_akey', 'example.com',
+        )
+
+    def test_non_limited_reponse(self, mock_sleep):
+        # monkeypatch client's _connect()
+        mock_connection = util.MockMultipleRequestHTTPConnection(
+            [200])
+        self.client._connect = lambda: mock_connection
+        (response, dummy) = self.client.api_call('GET', '/foo/bar', {})
+        mock_sleep.assert_not_called()
+
+        self.assertEqual(response.status, 200)
+        self.assertEqual(mock_connection.requests, 1)
+
+    @mock.patch('duo_client.client.random')
+    def test_single_limited_response(self, mock_random, mock_sleep):
+        mock_random.uniform.return_value = 0.123
+        # monkeypatch client's _connect()
+        mock_connection = util.MockMultipleRequestHTTPConnection(
+            [429, 200])
+        self.client._connect = lambda: mock_connection
+
+        (response, dummy) = self.client.api_call('GET', '/foo/bar', {})
+
+        mock_sleep.assert_called_once_with(1.123)
+        mock_random.uniform.assert_called_once()
+        self.assertEqual(response.status, 200)
+        self.assertEqual(mock_connection.requests, 2)
+
+    @mock.patch('duo_client.client.random')
+    def test_all_limited_responses(self, mock_random, mock_sleep):
+        mock_random.uniform.return_value = 0.123
+        # monkeypatch client's _connect()
+        mock_connection = util.MockMultipleRequestHTTPConnection(
+            [429, 429, 429, 429, 429, 429, 429])
+        self.client._connect = lambda: mock_connection
+
+        (response, data) = self.client.api_call('GET', '/foo/bar', {})
+
+        expected_sleep_calls = (
+            mock.call(1.123),
+            mock.call(2.123),
+            mock.call(4.123),
+            mock.call(8.123),
+            mock.call(16.123),
+            mock.call(32.123),
+        )
+        mock_sleep.assert_has_calls(expected_sleep_calls)
+        expected_random_calls = (
+            mock.call(0, 1),
+            mock.call(0, 1),
+            mock.call(0, 1),
+            mock.call(0, 1),
+            mock.call(0, 1),
+            mock.call(0, 1),
+        )
+        mock_random.uniform.assert_has_calls(expected_random_calls)
+        self.assertEqual(response.status, 429)
+        self.assertEqual(mock_connection.requests, 7)
 
 if __name__ == '__main__':
     unittest.main()
