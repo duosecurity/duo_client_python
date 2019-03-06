@@ -5,7 +5,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 import six
 
-__version__ = '4.1.0'
+__version__ = '4.2.0'
 
 import base64
 import collections
