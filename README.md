@@ -19,6 +19,7 @@ $ virtualenv .env
 $ source .env/bin/activate
 $ pip install --requirement requirements.txt
 $ pip install --requirement requirements-dev.txt
+$ python setup.py install
 ```
 
 System:
