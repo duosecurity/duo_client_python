@@ -46,5 +46,5 @@ $ nose2
 # Linting
 
 ```
-$ flake8 --ignore=E501 duo_client/ tests/
+$ flake8
 ```

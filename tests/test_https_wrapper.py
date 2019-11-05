@@ -8,7 +8,7 @@ class TestSSLContextCreation(unittest.TestCase):
     """ Test that the SSL context used to wrap sockets is configured correctly """
     def test_no_ca_certs(self):
         conn = CertValidatingHTTPSConnection('fake host')
-        self.assertEqual(conn.default_ssl_context.verify_mode, ssl.CERT_NONE)
+        self.assertEqual(conn.default_ssl_context.verify_mode, ssl.CERT_NONE)  # noqa: DUO122, testing insecure context
 
     @mock.patch('ssl.SSLContext.load_verify_locations')
     def test_with_ca_certs(self, mock_load):

@@ -105,7 +105,7 @@ def canonicalize(method, host, uri, params, date, sig_version):
 
 
 def sign(ikey, skey, method, host, uri, date, sig_version, params,
-         digestmod=hashlib.sha1):
+         digestmod=hashlib.sha1):  # noqa: DUO130, HMAC-SHA1 still secure
     """
     Return basic authorization header line with a Duo Web API signature.
     """
@@ -154,7 +154,7 @@ class Client(object):
                  user_agent=('Duo API Python/' + __version__),
                  timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
                  paging_limit=100,
-                 digestmod=hashlib.sha1,
+                 digestmod=hashlib.sha1,  # noqa: DUO130, HMAC-SHA1 still secure
                  sig_version=2
                  ):
         """
@@ -295,7 +295,7 @@ class Client(object):
             if hasattr(ssl, '_create_unverified_context'):
                 # httplib.HTTPSConnection validates certificates by
                 # default in Python 2.7.9+.
-                kwargs['context'] = ssl._create_unverified_context()
+                kwargs['context'] = ssl._create_unverified_context()  # noqa: DUO122, explicitly disabled for testing scenarios
             conn = six.moves.http_client.HTTPSConnection(host, port, **kwargs)
         else:
             conn = CertValidatingHTTPSConnection(host,
@@ -339,7 +339,7 @@ class Client(object):
             if (response.status != self._RATE_LIMITED_RESP_CODE or
                     wait_secs > self._MAX_BACKOFF_WAIT_SECS):
                 break
-            random_offset = random.uniform(0.0, 1.0)
+            random_offset = random.uniform(0.0, 1.0)  # noqa: DUO102, non-cryptographic random use
             sleep(wait_secs + random_offset)
             wait_secs = wait_secs * self._BACKOFF_FACTOR
 
