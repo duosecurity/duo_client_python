@@ -941,6 +941,46 @@ class Admin(client.Client):
 
         return list(self.get_user_u2ftokens_iterator(user_id))
 
+    def get_user_webauthncredentials_iterator(self, user_id):
+        """ Returns an iterator of webauthncredentials associated with a user.
+
+            Params:
+                user_id (str) - The user id.
+
+            Returns:
+                A generator yielding webauthncredentials dicts.
+
+            Notes:
+                Raises RuntimeError on error.
+        """
+        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        path = '/admin/v1/users/' + user_id + '/webauthncredentials'
+        return self.json_paging_api_call('GET', path, {})
+
+    def get_user_webauthncredentials(self, user_id, limit=None, offset=0):
+        """ Returns an array of webauthncredentials associated
+            with a user.
+
+            Params:
+                user_id (str) - The user id.
+                limit - The maximum number of records to return. (Optional)
+                offset - The offset of the first record to return. (Optional)
+
+            Returns:
+                An array of webauthncredentials dicts.
+
+            Notes:
+                Raises RuntimeError on error.
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+            path = '/admin/v1/users/' + user_id + '/webauthncredentials'
+            return self.json_api_call(
+                'GET', path, {'limit': limit, 'offset': offset})
+
+        return list(self.get_user_webauthncredentials_iterator(user_id))
+
     def get_user_groups_iterator(self, user_id):
         """
         Returns an iterator of groups associated with the user.
@@ -2640,6 +2680,40 @@ class Admin(client.Client):
         """
         return self.json_paging_api_call('GET', '/admin/v1/u2ftokens', {})
 
+    def get_webauthncredentials(self, limit=None, offset=0):
+        """
+        Retrieves a list of webauthn credentials
+        Args:
+            limit: The max number of webauthn credentials to fetch at once. Default None
+            offset: If a limit is passed, the offset to start retrieval.
+                    Default 0
+
+        Returns: A list of webauthn credentials
+
+        Notes: Raises RuntimeError on error.
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+
+        if limit:
+            return self.json_api_call('GET',
+                                      '/admin/v1/webauthn-credentials',
+                                      {'limit': limit, 'offset': offset})
+
+        iterator = self.get_webauthncredentials_iterator()
+        return list(iterator)
+
+    def get_webauthncredentials_iterator(self):
+        """
+        Provides a generator which webauthn credentials. Under the hood, this generator
+        uses pagination, so it will only store one page of administrative_units
+        at a time in memory.
+
+        Returns: A generator which produces webauthn credentials.
+
+        Raises RuntimeError on error.
+        """
+        return self.json_paging_api_call('GET', '/admin/v1/webauthn-credentials', {})
+
     def get_u2ftoken_by_id(self, registration_id):
         """ Returns u2ftoken specified by registration_id.
 
@@ -2673,6 +2747,42 @@ class Admin(client.Client):
         registration_id = \
             six.moves.urllib.parse.quote_plus(str(registration_id))
         path = '/admin/v1/u2ftokens/' + registration_id
+        response = self.json_api_call('DELETE', path, {})
+        return response
+
+    def get_webauthncredentials_by_id(self, webauthnkey):
+        """ Returns webauthn credentials specified by webauthnkey.
+
+            Params:
+                webauthnkey (str): The registration id of the
+                    webauthn credentials to fetch.
+
+            Returns:
+                Returns a webauthn credentials dict.
+
+            Notes:
+                Raises RuntimeError on error.
+        """
+        webauthnkey = \
+            six.moves.urllib.parse.quote_plus(str(webauthnkey))
+        path = '/admin/v1/webauthn-credentials/' + webauthnkey
+        response = self.json_api_call('GET', path, {})
+        return response
+
+    def delete_webauthncredentials(self, webauthnkey):
+        """ Deletes a webauthn credentials. If the webauthn credentials is already
+            deleted, does nothing.
+
+            Params:
+                webauthnkey (str): The registration id of the
+                    webauthn credentials.
+
+            Notes:
+                Raises RuntimeError on error.
+        """
+        webauthnkey = \
+            six.moves.urllib.parse.quote_plus(str(webauthnkey))
+        path = '/admin/v1/webauthn-credentials/' + webauthnkey
         response = self.json_api_call('DELETE', path, {})
         return response
 
