@@ -2750,7 +2750,7 @@ class Admin(client.Client):
         response = self.json_api_call('DELETE', path, {})
         return response
 
-    def get_webauthncredentials_by_id(self, webauthnkey):
+    def get_webauthncredential_by_id(self, webauthnkey):
         """ Returns webauthn credentials specified by webauthnkey.
 
             Params:
@@ -2769,7 +2769,7 @@ class Admin(client.Client):
         response = self.json_api_call('GET', path, {})
         return response
 
-    def delete_webauthncredentials(self, webauthnkey):
+    def delete_webauthncredential(self, webauthnkey):
         """ Deletes a webauthn credentials. If the webauthn credentials is already
             deleted, does nothing.
 
