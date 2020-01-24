@@ -2696,7 +2696,7 @@ class Admin(client.Client):
 
         if limit:
             return self.json_api_call('GET',
-                                      '/admin/v1/webauthn-credentials',
+                                      '/admin/v1/webauthncredentials',
                                       {'limit': limit, 'offset': offset})
 
         iterator = self.get_webauthncredentials_iterator()
@@ -2712,7 +2712,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        return self.json_paging_api_call('GET', '/admin/v1/webauthn-credentials', {})
+        return self.json_paging_api_call('GET', '/admin/v1/webauthncredentials', {})
 
     def get_u2ftoken_by_id(self, registration_id):
         """ Returns u2ftoken specified by registration_id.
@@ -2765,7 +2765,7 @@ class Admin(client.Client):
         """
         webauthnkey = \
             six.moves.urllib.parse.quote_plus(str(webauthnkey))
-        path = '/admin/v1/webauthn-credentials/' + webauthnkey
+        path = '/admin/v1/webauthncredentials/' + webauthnkey
         response = self.json_api_call('GET', path, {})
         return response
 
@@ -2782,7 +2782,7 @@ class Admin(client.Client):
         """
         webauthnkey = \
             six.moves.urllib.parse.quote_plus(str(webauthnkey))
-        path = '/admin/v1/webauthn-credentials/' + webauthnkey
+        path = '/admin/v1/webauthncredentials/' + webauthnkey
         response = self.json_api_call('DELETE', path, {})
         return response
 

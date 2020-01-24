@@ -11,7 +11,7 @@ class TestWebauthn(TestAdmin):
         uri, args = response['uri'].split('?')
 
         self.assertEqual(response['method'], 'GET')
-        self.assertEqual(uri, '/admin/v1/webauthn-credentials')
+        self.assertEqual(uri, '/admin/v1/webauthncredentials')
         self.assertEqual(
             util.params_to_dict(args),
             {
@@ -27,7 +27,7 @@ class TestWebauthn(TestAdmin):
         uri, args = response['uri'].split('?')
 
         self.assertEqual(response['method'], 'GET')
-        self.assertEqual(uri, '/admin/v1/webauthn-credentials')
+        self.assertEqual(uri, '/admin/v1/webauthncredentials')
         self.assertEqual(
             util.params_to_dict(args),
             {
@@ -44,7 +44,7 @@ class TestWebauthn(TestAdmin):
         uri, args = response['uri'].split('?')
 
         self.assertEqual(response['method'], 'GET')
-        self.assertEqual(uri, '/admin/v1/webauthn-credentials')
+        self.assertEqual(uri, '/admin/v1/webauthncredentials')
         self.assertEqual(
             util.params_to_dict(args),
             {
@@ -59,7 +59,7 @@ class TestWebauthn(TestAdmin):
         uri, args = response['uri'].split('?')
 
         self.assertEqual(response['method'], 'GET')
-        self.assertEqual(uri, '/admin/v1/webauthn-credentials')
+        self.assertEqual(uri, '/admin/v1/webauthncredentials')
         self.assertEqual(
             util.params_to_dict(args),
             {
@@ -76,7 +76,7 @@ class TestWebauthn(TestAdmin):
         uri, args = response['uri'].split('?')
 
         self.assertEqual(response['method'], 'GET')
-        self.assertEqual(uri, '/admin/v1/webauthn-credentials/DU012345678901234567')
+        self.assertEqual(uri, '/admin/v1/webauthncredentials/DU012345678901234567')
         self.assertEqual(util.params_to_dict(args),
                          {'account_id':[self.client.account_id]})
 
@@ -87,6 +87,6 @@ class TestWebauthn(TestAdmin):
         uri, args = response['uri'].split('?')
 
         self.assertEqual(response['method'], 'DELETE')
-        self.assertEqual(uri, '/admin/v1/webauthn-credentials/DU012345678901234567')
+        self.assertEqual(uri, '/admin/v1/webauthncredentials/DU012345678901234567')
         self.assertEqual(util.params_to_dict(args),
                          {'account_id':[self.client.account_id]})
