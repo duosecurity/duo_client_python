@@ -25,7 +25,7 @@ $ python setup.py install
 System:
 
 ```
-$ pip install duo_client
+$ pip install duo-client
 ```
 
 # Using
