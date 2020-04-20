@@ -1,2 +1,1 @@
-six
-setuptools
+six==1.14.0
