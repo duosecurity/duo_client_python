@@ -1707,6 +1707,7 @@ class Admin(client.Client):
                         password_requires_special=None,
                         helpdesk_bypass=None,
                         helpdesk_bypass_expiration=None,
+                        helpdesk_message=None,
                         reactivation_url=None,
                         reactivation_integration_key=None,
                         security_checkup_enabled=None,
@@ -1730,21 +1731,22 @@ class Admin(client.Client):
         telephony_warning_min - <int:credits>
         caller_id - <str:phone number>
         push_enabled - True|False|None
-        sms_enabled = True|False|None
-        voice_enabled = True|False|None
-        mobile_otp_enabled = True|False|None
-        u2f_enabled = True|False|None
-        user_telephony_cost_max = <int:positive number of credits>
-        minimum_password_length = <int:length>|None,
-        password_requires_upper_alpha = True|False|None
-        password_requires_lower_alpha = True|False|None
-        password_requires_numeric = True|False|None
-        password_requires_special = True|False|None
+        sms_enabled - True|False|None
+        voice_enabled - True|False|None
+        mobile_otp_enabled - True|False|None
+        u2f_enabled - True|False|None
+        user_telephony_cost_max - <int:positive number of credits>
+        minimum_password_length - <int:length>|None
+        password_requires_upper_alpha - True|False|None
+        password_requires_lower_alpha - True|False|None
+        password_requires_numeric - True|False|None
+        password_requires_special - True|False|None
         helpdesk_bypass - "allow"|"limit"|"deny"|None
         helpdesk_bypass_expiration - <int:minutes>|0
-        reactivation_url = <str: url>|None
-        reactivation_integration_key = <str: url>|None
-        security_checkup_enabled = True|False|None
+        helpdesk_message - <str:message|None>
+        reactivation_url - <str:url>|None
+        reactivation_integration_key - <str:url>|None
+        security_checkup_enabled - True|False|None
 
         Returns updated settings object.
 
@@ -1812,6 +1814,8 @@ class Admin(client.Client):
             params['helpdesk_bypass'] = str(helpdesk_bypass)
         if helpdesk_bypass_expiration is not None:
             params['helpdesk_bypass_expiration'] = str(helpdesk_bypass_expiration)
+        if helpdesk_message is not None:
+            params['helpdesk_message'] = str(helpdesk_message)
         if reactivation_url is not None:
             params['reactivation_url'] = reactivation_url
         if reactivation_integration_key is not None:
