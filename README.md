@@ -1,6 +1,10 @@
 # Overview
 
 [![Build Status](https://travis-ci.org/duosecurity/duo_client_python.svg?branch=master)](https://travis-ci.org/duosecurity/duo_client_python)
+[![Issues](https://img.shields.io/github/issues/duosecurity/duo_client_python)](https://github.com/duosecurity/duo_client_python/issues)
+[![Forks](https://img.shields.io/github/forks/duosecurity/duo_client_python)](https://github.com/duosecurity/duo_client_python/network/members)
+[![Stars](https://img.shields.io/github/stars/duosecurity/duo_client_python)](https://github.com/duosecurity/duo_client_python/stargazers)
+[![License](https://img.shields.io/badge/License-View%20License-orange)](https://github.com/duosecurity/duo_client_python/blob/master/LICENSE)
 
 **Auth** - https://www.duosecurity.com/docs/authapi
 
