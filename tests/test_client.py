@@ -48,6 +48,11 @@ class TestQueryParameters(unittest.TestCase):
             {'realname': ['First Last'], 'username': ['root']},
             'realname=First%20Last&username=root')
 
+    def test_with_boolean_and_string(self):
+        self.assert_canon_params(
+            {'realname': ['First Last'], 'username': [True]},
+            'realname=First%20Last&username=True')
+
     def test_list_string(self):
         """ A list and a string will both get converted. """
         self.assert_canon_params(
