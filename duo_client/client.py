@@ -133,8 +133,14 @@ def normalize_params(params):
     """
     # urllib cannot handle unicode strings properly. quote() excepts,
     # and urlencode() replaces them with '?'.
+    # converts booleans and ints to strings
     def encode(value):
-        if isinstance(value, bool):
+        if isinstance(value, bool) and value:
+            if value:
+                value = 'true'
+            else:
+                value = 'false'
+        elif isinstance(value, int):
             value = str(value)
         if isinstance(value, six.text_type):
             return value.encode("utf-8")
