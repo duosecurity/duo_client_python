@@ -48,10 +48,15 @@ class TestQueryParameters(unittest.TestCase):
             {'realname': ['First Last'], 'username': ['root']},
             'realname=First%20Last&username=root')
 
-    def test_with_boolean_int_and_string(self):
+    def test_with_boolean_true_int_and_string(self):
         self.assert_canon_params(
             {'words': ['First Last'], 'success': [True], 'digit': [5]},
             'digit=5&success=true&words=First%20Last')
+
+    def test_with_boolean_false_int_and_string(self):
+        self.assert_canon_params(
+            {'words': ['First Last'], 'success': [False], 'digit': [5]},
+            'digit=5&success=false&words=First%20Last')
 
     def test_list_string(self):
         """ A list and a string will both get converted. """
