@@ -5,6 +5,8 @@ import duo_client.admin
 
 class TestAdmin(unittest.TestCase):
 
+    TEST_RESOURCES_DIR = 'resources/'
+
     def setUp(self):
         self.client = duo_client.admin.Admin(
             'test_ikey', 'test_akey', 'example.com')
