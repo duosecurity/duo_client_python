@@ -1,11 +1,12 @@
 import unittest
 from .. import util
 import duo_client.admin
+import os
 
 
 class TestAdmin(unittest.TestCase):
 
-    TEST_RESOURCES_DIR = 'resources/'
+    TEST_RESOURCES_DIR = dir_path = os.path.join(os.path.abspath(os.curdir), 'resources')
 
     def setUp(self):
         self.client = duo_client.admin.Admin(
