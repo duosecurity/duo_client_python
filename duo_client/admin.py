@@ -159,6 +159,7 @@ from . import client
 import six
 import warnings
 import time
+import base64
 
 USER_STATUS_ACTIVE = 'active'
 USER_STATUS_BYPASS = 'bypass'
@@ -2643,7 +2644,7 @@ class Admin(client.Client):
         Raises RuntimeError on error.
         """
         params = {
-            'logo': logo.encode('base64'),
+            'logo': base64.b64encode(logo).decode(),
         }
         return self.json_api_call('POST', '/admin/v1/logo', params)
 
