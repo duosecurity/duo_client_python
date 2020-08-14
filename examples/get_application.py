@@ -23,13 +23,12 @@ admin_api = duo_client.Admin(
 
 limit_of_apps=get_next_arg('Numerical limit of integrations to collect: ')
 
-# Retrieve user info from API:
+# Retrieve limited number of integrations from API:
 integrations = admin_api.get_integrations(limit_of_apps)
 print(integrations)
-# Print CSV of username, phone number, phone type, and phone platform:
+# Print CSV of integration name and ikey:
 #
-# (If a user has multiple phones, there will be one line printed per
-# associated phone.)
+# 
 ## use the following below once line 27 above works properly
 #reporter = csv.writer(sys.stdout)
 #print("[+] Report of all integrations:")
