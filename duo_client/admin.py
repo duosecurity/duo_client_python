@@ -2586,22 +2586,31 @@ class Admin(client.Client):
 
     def activate_admin(self, email,
                        send_email=False,
-                       valid_days=None):
+                       valid_days=None,
+                       admin_role=None):
         """
-        Generates an activate code for an administrator and optionally
+        Generates an activation code for an administrator and optionally
         emails the administrator.
 
         email - <str:email address of administrator>
         valid_days - <int:number of days> (optional)
-        send_email - <bool: True if email should be sent> (optional)
+        send_email - <bool:True if email should be sent> (optional)
+        admin_role - <str: Role assigned to new admin> (optional)
 
         Returns {
-            "email": <str:email for admin/message>,
-            "valid_days": <int:valid days>
-            "link": <str:activation link>
-            "message": <str:message, whether sent or not>
-            "email_sent": <bool:true if email was sent, false otherwise>
+            "admin_activation_id": <str:ID of the administrator activation link>
+            "admin_role": <str:administrator role assigned to the new admin>
             "code": <str:activation code>
+            "email": <str:email for admin/message>
+            "email_sent": <bool:true if email was sent, false otherwise>
+            "expires": <int:timestamp of expiration>
+            "link": <str:activation link>
+            "message": <str:message in email body>
+            "subject": <str:email subject line>
+            "valid_days": <int:valid days>
+
+            "message": <str:message, whether sent or not>
+
         }
 
         See the adminapi docs for updated return values.
@@ -2615,8 +2624,10 @@ class Admin(client.Client):
             params['send_email'] = '1' if send_email else '0'
         if valid_days is not None:
             params['valid_days'] = str(valid_days)
+        if admin_role is not None:
+            params['admin_role'] = str(admin_role)
         response = self.json_api_call('POST',
-                                      '/admin/v1/admins/activate',
+                                      '/admin/v1/admins/activations',
                                       params)
         return response
 
