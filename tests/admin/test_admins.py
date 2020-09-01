@@ -1,5 +1,6 @@
 from .. import util
 import duo_client.admin
+import urllib
 from .base import TestAdmin
 
 
@@ -78,15 +79,15 @@ class TestAdmins(TestAdmin):
     def test_admin_activation(self):
             # all params given
             response = self.client.activate_admin(
-                email='foobar@baz.com', send_email=True, valid_days=2, admin_role='Admin')
+                email='foobar@baz.com', send_email=1, valid_days=2, admin_role='Admin')
             self.assertEqual(response['method'], 'POST')
             self.assertEqual(response['uri'], '/admin/v1/admins/activations')
             response_body = util.params_to_dict(response['body'])
 
-            self.assertEqual(response_body['admin_role'], 'Admin')
-            self.assertEqual(response_body['email'], 'foobar@baz.com')
-            self.assertEqual(response_body['email_sent'], True)
-            self.assertEqual(response_body['valid_days'], 2)
+            self.assertEqual(response_body['admin_role'], ['Admin'])
+            self.assertEqual(response_body['email'], [urllib.quote('foobar@baz.com')])
+            self.assertEqual(response_body['send_email'], ['1'])
+            self.assertEqual(response_body['valid_days'], ['2'])
 
             # only required params given
             response = self.client.activate_admin(email='foobartwo@baz.com')
@@ -94,7 +95,4 @@ class TestAdmins(TestAdmin):
             self.assertEqual(response['uri'], '/admin/v1/admins/activations')
             response_body = util.params_to_dict(response['body'])
 
-            self.assertEqual(response_body['admin_role'], 'Owner')
-            self.assertEqual(response_body['email'], 'foobartwo@baz.com')
-            self.assertEqual(response_body['email_sent'], False)
-            self.assertEqual(response_body['valid_days'], 7)
+            self.assertEqual(response_body['email'], [urllib.quote('foobartwo@baz.com')])

@@ -2602,7 +2602,7 @@ class Admin(client.Client):
             "admin_role": <str:administrator role assigned to the new admin>
             "code": <str:activation code>
             "email": <str:email for admin/message>
-            "email_sent": <bool:true if email was sent, false otherwise>
+            "email_sent": <string:true if email was sent, false otherwise>
             "expires": <int:timestamp of expiration>
             "link": <str:activation link>
             "message": <str:message in email body>
@@ -2619,7 +2619,7 @@ class Admin(client.Client):
         if email is not None:
             params['email'] = email
         if send_email is not None:
-            params['send_email'] = '1' if send_email else '0'
+            params['send_email'] = str(send_email)
         if valid_days is not None:
             params['valid_days'] = str(valid_days)
         if admin_role is not None:
