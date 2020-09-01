@@ -2609,8 +2609,6 @@ class Admin(client.Client):
             "subject": <str:email subject line>
             "valid_days": <int:valid days>
 
-            "message": <str:message, whether sent or not>
-
         }
 
         See the adminapi docs for updated return values.
