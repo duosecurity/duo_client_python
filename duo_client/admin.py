@@ -562,7 +562,8 @@ class Admin(client.Client):
 
     def add_user(self, username, realname=None, status=None,
                  notes=None, email=None, firstname=None, lastname=None,
-                 alias1=None, alias2=None, alias3=None, alias4=None):
+                 alias1=None, alias2=None, alias3=None, alias4=None,
+                 aliases=None):
         """
         Adds a user.
 
@@ -574,6 +575,7 @@ class Admin(client.Client):
         firstname - User's given name for ID Proofing (optional)
         lastname - User's surname for ID Proofing (optional)
         alias1..alias4 - Aliases for the user's primary username (optional)
+        aliases - Aliases for the user's primary username (optional)
 
         Returns newly created user object.
 
@@ -602,6 +604,8 @@ class Admin(client.Client):
             params['alias3'] = alias3
         if alias4 is not None:
             params['alias4'] = alias4
+        if aliases is not None:
+            params['aliases'] = aliases
         response = self.json_api_call('POST',
                                       '/admin/v1/users',
                                       params)
@@ -609,7 +613,8 @@ class Admin(client.Client):
 
     def update_user(self, user_id, username=None, realname=None, status=None,
                     notes=None, email=None, firstname=None, lastname=None,
-                    alias1=None, alias2=None, alias3=None, alias4=None):
+                    alias1=None, alias2=None, alias3=None, alias4=None,
+                    aliases=None):
         """
         Update username, realname, status, or notes for a user.
 
@@ -621,6 +626,8 @@ class Admin(client.Client):
         email - Email address (optional)
         firstname - User's given name for ID Proofing (optional)
         lastname - User's surname for ID Proofing (optional)
+        alias1..alias4 - Aliases for the user's primary username (optional)
+        aliases - Aliases for the user's primary username. (optional)
 
         Returns updated user object.
 
@@ -651,6 +658,8 @@ class Admin(client.Client):
             params['alias3'] = alias3
         if alias4 is not None:
             params['alias4'] = alias4
+        if aliases is not None:
+            params['aliases'] = aliases
         response = self.json_api_call('POST', path, params)
         return response
 
