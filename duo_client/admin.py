@@ -359,7 +359,7 @@ class Admin(client.Client):
         API Version v2:
 
         mintime (required) - Unix timestamp in ms; fetch records >= mintime
-        maxtime (required) - Unix timestamp in ms; fetch records <= mintime
+        maxtime (required) - Unix timestamp in ms; fetch records <= maxtime
         limit - Number of results to limit to
         next_offset - Used to grab the next set of results from a previous response
         sort - Sort order to be applied
