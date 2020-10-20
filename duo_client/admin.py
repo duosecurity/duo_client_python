@@ -2833,7 +2833,7 @@ class Admin(client.Client):
             Notes:
                 Raises RuntimeError on error.
         """
-        registration_id = \
+        bypass_code_id = \
             six.moves.urllib.parse.quote_plus(str(bypass_code_id))
         path = '/admin/v1/bypass_codes/' + bypass_code_id
         response = self.json_api_call('DELETE', path, {})
