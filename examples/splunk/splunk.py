@@ -217,8 +217,6 @@ def admin_api_from_config(config_path):
 
 
 def main():
-    parser = optparse.OptionParser(usage="%prog [<config file path>]")
-
     if len(sys.argv) == 1:
         config_path = os.path.abspath(__file__)
         config_path = os.path.dirname(config_path)
