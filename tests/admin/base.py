@@ -32,6 +32,17 @@ class TestAdmin(unittest.TestCase):
         self.client_authlog._connect = \
             lambda: util.MockHTTPConnection(data_response_from_get_authlog=True)
 
+        # client to simulate basic structure of a call to fetch Duo Trust
+        # Monitor events.
+        self.client_dtm = duo_client.admin.Admin(
+            'test_ikey',
+            'test_akey',
+            'example.com',
+        )
+        self.client_dtm.account_id = 'DA012345678901234567'
+        self.client_dtm._connect = \
+            lambda: util.MockHTTPConnection(data_response_from_get_dtm_events=True)
+
 
 if __name__ == '__main__':
     unittest.main()
