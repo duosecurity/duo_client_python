@@ -409,6 +409,46 @@ class Client(object):
             for obj in objects:
                 yield obj
 
+    def json_cursor_api_call(self, method, path, params, get_records_func):
+        """
+        Call a Duo API endpoint which utilizes a cursor in some responses to
+        page through a set of data. This cursor is supplied through the optional
+        "offset" parameter.  The cursor for the next set of data is in the
+        response metadata as "next_offset". Callers must also include a
+        function parameter to extract the iterable of records to yield. This is
+        slightly different than json_paging_api_call because the first request
+        does not contain the offset parameter.
+
+        :param method: The method to make the request w/ as a string. Ex:
+                       "GET", "POST", "PUT" etc.
+        :param path: The path to make the request with as a string.
+        :param params: The dict of parameters to send in the request.
+        :param get_records_func: Function that can be called to extract an
+                                 iterable of records from the parsed response
+                                 json.
+        
+        :returns: Generator which will yield records from the api response(s).
+        """
+
+        next_offset = None
+
+        if 'limit' not in params and self.paging_limit:
+            params['limit'] = str(self.paging_limit)
+
+        while True:
+            if next_offset is not None:
+                params['offset'] = str(next_offset)
+            (http_resp, http_resp_data) = self.api_call(method, path, params)
+            (response, metadata) = self.parse_json_response_and_metadata(
+                http_resp,
+                http_resp_data,
+            )
+            for record in get_records_func(response):
+                yield record
+            next_offset = metadata.get('next_offset', None)
+            if next_offset is None:
+                break
+
     def parse_json_response(self, response, data):
         """
         Return the parsed data structure or raise RuntimeError.

@@ -2876,3 +2876,96 @@ class Admin(client.Client):
             '/admin/v1/users/directorysync/{directory_key}/syncuser').format(
                 directory_key=directory_key)
         return self.json_api_call('POST', path, params)
+
+    def get_trust_monitor_events_iterator(
+        self,
+        mintime,
+        maxtime,
+        event_type=None,
+    ):
+        """
+        Returns a generator which yields trust monitor events.
+
+        Params:
+            mintime (int) - Return events that have a surfaced timestamp greater
+                            than or equal to mintime. Timestamp is represented as
+                            a unix timestamp in milliseconds.
+            maxtime (int) - Return events that have a surfaced timestamp less
+                            than or equal to maxtime. Timestamp is represented as
+                            a unix timestamp in milliseconds.
+            event_type (str, optional) - Limit the events returned by a supplied
+                                         event type represented as a string. If
+                                         not supplied, the caller will recieve all
+                                         event types. Check the Duo Admin API
+                                         documentation for expected values for
+                                         this parameter.
+
+        Returns: Generator which yields trust monitor events.
+        """
+
+        params = {
+            "mintime": "{}".format(mintime),
+            "maxtime": "{}".format(maxtime),
+        }
+
+        if event_type is not None:
+            params["type"] = event_type
+
+        return self.json_cursor_api_call(
+            "GET",
+            "/admin/v1/trust_monitor/events",
+            params,
+            lambda resp: resp["events"],
+        )
+
+    def get_trust_monitor_events_by_offset(
+        self,
+        mintime,
+        maxtime,
+        limit=None,
+        offset=None,
+        event_type=None,
+    ):
+        """
+        Fetch Duo Trust Monitor Events from the Admin API.
+
+        Params:
+            mintime (int) - Return events that have a surfaced timestamp greater
+                            than or equal to mintime. Timestamp is represented as
+                            a unix timestamp in milliseconds.
+            maxtime (int) - Return events that have a surfaced timestamp less
+                            than or equal to maxtime. Timestamp is represented as
+                            a unix timestamp in milliseconds.
+            limit (int, optional) - Limit the number of events returned.
+            offset (str, optional) - Provide an offset from a previous request's
+                                     response metadata["next_offset"].
+            event_type (str, optional) - Limit the events returned by a supplied
+                                         event type represented as a string. If
+                                         not supplied, the caller will recieve all
+                                         event types. Check the Duo Admin API
+                                         documentation for expected values for
+                                         this parameter.
+
+        Returns: response containing a list of Duo Trust Monitor Events.
+
+        """
+
+        params = {
+            "mintime": "{}".format(mintime),
+            "maxtime": "{}".format(maxtime),
+        }
+
+        if limit is not None:
+            params["limit"] = "{}".format(limit)
+
+        if offset is not None:
+            params["offset"] = "{}".format(offset)
+
+        if event_type is not None:
+            params["type"] = event_type
+
+        return self.json_api_call(
+            "GET",
+            "/admin/v1/trust_monitor/events",
+            params,
+        )
