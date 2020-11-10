@@ -1,6 +1,6 @@
 # Overview
 
-[![Build Status](https://travis-ci.org/duosecurity/duo_client_python.svg?branch=master)](https://travis-ci.org/duosecurity/duo_client_python)
+[![Build Status](https://github.com/duosecurity/duo_client_python/workflows/Python%20CI/badge.svg)](https://github.com/duosecurity/duo_client_python/actions)
 [![Issues](https://img.shields.io/github/issues/duosecurity/duo_client_python)](https://github.com/duosecurity/duo_client_python/issues)
 [![Forks](https://img.shields.io/github/forks/duosecurity/duo_client_python)](https://github.com/duosecurity/duo_client_python/network/members)
 [![Stars](https://img.shields.io/github/stars/duosecurity/duo_client_python)](https://github.com/duosecurity/duo_client_python/stargazers)
