@@ -2969,3 +2969,44 @@ class Admin(client.Client):
             "/admin/v1/trust_monitor/events",
             params,
         )
+  
+    def get_billing_edition(
+      self,
+    ):
+      """
+      Returns the billing edition for a child account.
+      
+      Returns dict including edition.
+      
+      Raises RuntimeError on error.
+      """
+      params = {
+        'account_id': self.account_id,
+      }
+      response = self.json_api_call(
+          'GET',
+          '/admin/v1/billing/edition',
+          params
+      )
+      return response
+
+    def set_billing_edition(self, edition):
+      """
+      Sets the billing edition for a child account.
+      
+      edition - <str:the edition to set> One of: ENTERPRISE, PLATFORM, or BEYOND
+      
+      Returns empty string on success.
+      
+      Raises RuntimeError on error.
+      """
+      params = {
+        'account_id': self.account_id,
+        'edition': edition
+      }
+      response = self.json_api_call(
+          'POST',
+          '/admin/v1/billing/edition',
+          params
+      )
+      return response
