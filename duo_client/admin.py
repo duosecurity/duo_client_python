@@ -2969,3 +2969,74 @@ class Admin(client.Client):
             "/admin/v1/trust_monitor/events",
             params,
         )
+
+class AccountAdmin(Admin):
+    """AccountAdmin manages a child account using an Accounts API integration."""
+
+    def __init__(self, account_id, **kwargs):
+        """Initializes an AccountAdmin for administering a child account.
+           account_id is the account id of the child account.
+           See the Client base class for other parameters."""
+        super(AccountAdmin, self).__init__(**kwargs)
+        self.account_id = account_id
+
+    def get_edition(self):
+        """
+        Returns the edition of the account {
+            "edition" : <str:editon name>
+        }
+
+        Raises RuntimeError on error.
+        """
+        response = self.json_api_call('GET',
+                                      '/admin/v1/billing/edition',
+                                      params={})
+
+        return response
+
+    def set_edition(self, edition):
+        """
+        Set the edition of the child account.
+
+        edition -  The edition string to set on the child account. Should be 'BUSINESS' or 'ENTERPRISE'.
+
+        Raises RuntimeError on error.
+        """
+        params = {
+            'edition': edition,
+        }
+
+        return self.json_api_call('POST',
+                                  '/admin/v1/billing/edition',
+                                  params)
+
+    def get_telephony_credits(self):
+        """
+        Returns the telephony credits of the account {
+            "credits" : <int>
+        }
+
+        Raises RuntimeError on error.
+        """
+        return self.json_api_call('GET',
+                                      '/admin/v1/billing/telephony_credits',
+                                      params={})
+
+
+    def set_telephony_credits(self, credits):
+        """
+        Set the telephony credits of the child account.
+
+        credits -  The telephony credits to set on the child account.
+                   The ammount added to the child account,
+                   (credits - child's current telephony credits), will be
+                   deducted from the parent account's telephony credits.
+
+        Raises RuntimeError on error.
+        """
+        params = {
+            'credits': str(credits),
+        }
+        return self.json_api_call('POST',
+                           '/admin/v1/billing/telephony_credits',
+                           params)
