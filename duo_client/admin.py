@@ -2983,7 +2983,7 @@ class AccountAdmin(Admin):
     def get_edition(self):
         """
         Returns the edition of the account {
-            "edition" : <str:editon name>
+            "edition" : <str:edition name>
         }
 
         Raises RuntimeError on error.
