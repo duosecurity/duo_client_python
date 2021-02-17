@@ -2998,7 +2998,8 @@ class AccountAdmin(Admin):
         """
         Set the edition of the child account.
 
-        edition -  The edition string to set on the child account. Should be 'BUSINESS' or 'ENTERPRISE'.
+        edition -  The edition string to set on the child account.
+                   Should be 'ENTERPRISE' (MFA), 'PLATFORM' (Access), or 'BEYOND'.
 
         Raises RuntimeError on error.
         """

@@ -18,9 +18,9 @@ class TestBilling(TestAccountAdmin):
                          })
 
     def test_set_business_billing_edition(self):
-        """Test to set BUSINESS billing edition
+        """Test to set PLATFORM billing edition
         """
-        response = self.client.set_edition('BUSINESS')
+        response = self.client.set_edition('PLATFORM')
         uri = response['uri']
         args = response['body']
 
@@ -28,7 +28,7 @@ class TestBilling(TestAccountAdmin):
         self.assertEqual(uri, '/admin/v1/billing/edition')
         self.assertEqual(util.params_to_dict(args),
                          {
-                             'edition': ['BUSINESS'],
+                             'edition': ['PLATFORM'],
                              'account_id': [self.client.account_id],
                          })
 
