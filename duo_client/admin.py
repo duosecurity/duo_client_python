@@ -1058,6 +1058,21 @@ class Admin(client.Client):
         params = {}
         return self.json_api_call('DELETE', path, params)
 
+    def get_endpoint(self, epkey):
+        """
+        Get a single endpoint from the AdminAPI by a supplied epkey.
+
+        Params:
+            epkey (str) - The supplied endpoint key to fetch.
+
+        Returns: The endpoint object represented as a dict.
+        Raises:
+            RuntimeError: if the request returns a non-200 status response.
+        """
+        escaped_epkey = six.moves.urllib.parse.quote_plus(str(epkey))
+        path = '/admin/v1/endpoints/' + escaped_epkey
+        return self.json_api_call('GET', path, {})
+
     def get_endpoints_iterator(self):
         """
         Returns iterator of endpoints objects.
