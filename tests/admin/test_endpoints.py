@@ -80,6 +80,19 @@ class TestEndpoints(TestAdmin):
                 'offset': ['20'],
             })
 
+    def test_get_endpoint(self):
+        """ Test getting a single endpoint.
+        """
+        epkey = 'EP18JX1A10AB102M2T2X'
+        response = self.client_list.get_endpoint(epkey)[0]
+        (uri, args) = response['uri'].split('?')
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v1/endpoints/' + epkey)
+        self.assertEqual(
+            util.params_to_dict(args),
+            {
+                'account_id': [self.client.account_id],
+            })
 
 if __name__ == '__main__':
     unittest.main()
