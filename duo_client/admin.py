@@ -2523,14 +2523,13 @@ class Admin(client.Client):
         response = self.json_api_call('GET', path, {})
         return response
 
-    def add_admin(self, name, email, phone, password, role=None):
+    def add_admin(self, name, email, phone, role=None):
         """
         Create an administrator and adds it to a customer.
 
         name - <str:the name of the administrator>
         email - <str:email address>
         phone - <str:phone number>
-        password - <str:password>
         role - <str|None:role>
 
         Returns the added administrator.  See the adminapi docs.
@@ -2544,8 +2543,6 @@ class Admin(client.Client):
             params['email'] = email
         if phone is not None:
             params['phone'] = phone
-        if password is not None:
-            params['password'] = password
         if role is not None:
             params['role'] = role
         response = self.json_api_call('POST', '/admin/v1/admins', params)
@@ -2554,7 +2551,6 @@ class Admin(client.Client):
     def update_admin(self, admin_id,
                      name=None,
                      phone=None,
-                     password=None,
                      password_change_required=None,
                      ):
         """
@@ -2577,8 +2573,6 @@ class Admin(client.Client):
             params['name'] = name
         if phone is not None:
             params['phone'] = phone
-        if password is not None:
-            params['password'] = password
         if password_change_required is not None:
             params['password_change_required'] = password_change_required
         response = self.json_api_call('POST', path, params)
@@ -2651,6 +2645,80 @@ class Admin(client.Client):
         response = self.json_api_call('POST',
                                       '/admin/v1/admins/activations',
                                       params)
+        return response
+
+    def get_external_password_mgmt_statuses(self, limit=None, offset=0):
+        """
+        Returns a paged list of administrators indicating whether they
+        have been configured for external password management.
+        Args:
+            limit: The max number of admins to fetch at once. Default None
+            offset: If a limit is passed, the offset to start retrieval.
+                    Default 0
+
+        Returns a list of administrators' external password management
+            statuses.  See the adminapi docs.
+
+        Raises RuntimeError on error.
+        """
+
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call(
+                'GET',
+                '/admin/v1/admins/password_mgmt',
+                {'limit': limit, 'offset': offset}
+            )
+
+        iterator = self.json_paging_api_call(
+            'GET', '/admin/v1/admins/password_mgmt', {})
+
+        return list(iterator)
+
+    def get_external_password_mgmt_status_for_admin(self, admin_id):
+        """
+        Returns the external password management status for an admin
+
+        admin_id - The id of the admin.
+
+        Returns an external password management status. See the
+        adminapi docs.
+
+        Raises RuntimeError on error.
+        """
+
+        admin_id = six.moves.urllib.parse.quote_plus(str(admin_id))
+        path = '/admin/v1/admins/{}/password_mgmt'.format(admin_id)
+        response = self.json_api_call('GET', path, {})
+        return response
+
+    def update_admin_password_mgmt_status(
+        self, admin_id, has_external_password_mgmt=None,
+        password=None):
+        """
+        Enable or disable an admin for external password management,
+        and optionally set the password for an admin
+
+        admin_id - The id of the admin.
+        has_external_password_mgmt - whether or not this admin's password
+            is managed via API.
+        password - New password for the admin.
+
+        Returns an external password management status. See the
+        adminapi docs.
+
+        Raises RuntimeError on error.
+        """
+
+        params = {}
+        if password is not None:
+            params['password'] = password
+        if has_external_password_mgmt is not None:
+            params['has_external_password_mgmt'] = str(has_external_password_mgmt)
+
+        admin_id = six.moves.urllib.parse.quote_plus(str(admin_id))
+        path = '/admin/v1/admins/{}/password_mgmt'.format(admin_id)
+        response = self.json_api_call('POST', path, params)
         return response
 
     def get_logo(self):
