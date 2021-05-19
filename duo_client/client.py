@@ -162,7 +162,8 @@ class Client(object):
                  timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
                  paging_limit=100,
                  digestmod=hashlib.sha1,  # noqa: DUO130, HMAC-SHA1 still secure
-                 sig_version=2
+                 sig_version=2,
+                 port=None
                  ):
         """
         ca_certs - Path to CA pem file.
@@ -170,7 +171,7 @@ class Client(object):
         self.ikey = ikey
         self.skey = skey
         self.host = host
-        self.port = None
+        self.port = port
         self.sig_timezone = sig_timezone
         if ca_certs is None:
             ca_certs = DEFAULT_CA_CERTS
