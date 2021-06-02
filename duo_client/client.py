@@ -247,7 +247,6 @@ class Client(object):
         headers = {
             'Authorization': auth,
             'Date': now,
-            'Host': self.host,
         }
 
         if self.user_agent:
