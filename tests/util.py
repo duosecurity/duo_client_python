@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import json
 import collections
+import urllib
 
 from json import JSONEncoder
 import duo_client
@@ -14,7 +15,7 @@ class MockObjectJsonEncoder(json.JSONEncoder):
 def params_to_dict(param_str):
     param_dict = collections.defaultdict(list)
     for (key, val) in (param.split('=') for param in param_str.split('&')):
-        param_dict[key].append(val)
+        param_dict[key].append(urllib.parse.unquote(val))
     return param_dict
 
 

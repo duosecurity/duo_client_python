@@ -284,7 +284,7 @@ class TestRequest(unittest.TestCase):
         'foo':['bar'],
         'baz':['qux', 'quux=quuux', 'foobar=foobar&barbaz=barbaz']}
     args_out = dict(
-        (key, [six.moves.urllib.parse.quote(v) for v in val])
+        (key, [v for v in val])
         for (key, val) in list(args_in.items()))
 
     def setUp(self):
