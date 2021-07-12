@@ -15,7 +15,7 @@ class MockObjectJsonEncoder(json.JSONEncoder):
 def params_to_dict(param_str):
     param_dict = collections.defaultdict(list)
     for (key, val) in (param.split('=') for param in param_str.split('&')):
-        param_dict[key].append(urllib.parse.unquote(val))
+        param_dict[key].append(six.moves.urllib.parse.unquote(val))
     return param_dict
 
 
