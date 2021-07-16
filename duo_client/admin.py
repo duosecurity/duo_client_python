@@ -1733,6 +1733,7 @@ class Admin(client.Client):
                         helpdesk_bypass=None,
                         helpdesk_bypass_expiration=None,
                         helpdesk_message=None,
+                        helpdesk_can_send_enroll_email=None,
                         reactivation_url=None,
                         reactivation_integration_key=None,
                         security_checkup_enabled=None,
@@ -1755,11 +1756,11 @@ class Admin(client.Client):
         timezone - <str:IANA timezone>|None
         telephony_warning_min - <int:credits>
         caller_id - <str:phone number>
-        push_enabled - True|False|None
-        sms_enabled - True|False|None
-        voice_enabled - True|False|None
-        mobile_otp_enabled - True|False|None
-        u2f_enabled - True|False|None
+        push_enabled - Deprecated; ignored if specified.
+        sms_enabled - Deprecated; ignored if specified.
+        voice_enabled - Deprecated; ignored if specified.
+        mobile_otp_enabled - Deprecated; ignored if specified.
+        u2f_enabled - Deprecated; ignored if specified.
         user_telephony_cost_max - <int:positive number of credits>
         minimum_password_length - <int:length>|None
         password_requires_upper_alpha - True|False|None
@@ -1769,6 +1770,7 @@ class Admin(client.Client):
         helpdesk_bypass - "allow"|"limit"|"deny"|None
         helpdesk_bypass_expiration - <int:minutes>|0
         helpdesk_message - <str:message|None>
+        helpdesk_can_send_enroll_email - True|False|None
         reactivation_url - <str:url>|None
         reactivation_integration_key - <str:url>|None
         security_checkup_enabled - True|False|None
@@ -1798,7 +1800,8 @@ class Admin(client.Client):
         if fraud_email is not None:
             params['fraud_email'] = fraud_email
         if fraud_email_enabled is not None:
-            params['fraud_email_enabled'] = fraud_email_enabled
+            params['fraud_email_enabled'] = ('1' if
+                fraud_email_enabled else '0')
         if keypress_confirm is not None:
             params['keypress_confirm'] = keypress_confirm
         if keypress_fraud is not None:
@@ -1809,16 +1812,6 @@ class Admin(client.Client):
             params['telephony_warning_min'] = str(telephony_warning_min)
         if caller_id is not None:
             params['caller_id'] = caller_id
-        if push_enabled is not None:
-            params['push_enabled'] = '1' if push_enabled else '0'
-        if sms_enabled is not None:
-            params['sms_enabled'] = '1' if sms_enabled else '0'
-        if voice_enabled is not None:
-            params['voice_enabled'] = '1' if voice_enabled else '0'
-        if mobile_otp_enabled is not None:
-            params['mobile_otp_enabled'] = '1' if mobile_otp_enabled else '0'
-        if u2f_enabled is not None:
-            params['u2f_enabled'] = '1' if u2f_enabled else '0'
         if user_telephony_cost_max is not None:
             params['user_telephony_cost_max'] = str(user_telephony_cost_max)
         if minimum_password_length is not None:
@@ -1841,12 +1834,16 @@ class Admin(client.Client):
             params['helpdesk_bypass_expiration'] = str(helpdesk_bypass_expiration)
         if helpdesk_message is not None:
             params['helpdesk_message'] = str(helpdesk_message)
+        if helpdesk_can_send_enroll_email is not None:
+            params['helpdesk_can_send_enroll_email'] = ('1' if
+              helpdesk_can_send_enroll_email else '0')
         if reactivation_url is not None:
             params['reactivation_url'] = reactivation_url
         if reactivation_integration_key is not None:
             params['reactivation_integration_key'] = reactivation_integration_key
         if security_checkup_enabled is not None:
-            params['security_checkup_enabled'] = security_checkup_enabled
+            params['security_checkup_enabled'] = ('1' if
+                security_checkup_enabled else '0')
 
         if not params:
             raise TypeError("No settings were provided")
