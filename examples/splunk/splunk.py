@@ -1,16 +1,14 @@
 #!/usr/bin/python
 from __future__ import absolute_import
 from __future__ import print_function
-import six.moves.configparser
-import optparse
+
 import os
 import sys
 import time
 
 import duo_client
-
-# For proxy support
-from urlparse import urlparse
+from six.moves.configparser import ConfigParser
+from six.moves.urllib.parse import urlparse
 
 
 class BaseLog(object):
@@ -192,7 +190,7 @@ def admin_api_from_config(config_path):
     Return a duo_client.Admin object created using the parameters
     stored in a config file.
     """
-    config = six.moves.configparser.ConfigParser()
+    config = ConfigParser()
     config.read(config_path)
     config_d = dict(config.items('duo'))
     ca_certs = config_d.get("ca_certs", None)
