@@ -36,8 +36,10 @@ except ImportError as e:
     pytz_error = e
 
 from .https_wrapper import CertValidatingHTTPSConnection
+from http.client import RemoteDisconnected
 
 DEFAULT_CA_CERTS = os.path.join(os.path.dirname(__file__), 'ca_certs.pem')
+MAX_GET_URL_LEN = 8192
 
 
 def canon_params(params):
@@ -183,7 +185,7 @@ class Client(object):
         self.sig_version = sig_version
 
         # Constants for handling rate limit backoff and retries
-        self._MAX_BACKOFF_WAIT_SECS = 32
+        self._MAX_BACKOFF_WAIT_SECS = 64
         self._INITIAL_BACKOFF_WAIT_SECS = 1
         self._BACKOFF_FACTOR = 2
         self._RATE_LIMITED_RESP_CODE = 429
@@ -220,60 +222,76 @@ class Client(object):
         * path: Full path of the API endpoint. E.g. "/auth/v2/ping".
         * params: dict mapping from parameter name to stringified value,
             or a dict to be converted to json.
+
+        Raises ValueError if invalid request.
         """
-        if self.sig_version in (1, 2):
-            params = normalize_params(params)
-        elif self.sig_version in (3, 4):
-            # Raises if params are not a dict that can be converted
-            # to json.
-            params = self.canon_json(params)
 
-        if self.sig_timezone == 'UTC':
-            now = email.utils.formatdate()
-        elif pytz is None:
-            raise pytz_error
-        else:
-            d = datetime.datetime.now(pytz.timezone(self.sig_timezone))
-            now = d.strftime("%a, %d %b %Y %H:%M:%S %z")
+        # backoff on rate limited requests and retry. if a request is rate
+        # limited after MAX_BACKOFF_WAIT_SECS, return the rate limited response
+        # We need to REGENERATE the request because of timestamp issues
+        # otherwise we'll get Received 401 Bad request timestamp eventually
+        wait_secs = self._INITIAL_BACKOFF_WAIT_SECS
+        while True:
+            if self.sig_version in (1, 2):
+                params = normalize_params(params)
+            elif self.sig_version in (3, 4):
+                # Raises if params are not a dict that can be converted
+                # to json.
+                params = self.canon_json(params)
 
-        auth = sign(self.ikey,
-                    self.skey,
-                    method,
-                    self.host,
-                    path,
-                    now,
-                    self.sig_version,
-                    params,
-                    self.digestmod)
-        headers = {
-            'Authorization': auth,
-            'Date': now,
-        }
-
-        if self.user_agent:
-            headers['User-Agent'] = self.user_agent
-
-        if method in ['POST', 'PUT']:
-            if self.sig_version in (3,4):
-                headers['Content-type'] = 'application/json'
-                body = params
+            if self.sig_timezone == 'UTC':
+                now = email.utils.formatdate()
+            elif pytz is None:
+                raise pytz_error
             else:
-                headers['Content-type'] = 'application/x-www-form-urlencoded'
-                body = six.moves.urllib.parse.urlencode(params, doseq=True)
-            uri = path
-        else:
-            body = None
-            uri = path + '?' + six.moves.urllib.parse.urlencode(params, doseq=True)
+                d = datetime.datetime.now(pytz.timezone(self.sig_timezone))
+                now = d.strftime("%a, %d %b %Y %H:%M:%S %z")
 
-        encoded_headers = {}
-        for k, v in headers.items():
-            if isinstance(k, six.text_type):
-                k = k.encode('ascii')
-            if isinstance(v, six.text_type):
-                v = v.encode('ascii')
-            encoded_headers[k] = v
+            auth = sign(self.ikey,
+                        self.skey,
+                        method,
+                        self.host,
+                        path,
+                        now,
+                        self.sig_version,
+                        params,
+                        self.digestmod)
+            headers = {
+                'Authorization': auth,
+                'Date': now,
+            }
 
-        return self._make_request(method, uri, body, encoded_headers)
+            if self.user_agent:
+                headers['User-Agent'] = self.user_agent
+
+            if method in ['POST', 'PUT']:
+                if self.sig_version in (3, 4):
+                    headers['Content-type'] = 'application/json'
+                    body = params
+                else:
+                    headers['Content-type'] = 'application/x-www-form-urlencoded'
+                    body = six.moves.urllib.parse.urlencode(params, doseq=True)
+                uri = path
+            else:
+                body = None
+                uri = path + '?' + six.moves.urllib.parse.urlencode(params, doseq=True)
+                if len(uri) >= MAX_GET_URL_LEN:
+                    raise RuntimeError("Invalid Request Length")
+
+            encoded_headers = {}
+            for k, v in headers.items():
+                if isinstance(k, six.text_type):
+                    k = k.encode('ascii')
+                if isinstance(v, six.text_type):
+                    v = v.encode('ascii')
+                encoded_headers[k] = v
+            response, data = self._make_request(method, uri, body, encoded_headers)
+            if (response.status != self._RATE_LIMITED_RESP_CODE):
+                break
+            random_offset = random.uniform(0.0, 1.0)  # noqa: DUO102, non-cryptographic random use
+            sleep(wait_secs + random_offset)
+            wait_secs = wait_secs * self._BACKOFF_FACTOR
+        return (response, data)
 
     def _connect(self):
         # Host and port for the HTTP(S) connection to the API server.
@@ -336,26 +354,28 @@ class Client(object):
                 api_proto = 'https'
             uri = ''.join((api_proto, '://', self.host, uri))
         conn = self._connect()
-
-        # backoff on rate limited requests and retry. if a request is rate
-        # limited after MAX_BACKOFF_WAIT_SECS, return the rate limited response
-        wait_secs = self._INITIAL_BACKOFF_WAIT_SECS
-        while True:
-            response, data = self._attempt_single_request(
-                conn, method, uri, body, headers)
-            if (response.status != self._RATE_LIMITED_RESP_CODE or
-                    wait_secs > self._MAX_BACKOFF_WAIT_SECS):
-                break
-            random_offset = random.uniform(0.0, 1.0)  # noqa: DUO102, non-cryptographic random use
-            sleep(wait_secs + random_offset)
-            wait_secs = wait_secs * self._BACKOFF_FACTOR
-
+        response, data = self._attempt_single_request(
+            conn, method, uri, body, headers)
         self._disconnect(conn)
         return (response, data)
 
     def _attempt_single_request(self, conn, method, uri, body, headers):
-        conn.request(method, uri, body, headers)
-        response = conn.getresponse()
+        response = None
+        max_attempts = 10
+        attempt_counter = 0
+        # Even with reliable internet, many subsequent requests will
+        # occasionally cause the Duo servers to respond with invalid data.
+        # here we capture these issues and resend after sleeping.
+        while not response:
+            try:
+                conn.request(method, uri, body, headers)
+                response = conn.getresponse()
+            except RemoteDisconnected as err:
+                response = None
+                attempt_counter += 1
+                if attempt_counter >= max_attempts:
+                    raise err
+                sleep(self._MAX_BACKOFF_WAIT_SECS)
         data = response.read()
         return (response, data)
 
@@ -402,7 +422,13 @@ class Client(object):
             params['limit'] = str(self.paging_limit)
 
         while next_offset is not None:
-            params['offset'] = str(next_offset)
+            # This is done because auth logs are handled differently
+            # than other API calls, fortunatly, other API calls don't care
+            # if 'next_offset' is set.
+            if isinstance(next_offset, list) and len(next_offset) == 2:
+                params['next_offset'] = ",".join(next_offset)
+            else:
+                params['offset'] = str(next_offset)
             (response, data) = self.api_call(method, path, params)
             (objects, metadata) = self.parse_json_response_and_metadata(response, data)
             next_offset = metadata.get('next_offset', None)
@@ -426,7 +452,7 @@ class Client(object):
         :param get_records_func: Function that can be called to extract an
                                  iterable of records from the parsed response
                                  json.
-        
+
         :returns: Generator which will yield records from the api response(s).
         """
 
@@ -494,7 +520,24 @@ class Client(object):
             data = json.loads(data)
             if data['stat'] != 'OK':
                 raise_error('Received error response: %s' % data)
-            return (data['response'], data.get('metadata', {}))
+            metadata = data.get('metadata', {})
+            resp_data = data['response']
+            # Auth Logs returns metadata inside response
+            # The list of data is also in a seperate key
+            # ... just to be confusing
+            if not metadata:
+                metadata = data['response'].get('metadata', {})
+                # if we did get metadata in the 'response'
+                # we need to iterate through the other keys in response
+                # till we find one that is a list and not metadata
+                if metadata:
+                    for resp_key in data['response'].keys():
+                        if resp_key == "metadata":
+                            continue
+                        if not isinstance(data['response'][resp_key], list):
+                            continue
+                        resp_data = data['response'][resp_key]
+            return (resp_data, metadata)
         except (ValueError, KeyError, TypeError):
             raise_error('Received bad response: %s' % data)
 
