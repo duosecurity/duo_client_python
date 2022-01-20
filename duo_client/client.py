@@ -225,60 +225,73 @@ class Client(object):
 
         Raises ValueError if invalid request.
         """
-        if self.sig_version in (1, 2):
-            params = normalize_params(params)
-        elif self.sig_version in (3, 4):
-            # Raises if params are not a dict that can be converted
-            # to json.
-            params = self.canon_json(params)
 
-        if self.sig_timezone == 'UTC':
-            now = email.utils.formatdate()
-        elif pytz is None:
-            raise pytz_error
-        else:
-            d = datetime.datetime.now(pytz.timezone(self.sig_timezone))
-            now = d.strftime("%a, %d %b %Y %H:%M:%S %z")
+        # backoff on rate limited requests and retry. if a request is rate
+        # limited after MAX_BACKOFF_WAIT_SECS, return the rate limited response
+        # We need to REGENERATE the request because of timestamp issues
+        # otherwise we'll get Received 401 Bad request timestamp eventually
+        wait_secs = self._INITIAL_BACKOFF_WAIT_SECS
+        while True:
+            if self.sig_version in (1, 2):
+                params = normalize_params(params)
+            elif self.sig_version in (3, 4):
+                # Raises if params are not a dict that can be converted
+                # to json.
+                params = self.canon_json(params)
 
-        auth = sign(self.ikey,
-                    self.skey,
-                    method,
-                    self.host,
-                    path,
-                    now,
-                    self.sig_version,
-                    params,
-                    self.digestmod)
-        headers = {
-            'Authorization': auth,
-            'Date': now,
-        }
-
-        if self.user_agent:
-            headers['User-Agent'] = self.user_agent
-
-        if method in ['POST', 'PUT']:
-            if self.sig_version in (3,4):
-                headers['Content-type'] = 'application/json'
-                body = params
+            if self.sig_timezone == 'UTC':
+                now = email.utils.formatdate()
+            elif pytz is None:
+                raise pytz_error
             else:
-                headers['Content-type'] = 'application/x-www-form-urlencoded'
-                body = six.moves.urllib.parse.urlencode(params, doseq=True)
-            uri = path
-        else:
-            body = None
-            uri = path + '?' + six.moves.urllib.parse.urlencode(params, doseq=True)
-            if len(uri) >= MAX_GET_URL_LEN:
-                raise RuntimeError("Invalid Request Length")
-        encoded_headers = {}
-        for k, v in headers.items():
-            if isinstance(k, six.text_type):
-                k = k.encode('ascii')
-            if isinstance(v, six.text_type):
-                v = v.encode('ascii')
-            encoded_headers[k] = v
+                d = datetime.datetime.now(pytz.timezone(self.sig_timezone))
+                now = d.strftime("%a, %d %b %Y %H:%M:%S %z")
 
-        return self._make_request(method, uri, body, encoded_headers)
+            auth = sign(self.ikey,
+                        self.skey,
+                        method,
+                        self.host,
+                        path,
+                        now,
+                        self.sig_version,
+                        params,
+                        self.digestmod)
+            headers = {
+                'Authorization': auth,
+                'Date': now,
+            }
+
+            if self.user_agent:
+                headers['User-Agent'] = self.user_agent
+
+            if method in ['POST', 'PUT']:
+                if self.sig_version in (3, 4):
+                    headers['Content-type'] = 'application/json'
+                    body = params
+                else:
+                    headers['Content-type'] = 'application/x-www-form-urlencoded'
+                    body = six.moves.urllib.parse.urlencode(params, doseq=True)
+                uri = path
+            else:
+                body = None
+                uri = path + '?' + six.moves.urllib.parse.urlencode(params, doseq=True)
+                if len(uri) >= MAX_GET_URL_LEN:
+                    raise RuntimeError("Invalid Request Length")
+
+            encoded_headers = {}
+            for k, v in headers.items():
+                if isinstance(k, six.text_type):
+                    k = k.encode('ascii')
+                if isinstance(v, six.text_type):
+                    v = v.encode('ascii')
+                encoded_headers[k] = v
+            response, data = self._make_request(method, uri, body, encoded_headers)
+            if (response.status != self._RATE_LIMITED_RESP_CODE):
+                break
+            random_offset = random.uniform(0.0, 1.0)  # noqa: DUO102, non-cryptographic random use
+            sleep(wait_secs + random_offset)
+            wait_secs = wait_secs * self._BACKOFF_FACTOR
+        return (response, data)
 
     def _connect(self):
         # Host and port for the HTTP(S) connection to the API server.
@@ -341,19 +354,8 @@ class Client(object):
                 api_proto = 'https'
             uri = ''.join((api_proto, '://', self.host, uri))
         conn = self._connect()
-
-        # backoff on rate limited requests and retry. if a request is rate
-        # limited after MAX_BACKOFF_WAIT_SECS, return the rate limited response
-        wait_secs = self._INITIAL_BACKOFF_WAIT_SECS
-        while True:
-            response, data = self._attempt_single_request(
-                conn, method, uri, body, headers)
-            if (response.status != self._RATE_LIMITED_RESP_CODE):
-                break
-            random_offset = random.uniform(0.0, 1.0)  # noqa: DUO102, non-cryptographic random use
-            sleep(wait_secs + random_offset)
-            wait_secs = wait_secs * self._BACKOFF_FACTOR
-
+        response, data = self._attempt_single_request(
+            conn, method, uri, body, headers)
         self._disconnect(conn)
         return (response, data)
 
@@ -424,7 +426,7 @@ class Client(object):
             # than other API calls, fortunatly, other API calls don't care
             # if 'next_offset' is set.
             if isinstance(next_offset, list) and len(next_offset) == 2:
-                params['next_offset'] = f"{next_offset[0]},{next_offset[1]}"
+                params['next_offset'] = ",".join(next_offset)
             else:
                 params['offset'] = str(next_offset)
             (response, data) = self.api_call(method, path, params)
