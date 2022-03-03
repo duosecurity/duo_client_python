@@ -156,6 +156,7 @@ def normalize_params(params):
 class Client(object):
 
     def __init__(self, ikey, skey, host,
+                 mkey=None,
                  ca_certs=DEFAULT_CA_CERTS,
                  sig_timezone='UTC',
                  user_agent=('Duo API Python/' + __version__),
@@ -170,6 +171,7 @@ class Client(object):
         """
         self.ikey = ikey
         self.skey = skey
+        self.mkey = mkey
         self.host = host
         self.port = port
         self.sig_timezone = sig_timezone
@@ -426,7 +428,7 @@ class Client(object):
         :param get_records_func: Function that can be called to extract an
                                  iterable of records from the parsed response
                                  json.
-        
+
         :returns: Generator which will yield records from the api response(s).
         """
 
