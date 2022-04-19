@@ -54,7 +54,7 @@ def canon_params(params):
     return '&'.join(args)
 
 
-def canonicalize(method, host, uri, params, date, sig_version):
+def canonicalize(method, host, uri, params, date, sig_version, body=''):
     """
     Return a canonical string version of the given request attributes.
 
@@ -96,20 +96,20 @@ def canonicalize(method, host, uri, params, date, sig_version):
             method.upper(),
             host.lower(),
             uri,
-            '',
-            hashlib.sha512(params.encode('utf-8')).hexdigest(),
+            canon_params(params),
+            hashlib.sha512(body.encode('utf-8')).hexdigest(),
         ]
     else:
         raise ValueError("Unknown signature version: {}".format(sig_version))
     return '\n'.join(canon)
 
 
-def sign(ikey, skey, method, host, uri, date, sig_version, params,
+def sign(ikey, skey, method, host, uri, date, sig_version, params, body='',
          digestmod=hashlib.sha1):  # noqa: DUO130, HMAC-SHA1 still secure
     """
     Return basic authorization header line with a Duo Web API signature.
     """
-    canonical = canonicalize(method, host, uri, params, date, sig_version)
+    canonical = canonicalize(method, host, uri, params, date, sig_version, body=body)
     if isinstance(skey, six.text_type):
         skey = skey.encode('utf-8')
     if isinstance(canonical, six.text_type):
@@ -221,12 +221,24 @@ class Client(object):
         * params: dict mapping from parameter name to stringified value,
             or a dict to be converted to json.
         """
+        params_go_in_body = method in ('POST', 'PUT', 'PATCH')
         if self.sig_version in (1, 2):
             params = normalize_params(params)
-        elif self.sig_version in (3, 4):
+            # v1 and v2 canonicalization don't distinguish between
+            # params and body. There's no separate body input.
+            body = None
+        elif self.sig_version == 3:
             # Raises if params are not a dict that can be converted
             # to json.
             params = self.canon_json(params)
+            body = params
+        elif self.sig_version == 4:
+            if params_go_in_body:
+                body = self.canon_json(params)
+                params = {}
+            else:
+                body = ''
+                params = normalize_params(params)
 
         if self.sig_timezone == 'UTC':
             now = email.utils.formatdate()
@@ -244,7 +256,8 @@ class Client(object):
                     now,
                     self.sig_version,
                     params,
-                    self.digestmod)
+                    body=body,
+                    digestmod=self.digestmod)
         headers = {
             'Authorization': auth,
             'Date': now,
@@ -253,10 +266,9 @@ class Client(object):
         if self.user_agent:
             headers['User-Agent'] = self.user_agent
 
-        if method in ['POST', 'PUT']:
+        if params_go_in_body:
             if self.sig_version in (3,4):
                 headers['Content-type'] = 'application/json'
-                body = params
             else:
                 headers['Content-type'] = 'application/x-www-form-urlencoded'
                 body = six.moves.urllib.parse.urlencode(params, doseq=True)
@@ -426,7 +438,7 @@ class Client(object):
         :param get_records_func: Function that can be called to extract an
                                  iterable of records from the parsed response
                                  json.
-        
+
         :returns: Generator which will yield records from the api response(s).
         """
 
