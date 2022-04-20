@@ -611,5 +611,12 @@ class TestRetryRequests(unittest.TestCase):
         self.assertEqual(response.status, 429)
         self.assertEqual(mock_connection.requests, 7)
 
+class TestInstantiate(unittest.TestCase):
+    def test_sig_version_3_raises_exception(self):
+        with self.assertRaises(ValueError):
+            duo_client.client.Client(
+                'test_ikey', 'test_akey', 'example.com', sig_timezone='America/Detroit',
+                sig_version=3)
+
 if __name__ == '__main__':
     unittest.main()
