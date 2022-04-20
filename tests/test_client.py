@@ -452,6 +452,7 @@ class TestRequestsV4(unittest.TestCase):
         (response, dummy) = self.client.api_call('GET', '/foo/bar', {})
         self.assertEqual(response.method, 'GET')
         self.assertEqual(response.uri, '/foo/bar?')
+        self.assertIn('Authorization', response.headers)
 
     def test_get_params(self):
         (response, dummy) = self.client.api_call(
@@ -460,12 +461,14 @@ class TestRequestsV4(unittest.TestCase):
         (uri, args) = response.uri.split('?')
         self.assertEqual(uri, '/foo/bar')
         self.assertEqual(util.params_to_dict(args), self.args_out)
+        self.assertIn('Authorization', response.headers)
 
     def test_json_api_call_get_no_params(self):
         response = self.client.json_api_call('GET', '/foo/bar', {})
         self.assertEqual(response['method'], 'GET')
         self.assertEqual(response['uri'], '/foo/bar?')
         self.assertEqual(response['body'], None)
+        self.assertIn('Authorization', response['headers'])
 
     def test_json_api_call_get_params(self):
         response = self.client.json_api_call(
@@ -474,6 +477,7 @@ class TestRequestsV4(unittest.TestCase):
         (uri, args) = response['uri'].split('?')
         self.assertEqual(uri, '/foo/bar')
         self.assertEqual(util.params_to_dict(args), self.args_out)
+        self.assertIn('Authorization', response['headers'])
 
     def test_json_post(self):
         (response, dummy) = self.client.api_call('POST', '/foo/bar', JSON_BODY)
