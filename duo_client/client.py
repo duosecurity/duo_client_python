@@ -81,15 +81,6 @@ def canonicalize(method, host, uri, params, date, sig_version, body=None):
             uri,
             canon_params(params),
         ]
-    elif sig_version == 3:
-        # sig_version 3 is json only
-        canon = [
-            date,
-            method.upper(),
-            host.lower(),
-            uri,
-            params,
-        ]
     elif sig_version == 4:
         # sig_version 4 is json only
         canon = [
@@ -195,6 +186,9 @@ class Client(object):
         else:
             self.timeout = float(timeout)
 
+        if sig_version == 3:
+            raise ValueError('sig_version 3 not supported')
+
         if sig_version == 4 and digestmod != hashlib.sha512:
             raise ValueError('sha512 required for sig_version 4')
 
@@ -228,11 +222,6 @@ class Client(object):
             # v1 and v2 canonicalization don't distinguish between
             # params and body. There's no separate body input.
             body = None
-        elif self.sig_version == 3:
-            # Raises if params are not a dict that can be converted
-            # to json.
-            params = self.canon_json(params)
-            body = params
         elif self.sig_version == 4:
             if params_go_in_body:
                 body = self.canon_json(params)
@@ -268,7 +257,7 @@ class Client(object):
             headers['User-Agent'] = self.user_agent
 
         if params_go_in_body:
-            if self.sig_version in (3,4):
+            if self.sig_version == 4:
                 headers['Content-type'] = 'application/json'
             else:
                 headers['Content-type'] = 'application/x-www-form-urlencoded'
