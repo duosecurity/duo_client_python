@@ -168,10 +168,10 @@ class TestCanonicalize(unittest.TestCase):
             'POST\n'
             'foo.bar52.com\n'
             '/Foo/BaR2/qux\n\n' + hashed_body)
-        params = duo_client.client.Client.canon_json(JSON_BODY)
+        params = {}
         actual = duo_client.client.canonicalize(
             'POST', 'foO.BaR52.cOm', '/Foo/BaR2/qux', params,
-            'Tue, 04 Jul 2017 14:12:00', sig_version=4)
+            'Tue, 04 Jul 2017 14:12:00', sig_version=4, body=JSON_STRING)
 
         self.assertEqual(actual, expected)
 
@@ -425,6 +425,80 @@ class TestJsonRequests(unittest.TestCase):
             'POST', '/foo/bar', JSON_BODY)
 
         self.assertEqual(response.method, 'POST')
+        self.assertEqual(response.uri, '/foo/bar')
+        self.assertEqual(response.body, JSON_STRING)
+
+        self.assertIn('Content-type', response.headers)
+        self.assertEqual(response.headers['Content-type'], 'application/json')
+        self.assertIn('Authorization', response.headers)
+
+class TestRequestsV4(unittest.TestCase):
+    # usful args for testing GETs
+    args_in = {
+        'foo':['bar'],
+        'baz':['qux', 'quux=quuux', 'foobar=foobar&barbaz=barbaz']}
+    args_out = dict(
+        (key, [v for v in val])
+        for (key, val) in list(args_in.items()))
+
+    def setUp(self):
+        self.client = duo_client.client.Client(
+            'test_ikey', 'test_akey', 'example.com', sig_timezone='America/Detroit',
+            digestmod=hashlib.sha512, sig_version=4)
+        # monkeypatch client's _connect()
+        self.client._connect = lambda: util.MockHTTPConnection()
+
+    def test_get_no_params(self):
+        (response, dummy) = self.client.api_call('GET', '/foo/bar', {})
+        self.assertEqual(response.method, 'GET')
+        self.assertEqual(response.uri, '/foo/bar?')
+        self.assertIn('Authorization', response.headers)
+
+    def test_get_params(self):
+        (response, dummy) = self.client.api_call(
+            'GET', '/foo/bar', self.args_in)
+        self.assertEqual(response.method, 'GET')
+        (uri, args) = response.uri.split('?')
+        self.assertEqual(uri, '/foo/bar')
+        self.assertEqual(util.params_to_dict(args), self.args_out)
+        self.assertIn('Authorization', response.headers)
+
+    def test_json_api_call_get_no_params(self):
+        response = self.client.json_api_call('GET', '/foo/bar', {})
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(response['uri'], '/foo/bar?')
+        self.assertEqual(response['body'], None)
+        self.assertIn('Authorization', response['headers'])
+
+    def test_json_api_call_get_params(self):
+        response = self.client.json_api_call(
+            'GET', '/foo/bar', self.args_in)
+        self.assertEqual(response['method'], 'GET')
+        (uri, args) = response['uri'].split('?')
+        self.assertEqual(uri, '/foo/bar')
+        self.assertEqual(util.params_to_dict(args), self.args_out)
+        self.assertIn('Authorization', response['headers'])
+
+    def test_json_post(self):
+        (response, dummy) = self.client.api_call('POST', '/foo/bar', JSON_BODY)
+
+        self.assertEqual(response.method, 'POST')
+        self.assertEqual(response.uri, '/foo/bar')
+        self.assertEqual(response.body, JSON_STRING)
+
+        self.assertIn('Content-type', response.headers)
+        self.assertEqual(response.headers['Content-type'], 'application/json')
+        self.assertIn('Authorization', response.headers)
+
+    def test_json_fails_with_bad_args(self):
+        with self.assertRaises(ValueError) as e:
+            (response, dummy) = self.client.api_call('POST', '/foo/bar', '')
+        self.assertEqual(e.exception.args[0], "JSON request must be an object.")
+
+    def test_json_put(self):
+        (response, dummy) = self.client.api_call('PUT', '/foo/bar', JSON_BODY)
+
+        self.assertEqual(response.method, 'PUT')
         self.assertEqual(response.uri, '/foo/bar')
         self.assertEqual(response.body, JSON_STRING)
 
