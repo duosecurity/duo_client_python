@@ -54,7 +54,7 @@ def canon_params(params):
     return '&'.join(args)
 
 
-def canonicalize(method, host, uri, params, date, sig_version, body=''):
+def canonicalize(method, host, uri, params, date, sig_version, body=None):
     """
     Return a canonical string version of the given request attributes.
 
@@ -64,6 +64,7 @@ def canonicalize(method, host, uri, params, date, sig_version, body=''):
     * params: string containing request params
     * date: date string for request
     * sig_version: signature version integer
+    * body: request body, must be string for sig_version 4
     """
     if sig_version == 1:
         canon = [
@@ -104,7 +105,7 @@ def canonicalize(method, host, uri, params, date, sig_version, body=''):
     return '\n'.join(canon)
 
 
-def sign(ikey, skey, method, host, uri, date, sig_version, params, body='',
+def sign(ikey, skey, method, host, uri, date, sig_version, params, body=None,
          digestmod=hashlib.sha1):  # noqa: DUO130, HMAC-SHA1 still secure
     """
     Return basic authorization header line with a Duo Web API signature.
