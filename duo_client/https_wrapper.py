@@ -107,7 +107,7 @@ class CertValidatingHTTPSConnection(six.moves.http_client.HTTPConnection):
         """
         hosts = self._GetValidHostsForCert(cert)
         for host in hosts:
-            host_re = host.replace('.', '\.').replace('*', '[^.]*')
+            host_re = host.replace('.', r'\.').replace('*', '[^.]*')
             if re.search('^%s$' % (host_re,), hostname, re.I):
                 return True
         return False
