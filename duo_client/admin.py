@@ -2550,7 +2550,8 @@ class Admin(client.Client):
                      name=None,
                      phone=None,
                      password=None,
-                     password_change_required=None,
+                     password_change_required=None, 
+                     status=None, 
                      ):
         """
         Update one or more attributes of an administrator.
@@ -2560,6 +2561,7 @@ class Admin(client.Client):
         phone - <str:phone number> (optional)
         password - Deprecated; ignored if specified.
         password_change_required - <bool|None:Whether admin is required to change their password at next login> (optional)
+        status - the status of the adminstrator
 
         Returns the updated administrator.  See the adminapi docs.
 
@@ -2574,6 +2576,8 @@ class Admin(client.Client):
             params['phone'] = phone
         if password_change_required is not None:
             params['password_change_required'] = password_change_required
+        if status is not None:
+            params['status'] = status
         response = self.json_api_call('POST', path, params)
         return response
 
