@@ -20,6 +20,7 @@ from time import sleep
 import socket
 import ssl
 import sys
+import certifi
 
 try:
     # For the optional demonstration CLI program.
@@ -37,7 +38,7 @@ except ImportError as e:
 
 from .https_wrapper import CertValidatingHTTPSConnection
 
-DEFAULT_CA_CERTS = os.path.join(os.path.dirname(__file__), 'ca_certs.pem')
+DEFAULT_CA_CERTS = certifi.where()
 
 
 def canon_params(params):
