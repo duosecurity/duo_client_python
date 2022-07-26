@@ -33,8 +33,8 @@ Endpoint objects are returned in the following format:
     {"username": <str:username>,
      "email": <str:email>,
      "epkey": <str:epkey>,
-     "os family": <str:os family>,
-     "os version": <str:os version>,
+     "os_family": <str:os family>,
+     "os_version": <str:os version>,
      "model": <str:model>,
      "type": <str:type>,
      "browsers": [<browser object, ...]}
@@ -43,10 +43,10 @@ Endpoint objects are returned in the following format:
 BROWSERS
 
 Browser objects are returned in the following format:
-    {"browser family": <str:browser family>,
-     "browser version": <str:browser version>,
-     "flash version": <str: flash version>,
-     "java version": <str: java version>}
+    {"browser_family": <str:browser family>,
+     "browser_version": <str:browser version>,
+     "flash_version": <str: flash version>,
+     "java_version": <str: java version>}
 
 
 PHONES
