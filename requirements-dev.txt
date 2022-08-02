@@ -1,5 +1,5 @@
 nose2
 flake8
-pytz
+pytz>=2022.1
 mock
 dlint
