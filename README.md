@@ -12,6 +12,13 @@
 
 **Accounts** - https://www.duosecurity.com/docs/accountsapi
 
+## Tested Against Python Versions
+* 3.6
+* 3.7
+* 3.8
+* 3.9
+* 3.10
+
 # Installing
 
 Development:
