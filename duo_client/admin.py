@@ -37,7 +37,7 @@ Endpoint objects are returned in the following format:
      "os_version": <str:os version>,
      "model": <str:model>,
      "type": <str:type>,
-     "browsers": [<browser object, ...]}
+     "browsers": [<browser object, ...]|None}
 
 
 BROWSERS
@@ -137,6 +137,22 @@ Integration objects are returned in the following format:
 
 See the adminapi docs for possible values for enroll_policy, visual_style, ip_whitelist,
 and type.
+
+
+ADMINISTRATIVE UNITS
+
+Administrative unit objects are returned in the following format:
+
+    {'admin_unit_id': <str:administrative unit id>,
+     'name': <str:administrative unit name>,
+     'description': <str:administrative unit description>,
+     'restrict_by_groups': <bool:group restriction (0|1)>,
+     'restrict_by_integrations': <bool:integration restriction (0|1)>,
+     'admins': [<str:admin key>, ...],
+     'groups': [<str:group key>, ...],
+     'integrations': [<str:integration key>, ...],
+    }
+
 
 ERRORS
 
