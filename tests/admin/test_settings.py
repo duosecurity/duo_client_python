@@ -37,6 +37,7 @@ class TestSettings(TestAdmin):
             reactivation_url="https://www.example.com",
             reactivation_integration_key='DINTEGRATIONKEYTEST0',
             security_checkup_enabled=True,
+            user_managers_can_put_users_in_bypass=False
         )
         response = response[0]
         self.assertEqual(response['method'], 'POST')
@@ -73,4 +74,5 @@ class TestSettings(TestAdmin):
                 'reactivation_url': ['https://www.example.com'],
                 'reactivation_integration_key': ['DINTEGRATIONKEYTEST0'],
                 'security_checkup_enabled': ['1'],
+                'user_managers_can_put_users_in_bypass': ['0'],
             })

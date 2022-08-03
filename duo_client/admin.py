@@ -1737,6 +1737,7 @@ class Admin(client.Client):
                         reactivation_url=None,
                         reactivation_integration_key=None,
                         security_checkup_enabled=None,
+                        user_managers_can_put_users_in_bypass=None,
                         ):
         """
         Update settings.
@@ -1774,6 +1775,7 @@ class Admin(client.Client):
         reactivation_url - <str:url>|None
         reactivation_integration_key - <str:url>|None
         security_checkup_enabled - True|False|None
+        user_managers_can_put_users_in_bypass - True|False|None
 
         Returns updated settings object.
 
@@ -1844,6 +1846,9 @@ class Admin(client.Client):
         if security_checkup_enabled is not None:
             params['security_checkup_enabled'] = ('1' if
                 security_checkup_enabled else '0')
+        if user_managers_can_put_users_in_bypass is not None:
+            params['user_managers_can_put_users_in_bypass'] = ('1' if
+                user_managers_can_put_users_in_bypass else '0')
 
         if not params:
             raise TypeError("No settings were provided")
