@@ -110,6 +110,7 @@ Settings objects are returned in the following format:
      'password_requires_numeric': <bool:is numeric character required>,
      'password_requires_special': <bool:is special character required>,
      'security_checkup_enabled': <bool:is the security checkup feature enabled>,
+     'user_managers_can_put_users_in_bypass': <bool:can user managers put users in bypass status>,
     }
 
 
