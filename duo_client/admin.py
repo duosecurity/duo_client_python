@@ -2577,7 +2577,7 @@ class Admin(client.Client):
         phone - <str:phone number> (optional)
         password - Deprecated; ignored if specified.
         password_change_required - <bool|None:Whether admin is required to change their password at next login> (optional)
-        status - the status of the adminstrator (optional) - NOTE: Valid values are "Active" and "Disabled" - "Disabled" NOT valid for administrators with role - Owner
+        status - the status of the administrator (optional) - NOTE: Valid values are "Active" and "Disabled" - "Disabled" NOT valid for administrators with role - Owner
 
         Returns the updated administrator.  See the adminapi docs.
 
