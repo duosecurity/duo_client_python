@@ -110,6 +110,7 @@ Settings objects are returned in the following format:
      'password_requires_numeric': <bool:is numeric character required>,
      'password_requires_special': <bool:is special character required>,
      'security_checkup_enabled': <bool:is the security checkup feature enabled>,
+     'user_managers_can_put_users_in_bypass': <bool:can user managers put users in bypass status>,
     }
 
 
@@ -1753,6 +1754,7 @@ class Admin(client.Client):
                         reactivation_url=None,
                         reactivation_integration_key=None,
                         security_checkup_enabled=None,
+                        user_managers_can_put_users_in_bypass=None,
                         ):
         """
         Update settings.
@@ -1790,6 +1792,7 @@ class Admin(client.Client):
         reactivation_url - <str:url>|None
         reactivation_integration_key - <str:url>|None
         security_checkup_enabled - True|False|None
+        user_managers_can_put_users_in_bypass - True|False|None
 
         Returns updated settings object.
 
@@ -1860,6 +1863,9 @@ class Admin(client.Client):
         if security_checkup_enabled is not None:
             params['security_checkup_enabled'] = ('1' if
                 security_checkup_enabled else '0')
+        if user_managers_can_put_users_in_bypass is not None:
+            params['user_managers_can_put_users_in_bypass'] = ('1' if
+                user_managers_can_put_users_in_bypass else '0')
 
         if not params:
             raise TypeError("No settings were provided")
