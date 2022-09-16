@@ -519,6 +519,89 @@ class Admin(client.Client):
                 row['host'] = self.host
         return response
 
+    def get_activity_logs(self, mintime, maxtime, limit=100, next_offset=None, sort='ts:asc',):
+        """
+        Returns activity log events.
+
+        mintime (required) - Unix timestamp in ms; fetch records >= mintime
+        maxtime (required) - Unix timestamp in ms; fetch records <= maxtime
+        limit - Number of results to limit to
+        next_offset - Used to grab the next set of results from a previous response
+        sort - Sort order to be applied
+
+        Returns:
+            {
+                "items": [
+                    {
+                        "access_device": {
+                            "browser": "Chrome",
+                            "browser_version": "1.11.3",
+                            "ip": {
+                                "address": "1.2.3.4"
+                            },
+                            "location": {
+                                "city": "Ann Arbor",
+                                "country": "United States",
+                                "state": "Michigan"
+                            },
+                            "os": "Mac OS X",
+                            "os_version": "10.14.1"
+                        },
+                        "action": "phone_create",
+                        "activity_id": "edf96844-6e03-4528-963f-1fab8d5fabaa",
+                        "actor": {
+                            "details": "{\"created\": \"2020-01-13T18:56:20.351346+00:00\", \"last_login\": \"2020-02-10T18:56:20.351346+00:00\", \"status\": \"Locked Out\"}",
+                            "key" : "DUABCDECUSTOMER000001",
+                            "name": "John Doe",
+                            "type": "user"
+                        },
+                        "akey": "DABCDECUSTOMER000000",
+                        "application": {
+                            "key": "DIY231J8BR23QK4UKBY8",
+                            "name": "AdminAPI",
+                            "type": "adminapi"
+                        },
+                        "target": {
+                            "details": "{\"number\": \"+19876543210\", \"extension\": \"\"}",
+                            "key" : "DPFZRS9FB0D46QFTM899",
+                            "name": "987-654-3210",
+                            "type": "phone"
+                        },
+                        "ts": "2020-02-13T18:56:20.351346+00:00"
+                    },
+                ],
+                "metadata": {
+                    "next_offset": [
+                        "1532951895000",
+                        "af0ba235-0b33-23c8-bc23-a31aa0231de8"
+                    ],
+                    "total_objects": 1
+                }
+            },
+
+        Raises RuntimeError on error.
+        """
+        # Sanity check mintime as unix timestamp, then transform to string
+        mintime = str(int(mintime))
+        maxtime = str(int(maxtime))
+        params = {
+            'mintime': mintime,
+            'maxtime': maxtime,
+            'limit': limit,
+            'next_offset': next_offset,
+            'sort': sort,
+        }
+        response = self.json_api_call(
+            'GET',
+            '/admin/v2/logs/activity',
+            params,
+        )
+        print(f'response: {response}')
+        for row in response['items']:
+            row['eventtype'] = 'activity'
+            row['host'] = self.host
+        return response
+
     def get_telephony_log(self,
                           mintime=0):
         """
