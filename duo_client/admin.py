@@ -337,6 +337,42 @@ class Admin(client.Client):
             row['host'] = self.host
         return response
 
+    def get_offline_log(self,
+                        mintime=0):
+        """
+        Returns offline enrollment log events.
+
+        mintime - Fetch events only >= mintime (to avoid duplicate
+                  records that have already been fetched)
+
+        Returns:
+            [
+                {'timestamp': <int:unix timestamp>,
+                 'username': <str:username>,
+                 'action': <str:action>,
+                 'object': <str:object name>|None,
+                 'description': <str:description>|None}, ...
+            ]
+
+        <action> is one of:
+            'o2fa_user_provisioned',
+            'o2fa_user_deprovisioned',
+            'o2fa_user_reenrolled'
+
+        Raises RuntimeError on error.
+        """
+        # Sanity check mintime as unix timestamp, then transform to string
+        mintime = str(int(mintime))
+        params = {
+            'mintime': mintime,
+        }
+        response = self.json_api_call(
+            'GET',
+            '/admin/v1/logs/offline_enrollment',
+            params,
+        )
+        return response
+
     def get_authentication_log(self, api_version=1, **kwargs):
         """
         Returns authentication log events.
