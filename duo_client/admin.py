@@ -519,7 +519,7 @@ class Admin(client.Client):
                 row['host'] = self.host
         return response
 
-    def get_activity_logs(self, mintime, maxtime, limit=100, next_offset=None, sort='ts:asc',):
+    def get_activity_logs(self, mintime, maxtime, limit=100, next_offset=None, sort='ts:desc',):
         """
         Returns activity log events.
 
