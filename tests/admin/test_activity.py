@@ -5,7 +5,7 @@ from .base import TestAdmin
 class TestEndpoints(TestAdmin):
 
     def test_get_activity_log(self):
-        """ Test to get authentication log on version 1 api.
+        """ Test to get activities log.
         """
         response = self.client_activity.get_activity_logs(maxtime='1663131599000', mintime='1662958799000')
         uri, args = response['uri'].split('?')
