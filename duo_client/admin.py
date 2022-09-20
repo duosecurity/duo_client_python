@@ -203,6 +203,17 @@ VALID_AUTHLOG_REQUEST_PARAMS = [
     'api_version'
 ]
 
+VALID_ACTIVITY_REQUEST_PARAMS = [
+    'mintime',
+    'maxtime',
+    'limit',
+    'sort',
+    'next_offset'
+]
+
+DEFAULT_LIMIT = 100
+DEFAULT_SORT = 'ts:desc'
+
 
 class Admin(client.Client):
     account_id = None
@@ -519,7 +530,7 @@ class Admin(client.Client):
                 row['host'] = self.host
         return response
 
-    def get_activity_logs(self, mintime, maxtime, limit=100, next_offset=None, sort='ts:desc',):
+    def get_activity_logs(self, **kwargs):
         """
         Returns activity log events.
 
@@ -581,16 +592,21 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        # Sanity check mintime as unix timestamp, then transform to string
-        mintime = str(int(mintime))
-        maxtime = str(int(maxtime))
-        params = {
-            'mintime': mintime,
-            'maxtime': maxtime,
-            'limit': limit,
-            'next_offset': next_offset,
-            'sort': sort,
-        }
+        params = {}
+
+        for k in kwargs:
+            if kwargs[k] is not None and k in VALID_ACTIVITY_REQUEST_PARAMS:
+                params[k] = kwargs[k]
+
+        if 'mintime' in params:
+            params['mintime'] = str(int(params['mintime']))
+        if 'maxtime' in params:
+            params['maxtime'] = str(int(params['maxtime']))
+        if 'limit' not in params:
+            params['limit'] = '{:d}'.format(DEFAULT_LIMIT)
+        if 'sort' not in params:
+            params['sort'] = DEFAULT_SORT
+
         response = self.json_api_call(
             'GET',
             '/admin/v2/logs/activity',
