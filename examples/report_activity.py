@@ -17,7 +17,7 @@ def get_next_arg(prompt):
 # Configuration and information about objects to create.
 admin_api = duo_client.Admin(
     ikey="DIRDJHGRLETC0XHV6W4F",
-    skey="MR5HDUWTyTymtU2BIfaeGkFpUmeI2RBqaffZ3ZMW",
+    skey="",
     host="api-dataeng.trustedpath.info",
 )
 
