@@ -3,6 +3,7 @@ from .base import TestAdmin
 
 
 class TestEndpoints(TestAdmin):
+
     def test_get_activity_log(self):
         """ Test to get authentication log on version 1 api.
         """
@@ -13,4 +14,4 @@ class TestEndpoints(TestAdmin):
         self.assertEqual(uri, '/admin/v2/logs/activity')
         self.assertEqual(
             util.params_to_dict(args)['account_id'],
-            [self.client_list.account_id])
+            [self.client_activity.account_id])
