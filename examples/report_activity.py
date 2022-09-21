@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from __future__ import absolute_import
 from __future__ import print_function
-import csv
 import sys
 
 import duo_client
@@ -16,13 +15,26 @@ def get_next_arg(prompt):
 
 # Configuration and information about objects to create.
 admin_api = duo_client.Admin(
-    ikey="DIRDJHGRLETC0XHV6W4F",
-    skey="",
-    host="api-dataeng.trustedpath.info",
+    ikey=get_next_arg('Admin API integration key ("DI..."): '),
+    skey=get_next_arg('integration secret key: '),
+    host=get_next_arg('API hostname ("api-....duosecurity.com"): '),
 )
 
-# Retrieve user info from API:
-mintime = '1659380517000'
-maxtime = '1663700517000'
-logs = admin_api.get_activity_logs(mintime = mintime, maxtime = maxtime)
+next_offset = None
+limit = '100'
+sort = 'ts:desc'
+mintime = get_next_arg('Mintime: ')
+maxtime = get_next_arg('Maxtime: ')
+limit_arg = get_next_arg('Limit (Default = 100, Max = 1000): ')
+if limit_arg:
+    limit = limit_arg
+next_offset_arg = get_next_arg('Next_offset: ')
+if next_offset_arg:
+    next_offset = next_offset_arg
+
+sort_arg = get_next_arg('Sort (Default - ts:desc) :')
+if sort_arg:
+    sort = sort_arg
+
+logs = admin_api.get_activity_logs(mintime = mintime, maxtime = maxtime, limit = limit, next_offset = next_offset, sort = sort)
 print(logs)
