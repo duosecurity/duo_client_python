@@ -612,7 +612,6 @@ class Admin(client.Client):
             '/admin/v2/logs/activity',
             params,
         )
-        print(f'response: {response}')
         for row in response['items']:
             row['eventtype'] = 'activity'
             row['host'] = self.host
