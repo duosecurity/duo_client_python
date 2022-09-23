@@ -12,6 +12,8 @@
 
 **Accounts** - https://www.duosecurity.com/docs/accountsapi
 
+**Activity** - TBD (Available for private preview only)
+
 ## Tested Against Python Versions
 * 3.6
 * 3.7
