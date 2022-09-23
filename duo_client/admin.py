@@ -546,40 +546,40 @@ class Admin(client.Client):
                 "items": [
                     {
                         "access_device": {
-                            "browser": "Chrome",
-                            "browser_version": "1.11.3",
+                            "browser": <str:browser>,
+                            "browser_version": <str:browser version>,
                             "ip": {
-                                "address": "1.2.3.4"
+                                "address":  <str:ip address>
                             },
                             "location": {
-                                "city": "Ann Arbor",
-                                "country": "United States",
-                                "state": "Michigan"
+                                "city":  <str:city>,
+                                "country":  <str:country>,
+                                "state": <str:state>
                             },
-                            "os": "Mac OS X",
-                            "os_version": "10.14.1"
+                            "os":  <str:os name>,
+                            "os_version":  <str:os_version>
                         },
-                        "action": "phone_create",
-                        "activity_id": "edf96844-6e03-4528-963f-1fab8d5fabaa",
+                        "action":  <str:action>,
+                        "activity_id":  <str:activity id>,
                         "actor": {
-                            "details": "{\"created\": \"2020-01-13T18:56:20.351346+00:00\", \"last_login\": \"2020-02-10T18:56:20.351346+00:00\", \"status\": \"Locked Out\"}",
-                            "key" : "DUABCDECUSTOMER000001",
-                            "name": "John Doe",
-                            "type": "user"
+                            "details": <str:json for actor details>
+                            "key" :  <str:actor's key>,
+                            "name":  <str:actor's name>,
+                            "type":  <str:actor type>
                         },
-                        "akey": "DABCDECUSTOMER000000",
+                        "akey":  <str:akey>,
                         "application": {
-                            "key": "DIY231J8BR23QK4UKBY8",
-                            "name": "AdminAPI",
-                            "type": "adminapi"
+                            "key":  <str:application's key>,
+                            "name":  <str:application's name>,
+                            "type":  <str:application's type>
                         },
                         "target": {
-                            "details": "{\"number\": \"+19876543210\", \"extension\": \"\"}",
-                            "key" : "DPFZRS9FB0D46QFTM899",
-                            "name": "987-654-3210",
-                            "type": "phone"
+                            "details":  <str:target's details if available> ,
+                            "key" :  <str:target's key>,
+                            "name":  <str:target's name>,
+                            "type":  <str:target's type>
                         },
-                        "ts": "2020-02-13T18:56:20.351346+00:00"
+                        "ts":  <str:timestamp captured for activity>
                     },
                 ],
                 "metadata": {
