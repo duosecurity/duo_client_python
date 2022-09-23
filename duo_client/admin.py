@@ -211,9 +211,6 @@ VALID_ACTIVITY_REQUEST_PARAMS = [
     'next_offset'
 ]
 
-DEFAULT_LIMIT = 100
-DEFAULT_SORT = 'ts:desc'
-
 
 class Admin(client.Client):
     account_id = None
@@ -602,10 +599,6 @@ class Admin(client.Client):
             params['mintime'] = str(int(params['mintime']))
         if 'maxtime' in params:
             params['maxtime'] = str(int(params['maxtime']))
-        if 'limit' not in params:
-            params['limit'] = '{:d}'.format(DEFAULT_LIMIT)
-        if 'sort' not in params:
-            params['sort'] = DEFAULT_SORT
 
         response = self.json_api_call(
             'GET',
