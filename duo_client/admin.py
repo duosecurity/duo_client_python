@@ -603,6 +603,8 @@ class Admin(client.Client):
             params['mintime'] = str(int(params['mintime']))
         if 'maxtime' in params:
             params['maxtime'] = str(int(params['maxtime']))
+        if 'limit' in params:
+            params['limit'] = str(int(params['limit']))
 
         response = self.json_api_call(
             'GET',
