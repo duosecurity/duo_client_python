@@ -38,7 +38,7 @@ if sort_arg:
 
 reporter = csv.writer(sys.stdout)
 logs = admin_api.get_activity_logs(mintime = mintime, maxtime = maxtime, limit = limit, next_offset = next_offset, sort = sort)
-print(logs)
+
 reporter.writerow(('activity_id', 'ts', 'action', 'actor_name', 'target_name'))
 for log in logs['items']:
     activity = log['activity_id'],
