@@ -583,7 +583,7 @@ class Admin(client.Client):
                     },
                 ],
                 "metadata": {
-                    "next_offset": <str: comma seperated ts and offset value,
+                    "next_offset": <str: comma seperated ts and offset value>
                     "total_objects": {
                         "relation" : <str: relational operator>
                         "value" : <int: total objects in the time range>
