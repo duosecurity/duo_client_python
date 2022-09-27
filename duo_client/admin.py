@@ -583,11 +583,11 @@ class Admin(client.Client):
                     },
                 ],
                 "metadata": {
-                    "next_offset": [
-                        "1532951895000",
-                        "af0ba235-0b33-23c8-bc23-a31aa0231de8"
-                    ],
-                    "total_objects": 1
+                    "next_offset": <str: comma seperated ts and offset value,
+                    "total_objects": {
+                        "relation" : <str: relational operator>
+                        "value" : <int: total objects in the time range>
+                    }
                 }
             },
 
