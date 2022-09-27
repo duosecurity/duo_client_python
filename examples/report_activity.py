@@ -44,15 +44,8 @@ for log in logs['items']:
     activity = log['activity_id'],
     ts = log['ts']
     action = log['action']
-    if log['actor'] is not None and log['actor']['name'] is not None:
-        actor_name = str(log['actor']['name'])
-    else:
-        actor_name = None
-    if log['target'] is not None and log['target']['name'] is not None:
-        for target in log['target']:
-            target_name =str(log['target']['name'])
-    else:
-        target_name = None
+    actor_name = log.get('actor', {}).get('name', None)
+    target_name = log.get('target', {}).get('name', None)
     reporter.writerow([
         activity,
         ts,
