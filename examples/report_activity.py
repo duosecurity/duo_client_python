@@ -38,10 +38,25 @@ if sort_arg:
 
 reporter = csv.writer(sys.stdout)
 logs = admin_api.get_activity_logs(mintime = mintime, maxtime = maxtime, limit = limit, next_offset = next_offset, sort = sort)
-
-reporter.writerow(('activity_id', 'ts'))
+print(logs)
+reporter.writerow(('activity_id', 'ts', 'action', 'actor_name', 'target_name'))
 for log in logs['items']:
-     reporter.writerow([
-         log['activity_id'],
-         log['ts'],
-     ])
+    activity = log['activity_id'],
+    ts = log['ts']
+    action = log['action']
+    if log['actor'] is not None and log['actor']['name'] is not None:
+        actor_name = str(log['actor']['name'])
+    else:
+        actor_name = None
+    if log['target'] is not None and log['target']['name'] is not None:
+        for target in log['target']:
+            target_name =str(log['target']['name'])
+    else:
+        target_name = None
+    reporter.writerow([
+        activity,
+        ts,
+        action,
+        actor_name,
+        target_name,
+    ])
