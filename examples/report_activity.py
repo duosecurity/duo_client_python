@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 import sys
-
+import csv
 import duo_client
 from six.moves import input
 
@@ -36,5 +36,12 @@ sort_arg = get_next_arg('Sort (Default - ts:desc) :')
 if sort_arg:
     sort = sort_arg
 
+reporter = csv.writer(sys.stdout)
 logs = admin_api.get_activity_logs(mintime = mintime, maxtime = maxtime, limit = limit, next_offset = next_offset, sort = sort)
-print(logs)
+
+reporter.writerow(('activity_id', 'ts'))
+for log in logs['items']:
+     reporter.writerow([
+         log['activity_id'],
+         log['ts'],
+     ])
