@@ -531,8 +531,8 @@ class Admin(client.Client):
         """
         Returns activity log events.
 
-        As of now, this endpoint is not in general availability and restricted to few customers for private preview.
-        To access this endpoint,the customer needs to be enabled by agents manually.
+        As of now, the activity endpoint is not in general availability and is restricted to a few customers for private preview.
+        If you have any questions or need more information, feel free to reach out to support for guidance.
 
 
         mintime (required) - Unix timestamp in ms; fetch records >= mintime
