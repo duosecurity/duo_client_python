@@ -177,6 +177,7 @@ import six
 import warnings
 import time
 import base64
+from datetime import datetime, timedelta
 
 USER_STATUS_ACTIVE = 'active'
 USER_STATUS_BYPASS = 'bypass'
@@ -594,17 +595,28 @@ class Admin(client.Client):
         Raises RuntimeError on error.
         """
         params = {}
+        today = datetime.utcnow()
+        default_maxtime = int(today.timestamp() * 1000)
+        default_mintime = int((today - timedelta(days=180)).timestamp() * 1000)
 
         for k in kwargs:
             if kwargs[k] is not None and k in VALID_ACTIVITY_REQUEST_PARAMS:
                 params[k] = kwargs[k]
 
-        if 'mintime' in params:
-            params['mintime'] = str(int(params['mintime']))
-        if 'maxtime' in params:
-            params['maxtime'] = str(int(params['maxtime']))
+
+
+        if 'mintime' not in params:
+            # If mintime is not provided, the script defaults it to 180 days in past
+            params['mintime'] = default_mintime
+        params['mintime'] = str(int(params['mintime']))
+        if 'maxtime' not in params:
+            #if maxtime is not provided, the script defaults it to now
+            params['maxtime'] = default_maxtime
+        params['maxtime'] = str(int(params['maxtime']))
         if 'limit' in params:
             params['limit'] = str(int(params['limit']))
+
+
 
         response = self.json_api_call(
             'GET',
