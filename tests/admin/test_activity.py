@@ -15,3 +15,16 @@ class TestEndpoints(TestAdmin):
         self.assertEqual(
             util.params_to_dict(args)['account_id'],
             [self.client_activity.account_id])
+
+    def test_get_activity_log_with_no_args(self):
+        """ Test to get activities log.
+        """
+        response = self.client_activity.get_activity_logs()
+        uri, args = response['uri'].split('?')
+
+        self.assertEqual(response['method'], 'GET')
+        self.assertEqual(uri, '/admin/v2/logs/activity')
+        self.assertEqual(
+            util.params_to_dict(args)['account_id'],
+            [self.client_activity.account_id])
+
