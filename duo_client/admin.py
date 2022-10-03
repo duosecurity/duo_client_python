@@ -603,8 +603,6 @@ class Admin(client.Client):
             if kwargs[k] is not None and k in VALID_ACTIVITY_REQUEST_PARAMS:
                 params[k] = kwargs[k]
 
-
-
         if 'mintime' not in params:
             # If mintime is not provided, the script defaults it to 180 days in past
             params['mintime'] = default_mintime
@@ -623,6 +621,7 @@ class Admin(client.Client):
             '/admin/v2/logs/activity',
             params,
         )
+        print(response)
         for row in response['items']:
             row['eventtype'] = 'activity'
             row['host'] = self.host
