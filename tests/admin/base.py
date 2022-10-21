@@ -43,6 +43,12 @@ class TestAdmin(unittest.TestCase):
         self.client_dtm._connect = \
             lambda: util.MockHTTPConnection(data_response_from_get_dtm_events=True)
 
+        self.client_activity = duo_client.admin.Admin(
+            'test_ikey', 'test_akey', 'example.com')
+        self.client_activity.account_id = 'DA012345678901234567'
+        self.client_activity._connect = \
+            lambda: util.MockHTTPConnection(data_response_from_get_items=True)
+
 
 if __name__ == '__main__':
     unittest.main()

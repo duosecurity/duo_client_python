@@ -3,3 +3,4 @@ flake8
 pytz>=2022.1
 mock
 dlint
+freezegun

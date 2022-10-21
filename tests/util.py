@@ -30,12 +30,14 @@ class MockHTTPConnection(object):
         data_response_should_be_list=False,
         data_response_from_get_authlog=False,
         data_response_from_get_dtm_events=False,
+        data_response_from_get_items=False,
     ):
         # if a response object should be a list rather than
         # a dict, then set this flag to true
         self.data_response_should_be_list = data_response_should_be_list
         self.data_response_from_get_authlog = data_response_from_get_authlog
         self.data_response_from_get_dtm_events = data_response_from_get_dtm_events
+        self.data_response_from_get_items = data_response_from_get_items
 
     def dummy(self):
         return self
@@ -50,6 +52,9 @@ class MockHTTPConnection(object):
 
         if self.data_response_from_get_authlog:
             response['authlogs'] = []
+
+        if self.data_response_from_get_items:
+            response['items'] = []
 
         if self.data_response_from_get_dtm_events:
             response['events'] = [{"foo": "bar"}, {"bar": "foo"}]
