@@ -241,6 +241,37 @@ class TestSign(unittest.TestCase):
         self.assertEqual(actual,
                          expected)
 
+    def test_hmac_sha512(self):
+        test = {
+            'date': 'Fri, 07 Dec 2012 17:18:00 -0000',
+            'host': 'foO.BAr52.cOm',
+            'method': 'PoSt',
+            'params': {u'\u469a\u287b\u35d0\u8ef3\u6727\u502a\u0810\ud091\xc8\uc170': [u'\u0f45\u1a76\u341a\u654c\uc23f\u9b09\uabe2\u8343\u1b27\u60d0'],
+                       u'\u7449\u7e4b\uccfb\u59ff\ufe5f\u83b7\uadcc\u900c\ucfd1\u7813': [u'\u8db7\u5022\u92d3\u42ef\u207d\u8730\uacfe\u5617\u0946\u4e30'],
+                       u'\u7470\u9314\u901c\u9eae\u40d8\u4201\u82d8\u8c70\u1d31\ua042': [u'\u17d9\u0ba8\u9358\uaadf\ua42a\u48be\ufb96\u6fe9\ub7ff\u32f3'],
+                       u'\uc2c5\u2c1d\u2620\u3617\u96b3F\u8605\u20e8\uac21\u5934': [u'\ufba9\u41aa\ubd83\u840b\u2615\u3e6e\u652d\ua8b5\ud56bU']},
+            'uri': '/Foo/BaR2/qux',
+        }
+        test['params'] = duo_client.client.normalize_params(test['params'])
+        ikey = 'test_ikey'
+        actual = duo_client.client.sign(
+            sig_version=2,
+            ikey=ikey,
+            skey='gtdfxv9YgVBYcF6dl2Eq17KUQJN2PLM2ODVTkvoT',
+            **test
+        )
+        expected = '0508065035a03b2a1de2f453e629e791d180329e157f65df6b3e0f08299d4321e1c5c7a7c7ee6b9e5fc80d1fb6fbf3ad5eb7c44dd3b3985a02c37aca53ec3698'
+        expected = ikey + ':' + expected
+        if isinstance(expected, six.text_type):
+            expected = expected.encode('utf-8')
+        expected = base64.b64encode(expected).strip()
+        if not isinstance(expected, six.text_type):
+            expected = expected.decode('utf-8')
+        expected = 'Basic ' + expected
+        self.assertEqual(actual,
+                         expected)
+
+
 class TestRequest(unittest.TestCase):
     """ Tests for the request created by api_call and json_api_call. """
     # usful args for testing

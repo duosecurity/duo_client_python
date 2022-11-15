@@ -97,7 +97,7 @@ def canonicalize(method, host, uri, params, date, sig_version, body=None):
 
 
 def sign(ikey, skey, method, host, uri, date, sig_version, params, body=None,
-         digestmod=hashlib.sha1):  # noqa: DUO130, HMAC-SHA1 still secure
+         digestmod=hashlib.sha512): 
     """
     Return basic authorization header line with a Duo Web API signature.
     """
@@ -153,7 +153,7 @@ class Client(object):
                  user_agent=('Duo API Python/' + __version__),
                  timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
                  paging_limit=100,
-                 digestmod=hashlib.sha1,  # noqa: DUO130, HMAC-SHA1 still secure
+                 digestmod=hashlib.sha512, 
                  sig_version=2,
                  port=None
                  ):
