@@ -261,7 +261,7 @@ class TestSign(unittest.TestCase):
             skey='gtdfxv9YgVBYcF6dl2Eq17KUQJN2PLM2ODVTkvoT',
             **test
         )
-        expected = "0508065035a03b2a1de2f453e629e791d180329e157f65df6b3e0f08299d4321e1c5c7a7c7ee6b9e5fc80d1fb6fbf3ad5eb7c44dd3b3985a02c37aca53ec3698"
+        expected = '0508065035a03b2a1de2f453e629e791d180329e157f65df6b3e0f08299d4321e1c5c7a7c7ee6b9e5fc80d1fb6fbf3ad5eb7c44dd3b3985a02c37aca53ec3698'
         expected = ikey + ':' + expected
         if isinstance(expected, six.text_type):
             expected = expected.encode('utf-8')
@@ -271,7 +271,7 @@ class TestSign(unittest.TestCase):
         expected = 'Basic ' + expected
         self.assertEqual(actual,
                          expected)
-
+                         
 class TestRequest(unittest.TestCase):
     """ Tests for the request created by api_call and json_api_call. """
     # usful args for testing
