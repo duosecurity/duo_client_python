@@ -177,6 +177,7 @@ import six
 import warnings
 import time
 import base64
+from datetime import datetime, timedelta
 
 USER_STATUS_ACTIVE = 'active'
 USER_STATUS_BYPASS = 'bypass'
@@ -201,6 +202,14 @@ VALID_AUTHLOG_REQUEST_PARAMS = [
     'groups',
     'factors',
     'api_version'
+]
+
+VALID_ACTIVITY_REQUEST_PARAMS = [
+    'mintime',
+    'maxtime',
+    'limit',
+    'sort',
+    'next_offset'
 ]
 
 
@@ -335,6 +344,42 @@ class Admin(client.Client):
         for row in response:
             row['eventtype'] = 'administrator'
             row['host'] = self.host
+        return response
+
+    def get_offline_log(self,
+                        mintime=0):
+        """
+        Returns offline enrollment log events.
+
+        mintime - Fetch events only >= mintime (to avoid duplicate
+                  records that have already been fetched)
+
+        Returns:
+            [
+                {'timestamp': <int:unix timestamp>,
+                 'username': <str:username>,
+                 'action': <str:action>,
+                 'object': <str:object name>|None,
+                 'description': <str:description>|None}, ...
+            ]
+
+        <action> is one of:
+            'o2fa_user_provisioned',
+            'o2fa_user_deprovisioned',
+            'o2fa_user_reenrolled'
+
+        Raises RuntimeError on error.
+        """
+        # Sanity check mintime as unix timestamp, then transform to string
+        mintime = str(int(mintime))
+        params = {
+            'mintime': mintime,
+        }
+        response = self.json_api_call(
+            'GET',
+            '/admin/v1/logs/offline_enrollment',
+            params,
+        )
         return response
 
     def get_authentication_log(self, api_version=1, **kwargs):
@@ -481,6 +526,104 @@ class Admin(client.Client):
             for row in response['authlogs']:
                 row['eventtype'] = 'authentication'
                 row['host'] = self.host
+        return response
+
+    def get_activity_logs(self, **kwargs):
+        """
+        Returns activity log events.
+
+        As of now, the activity endpoint is not in general availability and is restricted to a few customers for private preview.
+        If you have any questions or need more information, feel free to reach out to support for guidance.
+
+
+        mintime - Unix timestamp in ms; fetch records >= mintime
+        maxtime - Unix timestamp in ms; fetch records <= maxtime
+        limit - Number of results to limit to
+        next_offset - Used to grab the next set of results from a previous response
+        sort - Sort order to be applied
+
+        Returns:
+            {
+                "items": [
+                    {
+                        "access_device": {
+                            "browser": <str:browser>,
+                            "browser_version": <str:browser version>,
+                            "ip": {
+                                "address":  <str:ip address>
+                            },
+                            "location": {
+                                "city":  <str:city>,
+                                "country":  <str:country>,
+                                "state": <str:state>
+                            },
+                            "os":  <str:os name>,
+                            "os_version":  <str:os_version>
+                        },
+                        "action":  <str:action>,
+                        "activity_id":  <str:activity id>,
+                        "actor": {
+                            "details": <str:json for actor details>
+                            "key" :  <str:actor's key>,
+                            "name":  <str:actor's name>,
+                            "type":  <str:actor type>
+                        },
+                        "akey":  <str:akey>,
+                        "application": {
+                            "key":  <str:application's key>,
+                            "name":  <str:application's name>,
+                            "type":  <str:application's type>
+                        },
+                        "target": {
+                            "details":  <str:target's details if available> ,
+                            "key" :  <str:target's key>,
+                            "name":  <str:target's name>,
+                            "type":  <str:target's type>
+                        },
+                        "ts":  <str:timestamp captured for activity>
+                    },
+                ],
+                "metadata": {
+                    "next_offset": <str: comma seperated ts and offset value>
+                    "total_objects": {
+                        "relation" : <str: relational operator>
+                        "value" : <int: total objects in the time range>
+                    }
+                }
+            },
+
+        Raises RuntimeError on error.
+        """
+        params = {}
+        today = datetime.utcnow()
+        default_maxtime = int(today.timestamp() * 1000)
+        default_mintime = int((today - timedelta(days=180)).timestamp() * 1000)
+
+        for k in kwargs:
+            if kwargs[k] is not None and k in VALID_ACTIVITY_REQUEST_PARAMS:
+                params[k] = kwargs[k]
+
+        if 'mintime' not in params:
+            # If mintime is not provided, the script defaults it to 180 days in past
+            params['mintime'] = default_mintime
+        params['mintime'] = str(int(params['mintime']))
+        if 'maxtime' not in params:
+            #if maxtime is not provided, the script defaults it to now
+            params['maxtime'] = default_maxtime
+        params['maxtime'] = str(int(params['maxtime']))
+        if 'limit' in params:
+            params['limit'] = str(int(params['limit']))
+
+
+
+        response = self.json_api_call(
+            'GET',
+            '/admin/v2/logs/activity',
+            params,
+        )
+        for row in response['items']:
+            row['eventtype'] = 'activity'
+            row['host'] = self.host
         return response
 
     def get_telephony_log(self,

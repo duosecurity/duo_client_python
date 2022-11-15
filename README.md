@@ -12,6 +12,9 @@
 
 **Accounts** - https://www.duosecurity.com/docs/accountsapi
 
+**Activity** - TBD (As of now, the activity endpoint is not in general availability and is restricted to a few customers for private preview. 
+If you have any questions or need more information, feel free to reach out to support for guidance.)
+
 ## Tested Against Python Versions
 * 3.6
 * 3.7

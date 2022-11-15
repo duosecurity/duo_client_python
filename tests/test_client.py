@@ -228,6 +228,7 @@ class TestSign(unittest.TestCase):
             sig_version=2,
             ikey=ikey,
             skey='gtdfxv9YgVBYcF6dl2Eq17KUQJN2PLM2ODVTkvoT',
+            digestmod=hashlib.sha1,
             **test
         )
         expected = 'f01811cbbf9561623ab45b893096267fd46a5178'
@@ -270,8 +271,7 @@ class TestSign(unittest.TestCase):
         expected = 'Basic ' + expected
         self.assertEqual(actual,
                          expected)
-
-
+                         
 class TestRequest(unittest.TestCase):
     """ Tests for the request created by api_call and json_api_call. """
     # usful args for testing
