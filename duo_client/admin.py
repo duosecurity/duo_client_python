@@ -95,6 +95,7 @@ SETTINGS
 Settings objects are returned in the following format:
 
     {'inactive_user_expiration': <int:days until expiration>|0,
+     'pending_deletion_days': <int:days a user will be in pending deletion status>,
      'sms_message': <str:sms message>,
      'name': <str:name>,
      'sms_batch': <int:sms batch size>,
@@ -1867,6 +1868,7 @@ class Admin(client.Client):
                         lockout_threshold=None,
                         lockout_expire_duration=None,
                         inactive_user_expiration=None,
+                        pending_deletion_days=None,
                         log_retention_days=None,
                         sms_batch=None,
                         sms_expiration=None,
@@ -1905,6 +1907,7 @@ class Admin(client.Client):
         lockout_threshold - <int:number of attempts>|None
         lockout_expire_duration - <int:minutes>|0|None
         inactive_user_expiration - <int:number of days>|None
+        pending_deletion_days - <int:number of days>|None
         log_retention_days - <int:number of days>|0|None
         sms_batch - <int:batch size>|None
         sms_expiration - <int:minutes>|None
@@ -1949,6 +1952,8 @@ class Admin(client.Client):
             params['lockout_expire_duration'] = str(lockout_expire_duration)
         if inactive_user_expiration is not None:
             params['inactive_user_expiration'] = str(inactive_user_expiration)
+        if pending_deletion_days is not None:
+            params['pending_deletion_days'] = str(pending_deletion_days)
         if log_retention_days is not None:
             params['log_retention_days'] = str(log_retention_days)
         if sms_batch is not None:
@@ -2715,8 +2720,8 @@ class Admin(client.Client):
                      name=None,
                      phone=None,
                      password=None,
-                     password_change_required=None, 
-                     status=None, 
+                     password_change_required=None,
+                     status=None,
                      ):
         """
         Update one or more attributes of an administrator.
