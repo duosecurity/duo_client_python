@@ -99,7 +99,7 @@ class AdministratorLog(BaseLog):
                 'admin_delete': "Delete Admin",
                 'customer_update': "Update Customer",
                 'group_create': "Create Group",
-                'group_udpate': "Update Group",
+                'group_update': "Update Group",
                 'group_delete': "Delete Group",
                 'integration_create': "Create Integration",
                 'integration_update': "Update Integration",
