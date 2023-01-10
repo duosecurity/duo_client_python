@@ -2187,7 +2187,7 @@ class Admin(client.Client):
         """
         Retrieves a list of groups.
         Args:
-            limit: The max number of admins to fetch at once. Default None
+            limit: The max number of groups to fetch at once. Default None
             offset: If a limit is passed, the offset to start retrieval.
                     Default 0
 
