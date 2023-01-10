@@ -16,7 +16,6 @@
 If you have any questions or need more information, feel free to reach out to support for guidance.)
 
 ## Tested Against Python Versions
-* 3.6
 * 3.7
 * 3.8
 * 3.9
