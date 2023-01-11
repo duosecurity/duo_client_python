@@ -216,11 +216,43 @@ VALID_ACTIVITY_REQUEST_PARAMS = [
 
 class Admin(client.Client):
     account_id = None
+    admin_sig_version = 5
 
-    def api_call(self, method, path, params):
+    def api_call(self, method, path, params, sig_version=admin_sig_version):
         if self.account_id is not None:
             params['account_id'] = self.account_id
-        return super(Admin, self).api_call(method, path, params)
+        return super(Admin, self).api_call(
+            method,
+            path,
+            params,
+            sig_version=sig_version
+        )
+
+    def json_api_call(self, method, path, params, sig_version=admin_sig_version):
+        return super(Admin, self).json_api_call(
+            method,
+            path,
+            params,
+            sig_version=sig_version
+        )
+
+    def json_paging_api_call(self, method, path, params, sig_version=admin_sig_version):
+        return super(Admin, self).json_paging_api_call(
+            method,
+            path,
+            params,
+            sig_version=sig_version
+        )
+
+    def json_cursor_api_call(self, method, path, params, get_records_func, sig_version=admin_sig_version):
+        return super(Admin, self).json_cursor_api_call(
+            method,
+            path,
+            params,
+            get_records_func,
+            sig_version=sig_version
+        )
+
 
     @classmethod
     def _canonicalize_ip_whitelist(klass, ip_whitelist):
@@ -2378,8 +2410,8 @@ class Admin(client.Client):
         """
         return self.json_paging_api_call(
             'GET',
-            '/admin/v1/integrations',
-            {}
+            '/admin/v2/integrations',
+            {},
         )
 
     def get_integrations(self, limit=None, offset=0):
@@ -2398,8 +2430,8 @@ class Admin(client.Client):
         if limit:
             return self.json_api_call(
                 'GET',
-                '/admin/v1/integrations',
-                {'limit': limit, 'offset': offset}
+                '/admin/v2/integrations',
+                {'limit': limit, 'offset': offset},
             )
 
         return list(self.get_integrations_generator())
@@ -2417,8 +2449,8 @@ class Admin(client.Client):
         params = {}
         response = self.json_api_call(
             'GET',
-            '/admin/v1/integrations/' + integration_key,
-            params
+            '/admin/v2/integrations/' + integration_key,
+            params,
         )
         return response
 
@@ -2441,7 +2473,8 @@ class Admin(client.Client):
                            ip_whitelist=None,
                            ip_whitelist_enroll_policy=None,
                            groups_allowed=None,
-                           self_service_allowed=None):
+                           self_service_allowed=None,
+                           sso=None):
         """Creates a new integration.
 
         name - The name of the integration (required)
@@ -2467,6 +2500,8 @@ class Admin(client.Client):
         adminapi_write_resource - <bool:write resource permission>|None
         groups_allowed - <str: CSV list of gkeys of groups allowed to auth>
         self_service_allowed - <bool: self service permission>|None
+        sso - <dict: parameters for generic single sign-on> (optional)
+                See adminapi docs for possible values.
 
         Returns the created integration.
 
@@ -2514,9 +2549,12 @@ class Admin(client.Client):
             params['groups_allowed'] = groups_allowed
         if self_service_allowed is not None:
             params['self_service_allowed'] = '1' if self_service_allowed else '0'
+        if sso is not None:
+            params['sso'] = sso
         response = self.json_api_call('POST',
-                                      '/admin/v1/integrations',
-                                      params)
+                                      '/admin/v2/integrations',
+                                      params,
+        )
         return response
 
     def delete_integration(self, integration_key):
@@ -2528,8 +2566,12 @@ class Admin(client.Client):
 
         """
         integration_key = six.moves.urllib.parse.quote_plus(str(integration_key))
-        path = '/admin/v1/integrations/%s' % integration_key
-        return self.json_api_call('DELETE', path, {})
+        path = '/admin/v2/integrations/%s' % integration_key
+        return self.json_api_call(
+            'DELETE',
+            path,
+            {},
+        )
 
     def update_integration(self,
                            integration_key,
@@ -2551,7 +2593,8 @@ class Admin(client.Client):
                            ip_whitelist=None,
                            ip_whitelist_enroll_policy=None,
                            groups_allowed=None,
-                           self_service_allowed=None):
+                           self_service_allowed=None,
+                           sso=None):
         """Updates an integration.
 
         integration_key - The key of the integration to update. (required)
@@ -2576,6 +2619,8 @@ class Admin(client.Client):
         reset_secret_key - <any value>|None
         groups_allowed - <str: CSV list of gkeys of groups allowed to auth>
         self_service_allowed - True|False|None
+        sso - <dict: parameters for generic single sign-on> (optional)
+                See adminapi docs for possible values.
 
         If any value other than None is provided for 'reset_secret_key'
         (for example, 1), then a new secret key will be generated for the
@@ -2587,7 +2632,7 @@ class Admin(client.Client):
 
         """
         integration_key = six.moves.urllib.parse.quote_plus(str(integration_key))
-        path = '/admin/v1/integrations/%s' % integration_key
+        path = '/admin/v2/integrations/%s' % integration_key
         params = {}
         if name is not None:
             params['name'] = name
@@ -2629,11 +2674,17 @@ class Admin(client.Client):
             params['groups_allowed'] = groups_allowed
         if self_service_allowed is not None:
             params['self_service_allowed'] = '1' if self_service_allowed else '0'
+        if sso is not None:
+            params['sso'] = sso
 
         if not params:
             raise TypeError("No new values were provided")
 
-        response = self.json_api_call('POST', path, params)
+        response = self.json_api_call(
+            'POST',
+            path,
+            params,
+        )
         return response
 
     def get_admins(self, limit=None, offset=0):
