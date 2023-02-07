@@ -859,7 +859,7 @@ class Admin(client.Client):
 
         return self.json_api_call('POST', path, params)
 
-    def add_user_bypass_codes(self, user_id, count=None, valid_secs=None, remaining_uses=None, codes=None):
+    def add_user_bypass_codes(self, user_id, count=None, valid_secs=None, remaining_uses=None, codes=None, preserve_existing=None):
         """
         Replace a user's bypass codes with new codes.
 
@@ -889,6 +889,9 @@ class Admin(client.Client):
 
         if codes is not None:
             params['codes'] = self._canonicalize_bypass_codes(codes)
+        
+        if preserve_existing is not None:
+            params['preserve_existing'] = preserve_existing
 
         return self.json_api_call('POST', path, params)
 
