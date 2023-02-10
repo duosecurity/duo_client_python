@@ -1,3 +1,4 @@
+import json
 from .. import util
 import duo_client.admin
 from .base import TestAdmin
@@ -111,28 +112,28 @@ class TestUsers(TestAdmin):
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(response['uri'], '/admin/v1/users')
         self.assertEqual(
-            util.params_to_dict(response['body']),
+            json.loads(response['body']),
             {
-                'realname': ['bar'],
-                'notes': ['notes'],
-                'username': ['foo'],
-                'status': ['active'],
-                'email': ['foobar@baz.com'],
-                'firstname': ['fName'],
-                'lastname': ['lName'],
-                'account_id': [self.client.account_id],
-                'alias1': ['alias1'],
-                'alias2': ['alias2'],
-                'alias3': ['alias3'],
-                'alias4': ['alias4'],
+                'realname': 'bar',
+                'notes': 'notes',
+                'username': 'foo',
+                'status': 'active',
+                'email': 'foobar@baz.com',
+                'firstname': 'fName',
+                'lastname': 'lName',
+                'account_id': self.client.account_id,
+                'alias1': 'alias1',
+                'alias2': 'alias2',
+                'alias3': 'alias3',
+                'alias4': 'alias4',
             })
         # defaults
         response = self.client.add_user('bar')
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(response['uri'], '/admin/v1/users')
         self.assertEqual(
-            util.params_to_dict(response['body']),
-            {'username':['bar'], 'account_id':[self.client.account_id]})
+            json.loads(response['body']),
+            {'username':'bar', 'account_id':self.client.account_id})
 
     def test_update_user(self):
         response = self.client.update_user(
@@ -144,21 +145,21 @@ class TestUsers(TestAdmin):
         self.assertEqual(
             response['uri'], '/admin/v1/users/DU012345678901234567')
         self.assertEqual(
-            util.params_to_dict(response['body']),
+            json.loads(response['body']),
             {
-                'account_id':[self.client.account_id],
-                'realname': ['bar'],
-                'notes': ['notes'],
-                'username': ['foo'],
-                'status': ['active'],
-                'email': ['foobar@baz.com'],
-                'firstname': ['fName'],
-                'lastname': ['lName'],
-                'account_id': [self.client.account_id],
-                'alias1': ['alias1'],
-                'alias2': ['alias2'],
-                'alias3': ['alias3'],
-                'alias4': ['alias4'],
+                'account_id':self.client.account_id,
+                'realname': 'bar',
+                'notes': 'notes',
+                'username': 'foo',
+                'status': 'active',
+                'email': 'foobar@baz.com',
+                'firstname': 'fName',
+                'lastname': 'lName',
+                'account_id': self.client.account_id,
+                'alias1': 'alias1',
+                'alias2': 'alias2',
+                'alias3': 'alias3',
+                'alias4': 'alias4',
             })
 
     def test_sync_user(self):
@@ -169,5 +170,5 @@ class TestUsers(TestAdmin):
         self.assertEqual(response['uri'],
                          '/admin/v1/users/directorysync/test_dir_key/syncuser')
         self.assertEqual(
-            util.params_to_dict(response['body']),
-            {'username': ['foo'], 'account_id': [self.client.account_id]})
+           json.loads(response['body']),
+            {'username': 'foo', 'account_id': self.client.account_id})
