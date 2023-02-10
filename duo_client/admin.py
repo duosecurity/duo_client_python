@@ -2501,7 +2501,8 @@ class Admin(client.Client):
         groups_allowed - <str: CSV list of gkeys of groups allowed to auth>
         self_service_allowed - <bool: self service permission>|None
         sso - <dict: parameters for generic single sign-on> (optional)
-                See adminapi docs for possible values.
+                New argument for unreleased feature. Will return an error if used.
+                Client will be updated again in the future when feature is released.
 
         Returns the created integration.
 
@@ -2620,7 +2621,8 @@ class Admin(client.Client):
         groups_allowed - <str: CSV list of gkeys of groups allowed to auth>
         self_service_allowed - True|False|None
         sso - <dict: parameters for generic single sign-on> (optional)
-                See adminapi docs for possible values.
+                New argument for unreleased feature. Will return an error if used.
+                Client will be updated again in the future when feature is released.
 
         If any value other than None is provided for 'reset_secret_key'
         (for example, 1), then a new secret key will be generated for the
