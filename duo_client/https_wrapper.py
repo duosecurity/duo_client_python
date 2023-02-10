@@ -69,7 +69,7 @@ class CertValidatingHTTPSConnection(six.moves.http_client.HTTPConnection):
               can't be parsed as a valid HTTP/1.0 or 1.1 status line.
         """
         six.moves.http_client.HTTPConnection.__init__(self, host, port, strict, **kwargs)
-        context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS)
         if cert_file:
             context.load_cert_chain(cert_file, key_file)
         if ca_certs:
