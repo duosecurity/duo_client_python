@@ -303,7 +303,7 @@ class Client(object):
                 body = ''
                 params = normalize_params(params)
         else:
-            raise ValueError(f"unsupported sig_version {sig_version}")
+            raise ValueError('unsupported sig_version {}'.format(sig_version))
 
         if self.sig_timezone == 'UTC':
             now = email.utils.formatdate()
