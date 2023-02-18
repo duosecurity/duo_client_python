@@ -1,4 +1,3 @@
-import json
 from .base import TestAdmin
 import os
 import base64
@@ -22,6 +21,5 @@ class TestLogo(TestAdmin):
 
             # Validate response:
             self.assertTrue(
-                json.loads(response['body']).get('logo'),
-                base64_logo
+                'logo={}'.format(base64_logo) in response['body']
             )

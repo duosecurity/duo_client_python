@@ -1,4 +1,3 @@
-import json
 from .. import util
 import duo_client.admin
 from .base import TestAdmin
@@ -156,10 +155,10 @@ class TestAdmins(TestAdmin):
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(response['uri'], '/admin/v1/admins/DFAKEADMINID/password_mgmt')
         self.assertEqual(
-            json.loads(response['body']),
+            util.params_to_dict(response['body']),
             {
-                'account_id': self.client.account_id,
-                'has_external_password_mgmt': 'False'
+                'account_id': [self.client.account_id],
+                'has_external_password_mgmt': ['False']
             })
 
     def test_update_admin_password_mgmt_status_set_password(self):
@@ -169,9 +168,9 @@ class TestAdmins(TestAdmin):
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(response['uri'], '/admin/v1/admins/DFAKEADMINID/password_mgmt')
         self.assertEqual(
-            json.loads(response['body']),
+            util.params_to_dict(response['body']),
             {
-                'account_id': self.client.account_id,
-                'has_external_password_mgmt': 'True',
-                'password': 'dolphins'
+                'account_id': [self.client.account_id],
+                'has_external_password_mgmt': ['True'],
+                'password': ['dolphins']
             })
