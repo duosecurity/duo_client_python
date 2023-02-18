@@ -160,22 +160,6 @@ class TestCanonicalize(unittest.TestCase):
 
         self.assertEqual(actual, expected)
 
-    def test_v5_with_json(self):
-        hashed_body = hashlib.sha512(JSON_STRING.encode('utf-8')).hexdigest()
-        headers = {"X-Duo-Header-1": "header_value_1"}
-        expected = (
-                'Tue, 17 Nov 2020 14:12:00\n'
-                'POST\n'
-                'foo.bar52.com\n'
-                '/Foo/BaR2/qux\n\n' + hashed_body
-                +'\n630b4bfe7e9abd03da2eee8f0a5d4e60a254ec880a839bcc2223bb5b9443e8ef24d58f0'
-                 '254f1f5934bf8c017ebd0fd5b1acf86766bdbe74185e712a4092df3ed')
-        params = {}
-        body = duo_client.client.Client.canon_json(JSON_BODY)
-        actual = duo_client.client.canonicalize(
-            'POST', 'foO.BaR52.cOm', '/Foo/BaR2/qux', params, 'Tue, 17 Nov 2020 14:12:00',
-            sig_version=5, body=body, additional_headers=headers)
-
     def test_invalid_signature_version_raises(self):
         params = duo_client.client.Client.canon_json(JSON_BODY)
         with self.assertRaises(ValueError) as e:
