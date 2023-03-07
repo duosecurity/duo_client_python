@@ -218,7 +218,7 @@ class Admin(client.Client):
     account_id = None
     sig_version = 5
 
-    def api_call(self, method, path, params, sig_version=sig_version):
+    def api_call(self, method, path, params):
         if self.account_id is not None:
             params['account_id'] = self.account_id
 
@@ -226,7 +226,6 @@ class Admin(client.Client):
             method,
             path,
             params,
-            sig_version=sig_version
         )
 
 

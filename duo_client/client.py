@@ -207,6 +207,7 @@ def normalize_params(params):
 
 
 class Client(object):
+    sig_version = 2
 
     def __init__(self, ikey, skey, host,
                  ca_certs=DEFAULT_CA_CERTS,
@@ -215,7 +216,7 @@ class Client(object):
                  timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
                  paging_limit=100,
                  digestmod=hashlib.sha512,
-                 sig_version=2,
+                 sig_version=None,
                  port=None
                  ):
         """
@@ -233,7 +234,8 @@ class Client(object):
         self.set_proxy(host=None, proxy_type=None)
         self.paging_limit = paging_limit
         self.digestmod = digestmod
-        self.sig_version = sig_version
+        if sig_version is not None:
+            self.sig_version = sig_version
 
         # Constants for handling rate limit backoff and retries
         self._MAX_BACKOFF_WAIT_SECS = 32
