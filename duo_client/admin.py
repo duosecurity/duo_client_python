@@ -216,40 +216,16 @@ VALID_ACTIVITY_REQUEST_PARAMS = [
 
 class Admin(client.Client):
     account_id = None
-    admin_sig_version = 5
+    sig_version = 5
 
-    def api_call(self, method, path, params, sig_version=admin_sig_version):
+    def api_call(self, method, path, params, sig_version=sig_version):
         if self.account_id is not None:
             params['account_id'] = self.account_id
+
         return super(Admin, self).api_call(
             method,
             path,
             params,
-            sig_version=sig_version
-        )
-
-    def json_api_call(self, method, path, params, sig_version=admin_sig_version):
-        return super(Admin, self).json_api_call(
-            method,
-            path,
-            params,
-            sig_version=sig_version
-        )
-
-    def json_paging_api_call(self, method, path, params, sig_version=admin_sig_version):
-        return super(Admin, self).json_paging_api_call(
-            method,
-            path,
-            params,
-            sig_version=sig_version
-        )
-
-    def json_cursor_api_call(self, method, path, params, get_records_func, sig_version=admin_sig_version):
-        return super(Admin, self).json_cursor_api_call(
-            method,
-            path,
-            params,
-            get_records_func,
             sig_version=sig_version
         )
 

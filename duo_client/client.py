@@ -462,16 +462,16 @@ class Client(object):
 
         return (limit, offset)
 
-    def json_api_call(self, method, path, params, sig_version=None):
+    def json_api_call(self, method, path, params):
         """
         Call a Duo API method which is expected to return a JSON body
         with a 200 status. Return the response data structure or raise
         RuntimeError.
         """
-        (response, data) = self.api_call(method, path, params, sig_version=sig_version)
+        (response, data) = self.api_call(method, path, params)
         return self.parse_json_response(response, data)
 
-    def json_paging_api_call(self, method, path, params, sig_version=None):
+    def json_paging_api_call(self, method, path, params):
         """
         Call a Duo API method which is expected to return a JSON body
         with a 200 status. Return a generator that can be used to get
@@ -485,13 +485,13 @@ class Client(object):
 
         while next_offset is not None:
             params['offset'] = str(next_offset)
-            (response, data) = self.api_call(method, path, params, sig_version=sig_version)
+            (response, data) = self.api_call(method, path, params)
             (objects, metadata) = self.parse_json_response_and_metadata(response, data)
             next_offset = metadata.get('next_offset', None)
             for obj in objects:
                 yield obj
 
-    def json_cursor_api_call(self, method, path, params, get_records_func, sig_version=None):
+    def json_cursor_api_call(self, method, path, params, get_records_func):
         """
         Call a Duo API endpoint which utilizes a cursor in some responses to
         page through a set of data. This cursor is supplied through the optional
@@ -520,7 +520,7 @@ class Client(object):
         while True:
             if next_offset is not None:
                 params['offset'] = str(next_offset)
-            (http_resp, http_resp_data) = self.api_call(method, path, params, sig_version=sig_version)
+            (http_resp, http_resp_data) = self.api_call(method, path, params)
             (response, metadata) = self.parse_json_response_and_metadata(
                 http_resp,
                 http_resp_data,

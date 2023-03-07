@@ -65,6 +65,7 @@ class TestSettings(TestAdmin):
                 'telephony_warning_min': '50',
                 'caller_id': '+15035551000',
                 'user_telephony_cost_max': '10',
+                'pending_deletion_days': '5',
                 'minimum_password_length': '12',
                 'password_requires_upper_alpha': '1',
                 'password_requires_lower_alpha': '1',
