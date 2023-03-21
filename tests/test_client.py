@@ -187,6 +187,29 @@ class TestCanonicalize(unittest.TestCase):
             e.exception.args[0],
             "Unknown signature version: {}".format(999))
 
+    def test_signature_v5_lowers_and_then_sorts_headers(self):
+        hashed_body = hashlib.sha512(JSON_STRING.encode('utf-8')).hexdigest()
+        headers = {
+            "x-duo-A": "header_value_1",
+            "X-Duo-B": "header_value_2"
+
+        }
+        expected = (
+                'Tue, 17 Nov 2020 14:12:00\n'
+                'POST\n'
+                'foo.bar52.com\n'
+                '/Foo/BaR2/qux\n\n'
+                + hashed_body
+                +'\n60be11a30e0756f2ee2afdce1db849b987dcf86c1133394b'
+                'd7bbbc9877920330c4d78aceacbb377ab8cbd9a8efe6a410fed4047376635ac71226ab46ca10d2b1')
+        params = {}
+        body = duo_client.client.Client.canon_json(JSON_BODY)
+        actual = duo_client.client.canonicalize(
+            'POST', 'foO.BaR52.cOm', '/Foo/BaR2/qux', params, 'Tue, 17 Nov 2020 14:12:00',
+            sig_version=5, body=body, additional_headers=headers)
+        #raise Exception(actual)
+        self.assertEqual(actual, expected)
+
 
 class TestNormalizePageArgs(unittest.TestCase):
 
