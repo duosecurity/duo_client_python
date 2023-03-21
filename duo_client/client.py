@@ -65,12 +65,17 @@ def canon_x_duo_headers(additional_headers):
     if additional_headers is None:
         additional_headers = {}
 
+    # Lower the headers before sorting them
+    lowered_headers = {}
+    for header_name, header_value in additional_headers.items():
+        header_name = header_name.lower() if header_name is not None else None
+        lowered_headers[header_name] = header_value
+
     canon_list = []
     added_headers = []  # store headers we've added, use for duplicate checking (case insensitive)
-    for header_name in sorted(additional_headers.keys()):
+    for header_name in sorted(lowered_headers.keys()):
         # Extract header value and set key to lower case from now on.
-        value = additional_headers[header_name]
-        header_name = header_name.lower() if header_name is not None else None
+        value = lowered_headers[header_name]
 
         # Validation gate. We will raise if a problem is found here.
         _validate_additional_header(header_name, value, added_headers)
