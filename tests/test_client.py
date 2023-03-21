@@ -207,7 +207,6 @@ class TestCanonicalize(unittest.TestCase):
         actual = duo_client.client.canonicalize(
             'POST', 'foO.BaR52.cOm', '/Foo/BaR2/qux', params, 'Tue, 17 Nov 2020 14:12:00',
             sig_version=5, body=body, additional_headers=headers)
-        #raise Exception(actual)
         self.assertEqual(actual, expected)
 
 
