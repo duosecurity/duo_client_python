@@ -175,6 +175,7 @@ class TestCanonicalize(unittest.TestCase):
         actual = duo_client.client.canonicalize(
             'POST', 'foO.BaR52.cOm', '/Foo/BaR2/qux', params, 'Tue, 17 Nov 2020 14:12:00',
             sig_version=5, body=body, additional_headers=headers)
+        self.assertEqual(actual, expected)
 
     def test_invalid_signature_version_raises(self):
         params = duo_client.client.Client.canon_json(JSON_BODY)
@@ -287,7 +288,7 @@ class TestSign(unittest.TestCase):
         expected = 'Basic ' + expected
         self.assertEqual(actual,
                          expected)
-                         
+
 class TestRequest(unittest.TestCase):
     """ Tests for the request created by api_call and json_api_call. """
     # usful args for testing
