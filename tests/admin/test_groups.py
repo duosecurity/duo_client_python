@@ -1,3 +1,4 @@
+import json
 import warnings
 from .. import util
 import duo_client.admin
@@ -212,5 +213,5 @@ class TestGroups(TestAdmin):
         response = self.client.modify_group('ABC123')
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(response['uri'], '/admin/v1/groups/ABC123')
-        self.assertEqual(util.params_to_dict(response['body']),
-                         {'account_id': [self.client.account_id]})
+        self.assertEqual(json.loads(response['body']),
+                         {'account_id': self.client.account_id})

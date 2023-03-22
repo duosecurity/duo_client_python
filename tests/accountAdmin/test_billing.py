@@ -1,3 +1,5 @@
+import json
+
 from .. import util
 import duo_client.admin
 from .base import TestAccountAdmin
@@ -22,14 +24,13 @@ class TestBilling(TestAccountAdmin):
         """
         response = self.client.set_edition('PLATFORM')
         uri = response['uri']
-        args = response['body']
 
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(uri, '/admin/v1/billing/edition')
-        self.assertEqual(util.params_to_dict(args),
+        self.assertEqual(json.loads(response['body']),
                          {
-                             'edition': ['PLATFORM'],
-                             'account_id': [self.client.account_id],
+                             'edition': 'PLATFORM',
+                             'account_id': self.client.account_id,
                          })
 
     def test_set_enterprise_billing_edition(self):
@@ -37,14 +38,13 @@ class TestBilling(TestAccountAdmin):
         """
         response = self.client.set_edition('ENTERPRISE')
         uri = response['uri']
-        args = response['body']
 
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(uri, '/admin/v1/billing/edition')
-        self.assertEqual(util.params_to_dict(args),
+        self.assertEqual(json.loads(response['body']),
                          {
-                             'edition': ['ENTERPRISE'],
-                             'account_id': [self.client.account_id],
+                             'edition': 'ENTERPRISE',
+                             'account_id': self.client.account_id,
                          })
 
     def test_get_telephony_credits(self):
@@ -65,12 +65,11 @@ class TestBilling(TestAccountAdmin):
         """
         response = self.client.set_telephony_credits(10)
         uri = response['uri']
-        args = response['body']
 
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(uri, '/admin/v1/billing/telephony_credits')
-        self.assertEqual(util.params_to_dict(args),
+        self.assertEqual(json.loads(response['body']),
                          {
-                             'credits': ['10'],
-                             'account_id': [self.client.account_id],
+                             'credits': '10',
+                             'account_id': self.client.account_id,
                          })

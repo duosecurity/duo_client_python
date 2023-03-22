@@ -54,7 +54,63 @@ def canon_params(params):
     return '&'.join(args)
 
 
-def canonicalize(method, host, uri, params, date, sig_version, body=None):
+def canon_x_duo_headers(additional_headers):
+    """
+    Args:
+        additional_headers: Dict
+    Returns:
+        stringified version of all headers that start with 'X-Duo*'. Which is then hashed.
+        Note: the keys are also lower-cased for signing.
+    """
+    if additional_headers is None:
+        additional_headers = {}
+
+    # Lower the headers before sorting them
+    lowered_headers = {}
+    for header_name, header_value in additional_headers.items():
+        header_name = header_name.lower() if header_name is not None else None
+        lowered_headers[header_name] = header_value
+
+    canon_list = []
+    added_headers = []  # store headers we've added, use for duplicate checking (case insensitive)
+    for header_name in sorted(lowered_headers.keys()):
+        # Extract header value and set key to lower case from now on.
+        value = lowered_headers[header_name]
+
+        # Validation gate. We will raise if a problem is found here.
+        _validate_additional_header(header_name, value, added_headers)
+
+        # Add to the list of values to canonicalize:
+        canon_list.extend([header_name, value])
+        added_headers.append(header_name)
+
+    canon = '\x00'.join(canon_list)
+    return hashlib.sha512(canon.encode('utf-8')).hexdigest()
+
+
+def _validate_additional_header(header_name, value, added_headers):
+    """
+    Args:
+        header_name: str
+        value: str
+        added_headers: list[str] - headers we've already added - check for duplicates (case insensitive)
+    Returns: None
+
+    Validates additional headers added to request - headers must comply with the following rules (for V5 sig_version)
+    """
+    if header_name is None or value is None:
+        raise ValueError("Not allowed 'None' as a header name or value")
+    if '\x00' in header_name:
+        raise ValueError("Not allowed 'Null' character in header name")
+    if '\x00' in value:
+        raise ValueError("Not allowed 'Null' character in header value")
+    if not header_name.lower().startswith('x-duo-'):
+        raise ValueError("Additional headers must start with \'X-Duo-\'")
+    if header_name.lower() in added_headers:
+        raise ValueError("Duplicate header passed, header={}".format(header_name))
+
+
+def canonicalize(method, host, uri, params, date, sig_version, body=None, additional_headers=None):
     """
     Return a canonical string version of the given request attributes.
 
@@ -91,17 +147,27 @@ def canonicalize(method, host, uri, params, date, sig_version, body=None):
             canon_params(params),
             hashlib.sha512(body.encode('utf-8')).hexdigest(),
         ]
+    elif sig_version == 5:
+        canon = [
+            date,
+            method.upper(),
+            host.lower(),
+            uri,
+            canon_params(params),
+            hashlib.sha512(body.encode('utf-8')).hexdigest(),
+            canon_x_duo_headers(additional_headers),  # hashed in canon_x_duo_headers
+        ]
     else:
         raise ValueError("Unknown signature version: {}".format(sig_version))
     return '\n'.join(canon)
 
 
 def sign(ikey, skey, method, host, uri, date, sig_version, params, body=None,
-         digestmod=hashlib.sha512): 
+         digestmod=hashlib.sha512, additional_headers=None):
     """
     Return basic authorization header line with a Duo Web API signature.
     """
-    canonical = canonicalize(method, host, uri, params, date, sig_version, body=body)
+    canonical = canonicalize(method, host, uri, params, date, sig_version, body=body, additional_headers=additional_headers)
     if isinstance(skey, six.text_type):
         skey = skey.encode('utf-8')
     if isinstance(canonical, six.text_type):
@@ -146,6 +212,7 @@ def normalize_params(params):
 
 
 class Client(object):
+    sig_version = 2
 
     def __init__(self, ikey, skey, host,
                  ca_certs=DEFAULT_CA_CERTS,
@@ -153,8 +220,8 @@ class Client(object):
                  user_agent=('Duo API Python/' + __version__),
                  timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
                  paging_limit=100,
-                 digestmod=hashlib.sha512, 
-                 sig_version=2,
+                 digestmod=hashlib.sha512,
+                 sig_version=None,
                  port=None
                  ):
         """
@@ -172,7 +239,8 @@ class Client(object):
         self.set_proxy(host=None, proxy_type=None)
         self.paging_limit = paging_limit
         self.digestmod = digestmod
-        self.sig_version = sig_version
+        if sig_version is not None:
+            self.sig_version = sig_version
 
         # Constants for handling rate limit backoff and retries
         self._MAX_BACKOFF_WAIT_SECS = 32
@@ -189,9 +257,6 @@ class Client(object):
         if sig_version == 3:
             raise ValueError('sig_version 3 not supported')
 
-        if sig_version == 4 and digestmod != hashlib.sha512:
-            raise ValueError('sha512 required for sig_version 4')
-
     def set_proxy(self, host, port=None, headers=None,
                   proxy_type='CONNECT'):
         """
@@ -207,7 +272,14 @@ class Client(object):
         self.proxy_port = port
         self.proxy_type = proxy_type
 
-    def api_call(self, method, path, params):
+    def api_call(
+        self,
+        method,
+        path,
+        params,
+        additional_headers=None,
+        sig_version=None,
+    ):
         """
         Call a Duo API method. Return a (response, data) tuple.
 
@@ -215,20 +287,30 @@ class Client(object):
         * path: Full path of the API endpoint. E.g. "/auth/v2/ping".
         * params: dict mapping from parameter name to stringified value,
             or a dict to be converted to json.
+        * sig_version: signature version integer
         """
         params_go_in_body = method in ('POST', 'PUT', 'PATCH')
-        if self.sig_version in (1, 2):
+        digestmod = self.digestmod
+        if additional_headers is None:
+            additional_headers = {}
+        if sig_version is None:
+            sig_version = self.sig_version
+
+        if sig_version in (1, 2):
             params = normalize_params(params)
             # v1 and v2 canonicalization don't distinguish between
             # params and body. There's no separate body input.
             body = None
-        elif self.sig_version == 4:
+        elif sig_version in (4, 5):
+            digestmod = hashlib.sha512
             if params_go_in_body:
                 body = self.canon_json(params)
                 params = {}
             else:
                 body = ''
                 params = normalize_params(params)
+        else:
+            raise ValueError(f"unsupported sig_version {sig_version}")
 
         if self.sig_timezone == 'UTC':
             now = email.utils.formatdate()
@@ -244,20 +326,25 @@ class Client(object):
                     self.host,
                     path,
                     now,
-                    self.sig_version,
+                    sig_version,
                     params,
                     body=body,
-                    digestmod=self.digestmod)
+                    digestmod=digestmod,
+                    additional_headers=additional_headers)
         headers = {
             'Authorization': auth,
             'Date': now,
         }
 
+        if sig_version == 5:
+            for k, v in additional_headers.items():
+                headers[k] = v
+
         if self.user_agent:
             headers['User-Agent'] = self.user_agent
 
         if params_go_in_body:
-            if self.sig_version == 4:
+            if sig_version in (4, 5):
                 headers['Content-type'] = 'application/json'
             else:
                 headers['Content-type'] = 'application/x-www-form-urlencoded'
