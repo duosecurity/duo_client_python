@@ -42,6 +42,7 @@ $ python setup.py install
 
 System:
 
+Install from [PyPi](https://pypi.org/project/duo-client/)
 ```
 $ pip install duo-client
 ```
