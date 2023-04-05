@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 """Print Duo Trust Monitor Events which surfaced within the past two weeks."""
 
-from __future__ import print_function
-from __future__ import absolute_import
-import datetime
+from __future__ import absolute_import, print_function
+
 import json
 import sys
+from datetime import datetime, timedelta, timezone
 
-from duo_client import Admin
 from six.moves import input
 
+from duo_client import Admin
 
 argv_iter = iter(sys.argv[1:])
 def get_next_arg(prompt):
@@ -24,8 +24,8 @@ def main(args):
     admin_client = Admin(args[0], args[1], args[2])
 
     # Query for Duo Trust Monitor events that were surfaced within the last two weeks (from today).
-    now = datetime.datetime.utcnow()
-    mintime_ms = int((now - datetime.timedelta(weeks=2)).timestamp() * 1000)
+    now = datetime.now(tz=timezone.utc)
+    mintime_ms = int((now - timedelta(weeks=2)).timestamp() * 1000)
     maxtime_ms = int(now.timestamp() * 1000)
 
     # Loop over the returned iterator to navigate through each event, printing it to stdout.

@@ -174,44 +174,39 @@ from __future__ import absolute_import
 import six.moves.urllib
 
 from . import client
+from .logs.telephony import Telephony
 import six
 import warnings
 import time
 import base64
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
-USER_STATUS_ACTIVE = 'active'
-USER_STATUS_BYPASS = 'bypass'
-USER_STATUS_DISABLED = 'disabled'
-USER_STATUS_LOCKED_OUT = 'locked out'
+USER_STATUS_ACTIVE = "active"
+USER_STATUS_BYPASS = "bypass"
+USER_STATUS_DISABLED = "disabled"
+USER_STATUS_LOCKED_OUT = "locked out"
 
-TOKEN_HOTP_6 = 'h6'
-TOKEN_HOTP_8 = 'h8'
-TOKEN_YUBIKEY = 'yk'
+TOKEN_HOTP_6 = "h6"
+TOKEN_HOTP_8 = "h8"
+TOKEN_YUBIKEY = "yk"
 
 VALID_AUTHLOG_REQUEST_PARAMS = [
-    'mintime',
-    'maxtime',
-    'limit',
-    'sort',
-    'next_offset',
-    'event_types',
-    'reasons',
-    'results',
-    'users',
-    'applications',
-    'groups',
-    'factors',
-    'api_version'
+    "mintime",
+    "maxtime",
+    "limit",
+    "sort",
+    "next_offset",
+    "event_types",
+    "reasons",
+    "results",
+    "users",
+    "applications",
+    "groups",
+    "factors",
+    "api_version",
 ]
 
-VALID_ACTIVITY_REQUEST_PARAMS = [
-    'mintime',
-    'maxtime',
-    'limit',
-    'sort',
-    'next_offset'
-]
+VALID_ACTIVITY_REQUEST_PARAMS = ["mintime", "maxtime", "limit", "sort", "next_offset"]
 
 
 class Admin(client.Client):
@@ -598,12 +593,12 @@ class Admin(client.Client):
                         "value" : <int: total objects in the time range>
                     }
                 }
-            },
+            }
 
         Raises RuntimeError on error.
         """
         params = {}
-        today = datetime.utcnow()
+        today = datetime.now(tz=timezone.utc)
         default_maxtime = int(today.timestamp() * 1000)
         default_mintime = int((today - timedelta(days=180)).timestamp() * 1000)
 
@@ -622,8 +617,6 @@ class Admin(client.Client):
         if 'limit' in params:
             params['limit'] = str(int(params['limit']))
 
-
-
         response = self.json_api_call(
             'GET',
             '/admin/v2/logs/activity',
@@ -634,41 +627,64 @@ class Admin(client.Client):
             row['host'] = self.host
         return response
 
-    def get_telephony_log(self,
-                          mintime=0):
+    def get_telephony_log(self, mintime=0, api_version=1, **kwargs):
         """
         Returns telephony log events.
 
         mintime - Fetch events only >= mintime (to avoid duplicate
-                  records that have already been fetched)
+            records that have already been fetched)
+        api_version - The API version of the handler to use.
+            Currently, the default api version is v1, but the v1 API
+            will be deprecated in a future version of the Duo Admin API.
+            Please migrate to the v2 api at your earliest convenience.
+            For details on the differences between v1 and v2,
+            please see Duo's Admin API documentation. (Optional)
 
-        Returns:
+        v1 Returns:
             [
-                {'timestamp': <int:unix timestamp>,
-                 'eventtype': "telephony",
-                 'host': <str:host>,
-                 'context': <str:context>,
-                 'type': <str:type>,
-                 'phone': <str:phone number>,
-                 'credits': <str:credits>}, ...
+                {
+                    'timestamp': <int:unix timestamp>,
+                    'eventtype': "telephony",
+                    'host': <str:host>,
+                    'context': <str:context>,
+                    'type': <str:type>,
+                    'phone': <str:phone number>,
+                    'credits': <str:credits>}
             ]
+            
+        v2 Returns:
+            {
+                "items": [
+                    {
+                        'context': <str>,
+                        'credits': <int: credits used>,
+                        'phone': <str:phone number>,
+                        'telephony_id': <str:UUID>,
+                        'ts': <str:ISO timestamp>,
+                        'txid': <str:UUID>,
+                        'type': <str:"sms" or "phone">,
+                        'eventtype': <str:"telephony">,
+                        'host': <str:application hostname>
+                    }
+                ],
+                "metadata": {
+                    "next_offset": <str: comma seperated ts and offset value>
+                    "total_objects": {
+                        "relation" : <str: relational operator>
+                        "value" : <int: total objects in the time range>
+                    }
+                }
+            }
 
         Raises RuntimeError on error.
         """
-        # Sanity check mintime as unix timestamp, then transform to string
-        mintime = str(int(mintime))
-        params = {
-            'mintime': mintime,
-        }
-        response = self.json_api_call(
-            'GET',
-            '/admin/v1/logs/telephony',
-            params,
-        )
-        for row in response:
-            row['eventtype'] = 'telephony'
-            row['host'] = self.host
-        return response
+
+        if api_version not in [1,2]:
+            raise ValueError("Invalid API Version")
+
+        if api_version == 2:
+            return Telephony.get_telephony_logs_v2(self.json_api_call, self.host, **kwargs)
+        return Telephony.get_telephony_logs_v1(self.json_api_call, self.host, mintime=mintime)
 
     def get_users_iterator(self):
         """
