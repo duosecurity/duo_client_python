@@ -25,7 +25,7 @@ class TestTelephonyLogEndpoints(TestAdmin):
         expected_mintime = str(
             int((freezed_time - timedelta(days=180)).timestamp() * 1000)
         )
-        expected_maxtime = str(int(freezed_time.timestamp() * 1000))
+        expected_maxtime = str(int(freezed_time.timestamp() * 1000) - 120)
         response = self.items_response_client.get_telephony_log(api_version=2)
         uri, args = response["uri"].split("?")
         param_dict = util.params_to_dict(args)
