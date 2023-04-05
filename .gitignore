@@ -9,3 +9,6 @@ dist
 .idea
 env/
 py3env/
+.venv
+duo_client.egg-info
+*.DS_Store
