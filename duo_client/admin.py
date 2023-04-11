@@ -3266,6 +3266,88 @@ class Admin(client.Client):
             params,
         )
 
+    def _quote_policy_id(self, policy_key):
+        return six.moves.urllib.parse.quote_plus("{}".format(policy_key))
+
+    def get_policies_v2_iterator(self):
+        """
+        Obtain an iterator for retrieving all the policies. The order isn't defined.
+        Returns: Iterator of dict elements. Each element contains the policy content.
+        """
+
+        return self.json_paging_api_call(
+            "GET",
+            "/admin/v2/policies",
+            {},
+        )
+
+    def get_policies_v2(self, limit=None, offset=0):
+        """
+        Retrieves a list of policies. The order isn't defined.
+        Args:
+            limit (int, optional): The max number of policies to fetch at once.
+            offset (int, optional): If a limit is passed, the offset to start retrieval.
+                Default 0
+        Raises RuntimeError on error.
+        """
+
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call(
+                "GET",
+                "/admin/v2/policies",
+                {"limit": limit, "offset": offset},
+            )
+        return list(self.get_policies_v2_iterator())
+
+    def delete_policy_v2(self, policy_key):
+        """
+        Deletes a policy.
+        Params:
+            policy_key (str) - Unique id of the policy
+        Notes:
+            Raises RuntimeError on error.
+        """
+
+        path = "/admin/v2/policies/" + self._quote_policy_id(policy_key)
+        return self.json_api_call("DELETE", path, {})
+
+    def update_policy_v2(self, policy_key, json_request):
+        """
+        Update the content of a single policy
+        Args:
+            policy_key (str) - Unique id of the policy
+            json_request (dict) - policy content to update.
+        Returns (dict) - policy after updates have been made.
+        """
+
+        path = "/admin/v2/policies/" + self._quote_policy_id(policy_key)
+        response = self.json_api_call("PUT", path, json_request)
+        return response
+
+    def create_policy_v2(self, json_request):
+        """
+        Args:
+            json_request (dict) - policy content to create.
+        Returns (dict) - newly created policy
+        """
+
+        path = "/admin/v2/policies"
+        response = self.json_api_call("POST", path, json_request)
+        return response
+
+    def get_policy_v2(self, policy_key):
+        """
+        Args:
+            policy_key: policy_key (str) - Unique id of the policy
+        Returns (dict) - policy content
+        """
+
+        path = "/admin/v2/policies/" + self._quote_policy_id(policy_key)
+        response = self.json_api_call("GET", path, {})
+        return response
+
+
 class AccountAdmin(Admin):
     """AccountAdmin manages a child account using an Accounts API integration."""
 
