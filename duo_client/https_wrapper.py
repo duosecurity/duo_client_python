@@ -118,7 +118,8 @@ class CertValidatingHTTPSConnection(six.moves.http_client.HTTPConnection):
                                              self.timeout)
         if self._tunnel_host:
             self._tunnel()
-        self.sock = self.default_ssl_context.wrap_socket(self.sock)
+        self.sock = self.default_ssl_context.wrap_socket(self.sock,
+                                                         server_hostname=self.host)
         if self.default_ssl_context.verify_mode == ssl.CERT_REQUIRED:
             cert = self.sock.getpeercert()
             cert_validation_host = self._tunnel_host or self.host
