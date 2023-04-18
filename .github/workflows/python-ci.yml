@@ -9,6 +9,7 @@ on:
     
 jobs:
   test:
+    name: Python CI - test
     runs-on: ubuntu-latest
 
     strategy:
