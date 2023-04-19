@@ -34,3 +34,10 @@ class TestSSLContextCreation(unittest.TestCase):
         conn = CertValidatingHTTPSConnection(hostname)
         conn.connect()
         self.assertEqual(conn.sock.server_hostname, hostname)
+
+    @mock.patch('socket.socket.connect')
+    def test_server_hostname_with_port(self, mock_connect):
+        hostname = 'api-fakehost.duosecurity.com'
+        conn = CertValidatingHTTPSConnection(f'{hostname}:443')
+        conn.connect()
+        self.assertEqual(conn.sock.server_hostname, hostname)
