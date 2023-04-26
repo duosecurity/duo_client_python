@@ -546,13 +546,6 @@ class Client(object):
 
         return response
 
-    def get_first_list_value_from_dict(self, response):
-        return [
-            key for key in response.keys()
-            if key != 'metadata' and isinstance(response[key], list)
-        ].pop()
-
-
     def parse_json_response_and_metadata(self, response, data):
         """
         Return the parsed data structure and metadata as a tuple or raise RuntimeError.
