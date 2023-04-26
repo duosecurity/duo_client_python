@@ -125,6 +125,24 @@ class MockPagingHTTPConnection(MockHTTPConnection):
         self.limit = int(params['limit'][0])
         self.offset = int(params['offset'][0])
 
+class MockAlternatePagingHTTPConnection(MockPagingHTTPConnection):
+    def read(self):
+        metadata = {}
+        metadata['total_objects'] = len(self.objects)
+        if self.offset + self.limit < len(self.objects):
+            metadata['next_offset'] = self.offset + self.limit
+        if self.offset > 0:
+            metadata['prev_offset'] = max(self.offset-self.limit, 0)
+
+        return json.dumps(
+                {"stat":"OK",
+                 "response": {
+                    "data" : self.objects[self.offset: self.offset+self.limit],
+                    "metadata": metadata
+                  },
+                },
+                cls=MockObjectJsonEncoder)
+
 
 class MockMultipleRequestHTTPConnection(MockHTTPConnection):
     def __init__(self, statuses):

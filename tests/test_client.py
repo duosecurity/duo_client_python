@@ -381,11 +381,13 @@ class TestRequest(unittest.TestCase):
         self.assertEqual(util.params_to_dict(response['body']), self.args_out)
 
 class TestPaging(unittest.TestCase):
+    PagingClass = util.MockPagingHTTPConnection
+
     def setUp(self):
         self.client = util.CountingClient(
             'test_ikey', 'test_akey', 'example.com', paging_limit=100)
         self.objects = [util.MockJsonObject() for i in range(1000)]
-        self.client._connect = lambda: util.MockPagingHTTPConnection(self.objects)
+        self.client._connect = lambda: self.PagingClass(self.objects)
 
     def test_get_objects_paging(self):
         response = self.client.json_paging_api_call(
@@ -413,6 +415,10 @@ class TestPaging(unittest.TestCase):
         expected = [obj.to_json() for obj in self.objects]
         self.assertListEqual(expected, list(response))
         self.assertEqual(1, self.client.counter)
+
+class TestAlternatePaging(TestPaging):
+    PagingClass = util.MockAlternatePagingHTTPConnection
+
 
 class TestRequestsV4(unittest.TestCase):
     # usful args for testing GETs
