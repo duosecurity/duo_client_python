@@ -593,14 +593,8 @@ class Client(object):
             response = data['response']
             metadata = data.get('metadata', {})
             if not metadata and not isinstance(response, list):
-            # If the response is an object that we're trying to page over we have to assume
-            # 1. The response has only a `metadata` key and one other key
-            # 2. The "other key" will have a list value
-            # If for some reason there are multiple lists we just take the first one
                 metadata = response.get('metadata', {})
-                if metadata:
-                    response_key = self.get_first_list_value_from_dict(response)
-                    response = response[response_key]
+
             return (response, metadata)
         except (ValueError, KeyError, TypeError):
             raise_error('Received bad response: %s' % data)

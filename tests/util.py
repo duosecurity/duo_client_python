@@ -123,7 +123,10 @@ class MockPagingHTTPConnection(MockHTTPConnection):
         params = six.moves.urllib.parse.parse_qs(parsed.query)
 
         self.limit = int(params['limit'][0])
-        self.offset = int(params['offset'][0])
+
+        # offset is always present with list-based paging but cannot be
+        # present on the initial request with cursor-based paging
+        self.offset = int(params.get('offset', [0])[0])
 
 class MockAlternatePagingHTTPConnection(MockPagingHTTPConnection):
     def read(self):
