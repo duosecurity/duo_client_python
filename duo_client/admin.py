@@ -3211,7 +3211,7 @@ class Admin(client.Client):
             "GET",
             "/admin/v1/trust_monitor/events",
             params,
-            lambda resp: resp["events"],
+            lambda resp: resp
         )
 
     def get_trust_monitor_events_by_offset(

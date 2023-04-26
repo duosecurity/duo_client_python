@@ -546,7 +546,7 @@ class Client(object):
 
         return response
 
-    def get_first_list_value_from_dict(self, object):
+    def get_first_list_value_from_dict(self, response):
         return [
             key for key in response.keys()
             if key != 'metadata' and isinstance(response[key], list)
