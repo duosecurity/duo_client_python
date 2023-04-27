@@ -381,7 +381,6 @@ class TestRequest(unittest.TestCase):
         self.assertEqual(util.params_to_dict(response['body']), self.args_out)
 
 class TestPaging(unittest.TestCase):
-
     def setUp(self):
         self.client = util.CountingClient(
             'test_ikey', 'test_akey', 'example.com', paging_limit=100)
@@ -421,7 +420,6 @@ class TestAlternatePaging(unittest.TestCase):
             'test_ikey', 'test_akey', 'example.com', paging_limit=100)
         self.objects = [util.MockJsonObject() for i in range(1000)]
         self.client._connect = lambda: util.MockAlternatePagingHTTPConnection(self.objects)
-        self.client.json_cursor_api_call = self.client.json_cursor_api_call
 
     def test_get_objects_paging(self):
         response = self.client.json_cursor_api_call(
