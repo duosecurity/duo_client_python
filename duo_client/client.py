@@ -583,7 +583,12 @@ class Client(object):
             data = json.loads(data)
             if data['stat'] != 'OK':
                 raise_error('Received error response: %s' % data)
-            return (data['response'], data.get('metadata', {}))
+            response = data['response']
+            metadata = data.get('metadata', {})
+            if not metadata and not isinstance(response, list):
+                metadata = response.get('metadata', {})
+
+            return (response, metadata)
         except (ValueError, KeyError, TypeError):
             raise_error('Received bad response: %s' % data)
 
