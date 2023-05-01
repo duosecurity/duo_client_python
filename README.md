@@ -27,7 +27,7 @@ Duo_client_python supports Python 3.7 and higher
 
 ## TLS 1.2 and 1.3 Support
 
-Duo_client_python uses Python's ssl module and OpenSSL for TLS operations.  Python versions 2.7 (and higher) and 3.5 (and higher) have both TLS 1.2 and TLS 1.3 support.
+Duo_client_python uses Python's ssl module and OpenSSL for TLS operations.  Python versions 3.7 (and higher) have both TLS 1.2 and TLS 1.3 support.
 
 # Installing
 
