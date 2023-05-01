@@ -23,7 +23,7 @@ If you have any questions or need more information, feel free to reach out to su
 * 3.11
 
 ## Requirements
-Duo_client_python supports python 3.7 and higher
+Duo_client_python supports Python 3.7 and higher
 
 ## TLS 1.2 and 1.3 Support
 
