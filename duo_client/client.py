@@ -585,7 +585,7 @@ class Client(object):
                 raise_error('Received error response: %s' % data)
             response = data['response']
             metadata = data.get('metadata', {})
-            if not metadata and not isinstance(response, list):
+            if not metadata and isinstance(response, dict):
                 metadata = response.get('metadata', {})
 
             return (response, metadata)
