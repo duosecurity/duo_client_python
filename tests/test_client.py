@@ -628,6 +628,22 @@ class TestParseJsonResponseAndMetadata(unittest.TestCase):
         self.assertEqual(e.exception.reason, api_res.reason)
         self.assertEqual(e.exception.data, response)
 
+    def test_response_is_a_string(self):
+        """
+        Some API requests return just a string in their response.
+        We want to make sure we handle those correctly
+        """
+        api_res = self.APIResponse(200, 'Fake reason')
+        response = {
+            'response': "just a string",
+            'stat': 'OK'
+        }
+        try:
+            self.client.parse_json_response_and_metadata(api_res, json.dumps(response))
+        except Exception:
+            self.fail("parsing raised exception for string response")
+
+
     def test_response_stat_isnot_OK(self):
         api_res = self.APIResponse(200, 'Fake reason')
 
