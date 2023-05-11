@@ -112,6 +112,8 @@ Settings objects are returned in the following format:
      'password_requires_special': <bool:is special character required>,
      'security_checkup_enabled': <bool:is the security checkup feature enabled>,
      'user_managers_can_put_users_in_bypass': <bool:can user managers put users in bypass status>,
+     'email_activity_notification_enabled': <bool:can users get activity notifications via email>,
+     'push_activity_notification_enabled': <bool:can users get activity notifications via Duo Mobile>,
     }
 
 
@@ -1922,6 +1924,8 @@ class Admin(client.Client):
                         reactivation_integration_key=None,
                         security_checkup_enabled=None,
                         user_managers_can_put_users_in_bypass=None,
+                        email_activity_notification_enabled=None,
+                        push_activity_notification_enabled=None,
                         ):
         """
         Update settings.
@@ -1961,6 +1965,8 @@ class Admin(client.Client):
         reactivation_integration_key - <str:url>|None
         security_checkup_enabled - True|False|None
         user_managers_can_put_users_in_bypass - True|False|None
+        email_activity_notification_enabled = True|False|None
+        push_activity_notification_enabled = True|False|None
 
         Returns updated settings object.
 
@@ -2036,6 +2042,14 @@ class Admin(client.Client):
         if user_managers_can_put_users_in_bypass is not None:
             params['user_managers_can_put_users_in_bypass'] = ('1' if
                 user_managers_can_put_users_in_bypass else '0')
+        if email_activity_notification_enabled is not None:
+            params['email_activity_notification_enabled'] = (
+                '1' if email_activity_notification_enabled else '0'
+            )
+        if push_activity_notification_enabled is not None:
+            params['push_activity_notification_enabled'] = (
+                '1' if push_activity_notification_enabled else '0'
+            )
 
         if not params:
             raise TypeError("No settings were provided")
