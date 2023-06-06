@@ -336,7 +336,7 @@ class TestRequest(unittest.TestCase):
         (response, dummy) = self.client.api_call('POST', '/foo/bar', {})
         self.assertEqual(response.method, 'POST')
         self.assertEqual(response.uri, '/foo/bar')
-        self.assertEqual(response.body, '')
+        self.assertEqual(json.loads(response.body), {})
 
     def test_api_call_get_params(self):
         (response, dummy) = self.client.api_call(
@@ -351,7 +351,7 @@ class TestRequest(unittest.TestCase):
             'POST', '/foo/bar', self.args_in)
         self.assertEqual(response.method, 'POST')
         self.assertEqual(response.uri, '/foo/bar')
-        self.assertEqual(util.params_to_dict(response.body), self.args_out)
+        self.assertEqual(json.loads(response.body), self.args_out)
 
     def test_json_api_call_get_no_params(self):
         response = self.client.json_api_call('GET', '/foo/bar', {})
@@ -363,7 +363,7 @@ class TestRequest(unittest.TestCase):
         response = self.client.json_api_call('POST', '/foo/bar', {})
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(response['uri'], '/foo/bar')
-        self.assertEqual(response['body'], '')
+        self.assertEqual(json.loads(response['body']), {})
 
     def test_json_api_call_get_params(self):
         response = self.client.json_api_call(
@@ -378,7 +378,7 @@ class TestRequest(unittest.TestCase):
             'POST', '/foo/bar', self.args_in)
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(response['uri'], '/foo/bar')
-        self.assertEqual(util.params_to_dict(response['body']), self.args_out)
+        self.assertEqual(json.loads(response['body']), self.args_out)
 
 class TestPaging(unittest.TestCase):
     def setUp(self):

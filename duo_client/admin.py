@@ -213,7 +213,6 @@ VALID_ACTIVITY_REQUEST_PARAMS = ["mintime", "maxtime", "limit", "sort", "next_of
 
 class Admin(client.Client):
     account_id = None
-    sig_version = 5
 
     def api_call(self, method, path, params):
         if self.account_id is not None:
@@ -653,7 +652,7 @@ class Admin(client.Client):
                     'phone': <str:phone number>,
                     'credits': <str:credits>}
             ]
-            
+
         v2 Returns:
             {
                 "items": [

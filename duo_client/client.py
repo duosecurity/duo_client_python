@@ -212,7 +212,7 @@ def normalize_params(params):
 
 
 class Client(object):
-    sig_version = 2
+    sig_version = 5
 
     def __init__(self, ikey, skey, host,
                  ca_certs=DEFAULT_CA_CERTS,
