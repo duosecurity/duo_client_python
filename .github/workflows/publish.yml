@@ -8,8 +8,7 @@ on:
     types: [created]
 
 jobs:
-  deploy:
-
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,10 +21,54 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install setuptools wheel twine
+    - name: Generate SBOM
+      run: |
+        pip install cyclonedx-bom
+        cyclonedx-py --e --format json -o cyclonedx-sbom.json
+
+    - name: Build and publish
+      run: |
+        python setup.py sdist bdist_wheel
+    - uses: actions/upload-artifact@master
+      with:
+        name: dist-directory
+        path: ./dist
+    - uses: actions/upload-artifact@master
+      with:
+        name: cyclonedx-json
+        path: ./cyclonedx-sbom.json
+
+  convert:
+    needs: [build]
+    uses: mbish/duo_client_python/.github/workflows/sbom-convert.yml@sbom-workflow
+
+  deploy:
+    needs: [build, convert]
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        # this is just the version that twine runs on
+        python-version: '3.x'
+    - uses: actions/download-artifact@master
+      with:
+        name: dist-directory
+        path: ./dist
+    - uses: actions/download-artifact@master
+      with:
+        name: spdx-sbom
+        path: spdx.json
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install twine
     - name: Build and publish
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        python setup.py sdist bdist_wheel
         twine upload dist/*
