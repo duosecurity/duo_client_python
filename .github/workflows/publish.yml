@@ -40,7 +40,7 @@ jobs:
 
   convert:
     needs: [build]
-    uses: mbish/duo_client_python/.github/workflows/sbom-convert.yml@sbom-workflow
+    uses: duosecurity/duo_client_python/.github/workflows/sbom-convert.yml@master
 
   deploy:
     needs: [build, convert]
