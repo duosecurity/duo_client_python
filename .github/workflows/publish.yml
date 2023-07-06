@@ -22,6 +22,12 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install setuptools wheel twine
+    - name: Generate SBOM
+      run: |
+        pip install cyclonedx-bom
+        cyclonedx-py --e --format json -o cyclonedx-sbom.json
+    - name: Convert SBOM
+      uses: duosecurity/duo_client_python/.github/actions/sbom-convert@master
     - name: Build and publish
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
