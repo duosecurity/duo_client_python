@@ -73,3 +73,10 @@ class TestPolicies(TestAdmin):
         self.assertDictEqual(
             util.params_to_dict(args), {"limit": ["100"], "offset": ["0"]}
         )
+
+    def test_get_policy_summary(self):
+        response = self.client.get_policy_summary_v2()
+        uri, _ = response["uri"].split("?")
+
+        self.assertEqual(response["method"], "GET")
+        self.assertEqual(uri, "/admin/v2/policies/summary")
