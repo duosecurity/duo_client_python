@@ -28,7 +28,7 @@ def create_empty_policy(name, print_response=False):
     """
 
     json_request = {
-        "name": name,
+        "policy_name": name,
     }
     response = admin_api.create_policy_v2(json_request)
     if print_response:
@@ -44,7 +44,7 @@ def create_policy_browsers(name, print_response=False):
     """
 
     json_request = {
-        "name": name,
+        "policy_name": name,
         "sections": {
             "browsers": {
                 "blocked_browsers_list": [
@@ -103,11 +103,13 @@ def iterate_all_policies():
     print("#####################")
     print("Iterating over all policies...")
     print("#####################")
-    iter = sorted(admin_api.get_policies_v2_iterator(), key=lambda x: x.get("name"))
+    iter = sorted(
+        admin_api.get_policies_v2_iterator(), key=lambda x: x.get("policy_name")
+    )
     for policy in iter:
         print(
             "##################### {} {}".format(
-                policy.get("name"), policy.get("policy_key")
+                policy.get("policy_name"), policy.get("policy_key")
             )
         )
         pretty = json.dumps(policy, indent=4, sort_keys=True, default=str)
