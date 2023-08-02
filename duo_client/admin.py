@@ -3362,6 +3362,16 @@ class Admin(client.Client):
         path = "/admin/v2/policies/" + self._quote_policy_id(policy_key)
         response = self.json_api_call("GET", path, {})
         return response
+    
+    def get_policy_summary_v2(self):
+        """
+        Returns (dict) - summary of all policies and the applications 
+        and groups to which they are applied. 
+        """
+
+        path = "/admin/v2/policies/summary"
+        response = self.json_api_call("GET", path, {})
+        return response
 
 
 class AccountAdmin(Admin):
