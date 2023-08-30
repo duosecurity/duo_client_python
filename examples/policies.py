@@ -19,7 +19,6 @@ admin_api = duo_client.Admin(
     ikey=get_next_arg('Admin API integration key ("DI..."): '),
     skey=get_next_arg("integration secret key: "),
     host=get_next_arg('API hostname ("api-....duosecurity.com"): '),
-    ca_certs="DISABLE",
 )
 
 
