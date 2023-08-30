@@ -39,6 +39,17 @@ class TestPolicies(TestAdmin):
         self.assertEqual(response["method"], "PUT")
         self.assertEqual(response["uri"], "/admin/v2/policies/{}".format(policy_key))
 
+    def test_update_policies_v2(self):
+        edit_list = ["POSTGY2G0HVWJR4JO1XT", "POSTGY2G0HVWJR4JO1XU"]
+        sections = {
+                "browsers": {
+                    "blocked_browsers_list": ["ie"],
+                }
+        }
+        response = self.client.update_policies_v2(sections, [], edit_list)
+        self.assertEqual(response["method"], "PUT")
+        self.assertEqual(response["uri"], "/admin/v2/policies/update")
+
     def test_create_policy_v2(self):
         policy_settings = {
             "name": "my new policy",
@@ -52,6 +63,14 @@ class TestPolicies(TestAdmin):
 
         self.assertEqual(response["method"], "POST")
         self.assertEqual(response["uri"], "/admin/v2/policies")
+
+    def test_copy_policy_v2(self):
+        policy_key = "POSTGY2G0HVWJR4JO1XT"
+        new_policy_names_list = ["Copied Pol 1", "Copied Pol 2"]
+        response = self.client.copy_policy_v2(policy_key, new_policy_names_list)
+
+        self.assertEqual(response["method"], "POST")
+        self.assertEqual(response["uri"], "/admin/v2/policies/copy")
 
     def test_get_policies_v2(self):
         response = self.client.get_policies_v2(limit=3, offset=0)

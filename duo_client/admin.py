@@ -3344,14 +3344,15 @@ class Admin(client.Client):
     def update_policies_v2(self, sections, sections_to_delete, 
                            edit_list, edit_all_policies=False):
         """
-        Update the contents of multiple policies
+        Update the contents of multiple policies.
+
         Args:
-            sections (dict) - policy content to update
-            sections_to_delete (array) - List of section names to delete
-            edit_list (array) - List of new policy keys to apply the changes to.
-                                Ignored if edit_all_policies is True.
-            edit_all_policies (bool, optional) - Apply changes to all policies
-        Returns (list) - all updated policies
+            sections (dict): policy content to update
+            sections_to_delete (array): List of section names to delete
+            edit_list (array): List of new policy keys to apply the changes to.
+                               Ignored if edit_all_policies is True.
+            edit_all_policies (bool, optional): Apply changes to all policies
+        Returns (list): all updated policies
         """
         path = "/admin/v2/policies/update"
         params = {
@@ -3380,12 +3381,14 @@ class Admin(client.Client):
     
     def copy_policy_v2(self, policy_key, new_policy_names_list):
         """
+        Copy policy to multiple new policies.
+ 
         Args:
-            policy_key (str) - Unique id of the policy to copy from
-            new_policy_names_list (array) - The policy specified by policy_key
+            policy_key (str): Unique id of the policy to copy from
+            new_policy_names_list (array): The policy specified by policy_key
                                             will be copied once for each name
                                             in the list
-        Returns (list) - all new policies
+        Returns (list): all new policies
         """
         path = "/admin/v2/policies/copy"
         params = {
