@@ -19,6 +19,7 @@ admin_api = duo_client.Admin(
     ikey=get_next_arg('Admin API integration key ("DI..."): '),
     skey=get_next_arg("integration secret key: "),
     host=get_next_arg('API hostname ("api-....duosecurity.com"): '),
+    ca_certs="DISABLE",
 )
 
 
@@ -59,6 +60,25 @@ def create_policy_browsers(name, print_response=False):
         print(pretty)
     return response.get("policy_key")
 
+def copy_policy(name1, name2, copy_from, print_response=False):
+    """
+    Copy the policy `copy_from` to two new policies.
+    """
+    response = admin_api.copy_policy_v2(copy_from, [name1, name2])
+    if print_response:
+        pretty = json.dumps(response, indent=4, sort_keys=True, default=str)
+        print(pretty)
+    policies = response.get("policies")
+    return (policies[0].get("policy_key"), policies[1].get("policy_key"))
+
+def bulk_delete_section(policy_keys, print_response=False):
+    """
+    Delete the section "browsers" from the provided policies.
+    """
+    response = admin_api.update_policies_v2("", ["browsers"], policy_keys)
+    if print_response:
+        pretty = json.dumps(response, indent=4, sort_keys=True, default=str)
+        print(pretty)
 
 def update_policy_with_device_health_app(policy_key, print_response=False):
     """
@@ -130,6 +150,12 @@ def main():
 
     # Create a policy with browser restriction settings.
     policy_key_d = create_policy_browsers("Test New Policy - d")
+
+    # Copy a policy to 2 new policies.
+    policy_key_e, policy_key_f = copy_policy("Test New Policy - e", "Test New Policy - f", policy_key_d)
+
+    # Delete the browser restriction settings from 2 policies.
+    bulk_delete_section([policy_key_e, policy_key_f])
 
     # Fetch the global and other custom policy.
     get_policy("global")
