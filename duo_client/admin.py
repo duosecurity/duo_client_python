@@ -175,6 +175,7 @@ import six.moves.urllib
 from . import client
 import six
 import warnings
+import json
 import time
 import base64
 from datetime import datetime, timedelta
@@ -718,6 +719,44 @@ class Admin(client.Client):
         response = self.json_api_call('GET',
                                       '/admin/v1/users',
                                       params)
+        return response
+
+    def get_users_by_names(self, usernames):
+        """
+        Returns users specified by usernames.
+
+        usernames - Users to fetch
+
+        Returns a list user objects matching usernames (or aliases).
+
+        Raises RuntimeError on error.
+        """
+        username_list = json.dumps(usernames)
+        params = {
+            'username_list': username_list,
+        }
+        response = self.json_paging_api_call('GET',
+                                             '/admin/v1/users',
+                                             params)
+        return response
+
+    def get_users_by_ids(self, user_ids):
+        """
+        Returns users specified by user ids.
+
+        user_ids - Users to fetch
+
+        Returns a list user objects matching user ids.
+
+        Raises RuntimeError on error.
+        """
+        user_id_list = json.dumps(user_ids)
+        params = {
+            'user_id_list': user_id_list,
+        }
+        response = self.json_paging_api_call('GET',
+                                             '/admin/v1/users',
+                                             params)
         return response
 
     def add_user(self, username, realname=None, status=None,
@@ -2181,6 +2220,23 @@ class Admin(client.Client):
             'GET',
             '/admin/v1/groups',
             {}
+        )
+
+    def get_groups_by_group_ids(self, group_ids):
+        """
+        Get a list of groups by their group ids
+
+        Args:
+            group_ids: list of group ids to fetch
+
+        Returns:
+            list of groups
+        """
+        group_id_list = json.dumps(group_ids)
+        return self.json_api_call(
+            'GET',
+            '/admin/v1/groups',
+            {'group_id_list': group_id_list}
         )
 
     def get_groups(self, limit=None, offset=0):
