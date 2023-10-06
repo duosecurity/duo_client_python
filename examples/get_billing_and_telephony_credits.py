@@ -28,16 +28,16 @@ accounts_api = duo_client.Accounts(
 kwargs = {
         'ikey': ikey,
         'skey': skey,
-        'host': host,
 }
 
 # Get all child accounts
 child_accounts = accounts_api.get_child_accounts()
 
 for child_account in child_accounts:
-    # Create AccountAdmin with child account_id and kwargs consisting of ikey, skey, and host
+    # Create AccountAdmin with child account_id, child api_hostname and kwargs consisting of ikey, skey
     account_admin_api = duo_client.admin.AccountAdmin(
             child_account['account_id'],
+            host = child_account['api_hostname'],
             **kwargs,
     )
     try:
