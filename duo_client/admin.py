@@ -175,7 +175,7 @@ from __future__ import absolute_import
 
 import six.moves.urllib
 
-from . import client
+from . import client, Accounts
 from .logs.telephony import Telephony
 import six
 import warnings
@@ -3437,6 +3437,17 @@ class AccountAdmin(Admin):
         """Initializes an AccountAdmin for administering a child account.
            account_id is the account id of the child account.
            See the Client base class for other parameters."""
+        child_api_host =  Accounts.child_map.get(account_id, None)
+        if child_api_host is None:
+            child_api_host = kwargs.get('host')
+            try:
+                accounts_api = Accounts(**kwargs)
+                accounts_api.get_child_accounts()
+                child_api_host =  Accounts.child_map.get(account_id, kwargs['host'])
+            except RuntimeError:
+                pass
+        kwargs['host'] = child_api_host
+        
         super(AccountAdmin, self).__init__(**kwargs)
         self.account_id = account_id
 
