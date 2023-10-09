@@ -5,7 +5,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 import six
 
-__version__ = '4.5.0'
+__version__ = '5.1.0'
 
 import base64
 import collections
@@ -65,12 +65,17 @@ def canon_x_duo_headers(additional_headers):
     if additional_headers is None:
         additional_headers = {}
 
+    # Lower the headers before sorting them
+    lowered_headers = {}
+    for header_name, header_value in additional_headers.items():
+        header_name = header_name.lower() if header_name is not None else None
+        lowered_headers[header_name] = header_value
+
     canon_list = []
     added_headers = []  # store headers we've added, use for duplicate checking (case insensitive)
-    for header_name in sorted(additional_headers.keys()):
+    for header_name in sorted(lowered_headers.keys()):
         # Extract header value and set key to lower case from now on.
-        value = additional_headers[header_name]
-        header_name = header_name.lower() if header_name is not None else None
+        value = lowered_headers[header_name]
 
         # Validation gate. We will raise if a problem is found here.
         _validate_additional_header(header_name, value, added_headers)
@@ -207,6 +212,7 @@ def normalize_params(params):
 
 
 class Client(object):
+    sig_version = 5
 
     def __init__(self, ikey, skey, host,
                  ca_certs=DEFAULT_CA_CERTS,
@@ -215,7 +221,7 @@ class Client(object):
                  timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
                  paging_limit=100,
                  digestmod=hashlib.sha512,
-                 sig_version=2,
+                 sig_version=None,
                  port=None
                  ):
         """
@@ -233,7 +239,8 @@ class Client(object):
         self.set_proxy(host=None, proxy_type=None)
         self.paging_limit = paging_limit
         self.digestmod = digestmod
-        self.sig_version = sig_version
+        if sig_version is not None:
+            self.sig_version = sig_version
 
         # Constants for handling rate limit backoff and retries
         self._MAX_BACKOFF_WAIT_SECS = 32
@@ -303,7 +310,7 @@ class Client(object):
                 body = ''
                 params = normalize_params(params)
         else:
-            raise ValueError(f"unsupported sig_version {sig_version}")
+            raise ValueError('unsupported sig_version {}'.format(sig_version))
 
         if self.sig_timezone == 'UTC':
             now = email.utils.formatdate()
@@ -462,16 +469,16 @@ class Client(object):
 
         return (limit, offset)
 
-    def json_api_call(self, method, path, params, sig_version=None):
+    def json_api_call(self, method, path, params):
         """
         Call a Duo API method which is expected to return a JSON body
         with a 200 status. Return the response data structure or raise
         RuntimeError.
         """
-        (response, data) = self.api_call(method, path, params, sig_version=sig_version)
+        (response, data) = self.api_call(method, path, params)
         return self.parse_json_response(response, data)
 
-    def json_paging_api_call(self, method, path, params, sig_version=None):
+    def json_paging_api_call(self, method, path, params):
         """
         Call a Duo API method which is expected to return a JSON body
         with a 200 status. Return a generator that can be used to get
@@ -485,13 +492,13 @@ class Client(object):
 
         while next_offset is not None:
             params['offset'] = str(next_offset)
-            (response, data) = self.api_call(method, path, params, sig_version=sig_version)
+            (response, data) = self.api_call(method, path, params)
             (objects, metadata) = self.parse_json_response_and_metadata(response, data)
             next_offset = metadata.get('next_offset', None)
             for obj in objects:
                 yield obj
 
-    def json_cursor_api_call(self, method, path, params, get_records_func, sig_version=None):
+    def json_cursor_api_call(self, method, path, params, get_records_func):
         """
         Call a Duo API endpoint which utilizes a cursor in some responses to
         page through a set of data. This cursor is supplied through the optional
@@ -520,7 +527,7 @@ class Client(object):
         while True:
             if next_offset is not None:
                 params['offset'] = str(next_offset)
-            (http_resp, http_resp_data) = self.api_call(method, path, params, sig_version=sig_version)
+            (http_resp, http_resp_data) = self.api_call(method, path, params)
             (response, metadata) = self.parse_json_response_and_metadata(
                 http_resp,
                 http_resp_data,
@@ -576,7 +583,12 @@ class Client(object):
             data = json.loads(data)
             if data['stat'] != 'OK':
                 raise_error('Received error response: %s' % data)
-            return (data['response'], data.get('metadata', {}))
+            response = data['response']
+            metadata = data.get('metadata', {})
+            if not metadata and isinstance(response, dict):
+                metadata = response.get('metadata', {})
+
+            return (response, metadata)
         except (ValueError, KeyError, TypeError):
             raise_error('Received bad response: %s' % data)
 

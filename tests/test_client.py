@@ -175,6 +175,7 @@ class TestCanonicalize(unittest.TestCase):
         actual = duo_client.client.canonicalize(
             'POST', 'foO.BaR52.cOm', '/Foo/BaR2/qux', params, 'Tue, 17 Nov 2020 14:12:00',
             sig_version=5, body=body, additional_headers=headers)
+        self.assertEqual(actual, expected)
 
     def test_invalid_signature_version_raises(self):
         params = duo_client.client.Client.canon_json(JSON_BODY)
@@ -185,6 +186,28 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual(
             e.exception.args[0],
             "Unknown signature version: {}".format(999))
+
+    def test_signature_v5_lowers_and_then_sorts_headers(self):
+        hashed_body = hashlib.sha512(JSON_STRING.encode('utf-8')).hexdigest()
+        headers = {
+            "x-duo-A": "header_value_1",
+            "X-Duo-B": "header_value_2"
+
+        }
+        expected = (
+                'Tue, 17 Nov 2020 14:12:00\n'
+                'POST\n'
+                'foo.bar52.com\n'
+                '/Foo/BaR2/qux\n\n'
+                + hashed_body
+                +'\n60be11a30e0756f2ee2afdce1db849b987dcf86c1133394b'
+                'd7bbbc9877920330c4d78aceacbb377ab8cbd9a8efe6a410fed4047376635ac71226ab46ca10d2b1')
+        params = {}
+        body = duo_client.client.Client.canon_json(JSON_BODY)
+        actual = duo_client.client.canonicalize(
+            'POST', 'foO.BaR52.cOm', '/Foo/BaR2/qux', params, 'Tue, 17 Nov 2020 14:12:00',
+            sig_version=5, body=body, additional_headers=headers)
+        self.assertEqual(actual, expected)
 
 
 class TestNormalizePageArgs(unittest.TestCase):
@@ -287,7 +310,7 @@ class TestSign(unittest.TestCase):
         expected = 'Basic ' + expected
         self.assertEqual(actual,
                          expected)
-                         
+
 class TestRequest(unittest.TestCase):
     """ Tests for the request created by api_call and json_api_call. """
     # usful args for testing
@@ -313,7 +336,7 @@ class TestRequest(unittest.TestCase):
         (response, dummy) = self.client.api_call('POST', '/foo/bar', {})
         self.assertEqual(response.method, 'POST')
         self.assertEqual(response.uri, '/foo/bar')
-        self.assertEqual(response.body, '')
+        self.assertEqual(json.loads(response.body), {})
 
     def test_api_call_get_params(self):
         (response, dummy) = self.client.api_call(
@@ -328,7 +351,7 @@ class TestRequest(unittest.TestCase):
             'POST', '/foo/bar', self.args_in)
         self.assertEqual(response.method, 'POST')
         self.assertEqual(response.uri, '/foo/bar')
-        self.assertEqual(util.params_to_dict(response.body), self.args_out)
+        self.assertEqual(json.loads(response.body), self.args_out)
 
     def test_json_api_call_get_no_params(self):
         response = self.client.json_api_call('GET', '/foo/bar', {})
@@ -340,7 +363,7 @@ class TestRequest(unittest.TestCase):
         response = self.client.json_api_call('POST', '/foo/bar', {})
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(response['uri'], '/foo/bar')
-        self.assertEqual(response['body'], '')
+        self.assertEqual(json.loads(response['body']), {})
 
     def test_json_api_call_get_params(self):
         response = self.client.json_api_call(
@@ -355,7 +378,7 @@ class TestRequest(unittest.TestCase):
             'POST', '/foo/bar', self.args_in)
         self.assertEqual(response['method'], 'POST')
         self.assertEqual(response['uri'], '/foo/bar')
-        self.assertEqual(util.params_to_dict(response['body']), self.args_out)
+        self.assertEqual(json.loads(response['body']), self.args_out)
 
 class TestPaging(unittest.TestCase):
     def setUp(self):
@@ -387,6 +410,48 @@ class TestPaging(unittest.TestCase):
     def test_get_all_objects(self):
         response = self.client.json_paging_api_call(
             'GET', '/admin/v1/objects', {'limit':'1000'})
+        expected = [obj.to_json() for obj in self.objects]
+        self.assertListEqual(expected, list(response))
+        self.assertEqual(1, self.client.counter)
+
+class TestAlternatePaging(unittest.TestCase):
+    def setUp(self):
+        self.client = util.CountingClient(
+            'test_ikey', 'test_akey', 'example.com', paging_limit=100)
+        self.objects = [util.MockJsonObject() for i in range(1000)]
+        self.client._connect = lambda: util.MockAlternatePagingHTTPConnection(self.objects)
+
+    def test_get_objects_paging(self):
+        response = self.client.json_cursor_api_call(
+            'GET', '/admin/v1/objects', {},
+            lambda response: response['data']
+        )
+        self.assertEqual(len(self.objects), len(list(response)))
+        self.assertEqual(10, self.client.counter)
+
+    def test_get_no_objects_paging(self):
+        self.objects = []
+        self.client._connect = lambda: util.MockAlternatePagingHTTPConnection(self.objects)
+        response = self.client.json_cursor_api_call(
+            'GET', '/admin/v1/objects', {},
+            lambda response: response['data']
+        )
+        self.assertEqual(len(self.objects), len(list(response)))
+        self.assertEqual(1, self.client.counter)
+
+    def test_get_objects_paging_limit(self):
+        response = self.client.json_cursor_api_call(
+            'GET', '/admin/v1/objects', {'limit':'250'},
+            lambda response: response['data']
+        )
+        self.assertEqual(len(self.objects), len(list(response)))
+        self.assertEqual(4, self.client.counter)
+
+    def test_get_all_objects(self):
+        response = self.client.json_cursor_api_call(
+            'GET', '/admin/v1/objects', {'limit':'1000'},
+            lambda response: response['data']
+        )
         expected = [obj.to_json() for obj in self.objects]
         self.assertListEqual(expected, list(response))
         self.assertEqual(1, self.client.counter)
@@ -562,6 +627,38 @@ class TestParseJsonResponseAndMetadata(unittest.TestCase):
         self.assertEqual(e.exception.status, api_res.status)
         self.assertEqual(e.exception.reason, api_res.reason)
         self.assertEqual(e.exception.data, response)
+
+    def test_response_is_a_string(self):
+        """
+        Some API requests return just a string in their response.
+        We want to make sure we handle those correctly
+        """
+        api_res = self.APIResponse(200, 'Fake reason')
+        response = {
+            'response': "just a string",
+            'stat': 'OK'
+        }
+        try:
+            self.client.parse_json_response_and_metadata(api_res, json.dumps(response))
+        except Exception:
+            self.fail("parsing raised exception for string response")
+
+    def test_response_is_a_list(self):
+        """
+        Some API requests return just a list in their response. with
+        metadata included at the top level.
+        We want to make sure we handle those correctly
+        """
+        api_res = self.APIResponse(200, "Fake reason")
+        expected_metadata = { "offset": 4 }
+        expected_response = ["multiple", "elements"]
+        response = {
+            "response": expected_response,
+            "metadata": expected_metadata,
+            "stat": "OK"
+        }
+        response, metadata = self.client.parse_json_response_and_metadata(api_res, json.dumps(response))
+        self.assertEqual(metadata, expected_metadata)
 
     def test_response_stat_isnot_OK(self):
         api_res = self.APIResponse(200, 'Fake reason')

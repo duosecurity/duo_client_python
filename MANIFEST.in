@@ -7,3 +7,4 @@ include README.md
 include duo_client/ca_certs.pem
 include requirements.txt
 include requirements-dev.txt
+include spdx.json

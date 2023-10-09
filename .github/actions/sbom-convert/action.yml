@@ -1,0 +1,13 @@
+name: Action for converting CycloneDX SBOM files to SPDX format
+runs:
+  using: "composite"
+  steps:
+    - name: Install CycloneDX
+      run: |
+        wget https://github.com/CycloneDX/cyclonedx-cli/releases/download/v0.24.2/cyclonedx-linux-x64
+        chmod a+x cyclonedx-linux-x64
+      shell: bash
+    - name: Convert SBOM
+      run: |
+        ./cyclonedx-linux-x64 convert --input-format json --output-format spdxjson --input-file cyclonedx-sbom.json --output-file spdx.json
+      shell: bash

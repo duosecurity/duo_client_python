@@ -112,6 +112,8 @@ Settings objects are returned in the following format:
      'password_requires_special': <bool:is special character required>,
      'security_checkup_enabled': <bool:is the security checkup feature enabled>,
      'user_managers_can_put_users_in_bypass': <bool:can user managers put users in bypass status>,
+     'email_activity_notification_enabled': <bool:can users get activity notifications via email>,
+     'push_activity_notification_enabled': <bool:can users get activity notifications via Duo Mobile>,
     }
 
 
@@ -174,83 +176,53 @@ from __future__ import absolute_import
 import six.moves.urllib
 
 from . import client, Accounts
+from .logs.telephony import Telephony
 import six
 import warnings
+import json
 import time
 import base64
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
-USER_STATUS_ACTIVE = 'active'
-USER_STATUS_BYPASS = 'bypass'
-USER_STATUS_DISABLED = 'disabled'
-USER_STATUS_LOCKED_OUT = 'locked out'
+USER_STATUS_ACTIVE = "active"
+USER_STATUS_BYPASS = "bypass"
+USER_STATUS_DISABLED = "disabled"
+USER_STATUS_LOCKED_OUT = "locked out"
 
-TOKEN_HOTP_6 = 'h6'
-TOKEN_HOTP_8 = 'h8'
-TOKEN_YUBIKEY = 'yk'
+TOKEN_HOTP_6 = "h6"
+TOKEN_HOTP_8 = "h8"
+TOKEN_YUBIKEY = "yk"
 
 VALID_AUTHLOG_REQUEST_PARAMS = [
-    'mintime',
-    'maxtime',
-    'limit',
-    'sort',
-    'next_offset',
-    'event_types',
-    'reasons',
-    'results',
-    'users',
-    'applications',
-    'groups',
-    'factors',
-    'api_version'
+    "mintime",
+    "maxtime",
+    "limit",
+    "sort",
+    "next_offset",
+    "event_types",
+    "reasons",
+    "results",
+    "users",
+    "applications",
+    "groups",
+    "factors",
+    "api_version",
 ]
 
-VALID_ACTIVITY_REQUEST_PARAMS = [
-    'mintime',
-    'maxtime',
-    'limit',
-    'sort',
-    'next_offset'
-]
+VALID_ACTIVITY_REQUEST_PARAMS = ["mintime", "maxtime", "limit", "sort", "next_offset"]
 
 
 class Admin(client.Client):
     account_id = None
-    admin_sig_version = 5
 
-    def api_call(self, method, path, params, sig_version=admin_sig_version):
+    def api_call(self, method, path, params):
         if self.account_id is not None:
             params['account_id'] = self.account_id
+
         return super(Admin, self).api_call(
             method,
             path,
             params,
-            sig_version=sig_version
-        )
-
-    def json_api_call(self, method, path, params, sig_version=admin_sig_version):
-        return super(Admin, self).json_api_call(
-            method,
-            path,
-            params,
-            sig_version=sig_version
-        )
-
-    def json_paging_api_call(self, method, path, params, sig_version=admin_sig_version):
-        return super(Admin, self).json_paging_api_call(
-            method,
-            path,
-            params,
-            sig_version=sig_version
-        )
-
-    def json_cursor_api_call(self, method, path, params, get_records_func, sig_version=admin_sig_version):
-        return super(Admin, self).json_cursor_api_call(
-            method,
-            path,
-            params,
-            get_records_func,
-            sig_version=sig_version
         )
 
 
@@ -623,12 +595,12 @@ class Admin(client.Client):
                         "value" : <int: total objects in the time range>
                     }
                 }
-            },
+            }
 
         Raises RuntimeError on error.
         """
         params = {}
-        today = datetime.utcnow()
+        today = datetime.now(tz=timezone.utc)
         default_maxtime = int(today.timestamp() * 1000)
         default_mintime = int((today - timedelta(days=180)).timestamp() * 1000)
 
@@ -647,8 +619,6 @@ class Admin(client.Client):
         if 'limit' in params:
             params['limit'] = str(int(params['limit']))
 
-
-
         response = self.json_api_call(
             'GET',
             '/admin/v2/logs/activity',
@@ -659,41 +629,64 @@ class Admin(client.Client):
             row['host'] = self.host
         return response
 
-    def get_telephony_log(self,
-                          mintime=0):
+    def get_telephony_log(self, mintime=0, api_version=1, **kwargs):
         """
         Returns telephony log events.
 
         mintime - Fetch events only >= mintime (to avoid duplicate
-                  records that have already been fetched)
+            records that have already been fetched)
+        api_version - The API version of the handler to use.
+            Currently, the default api version is v1, but the v1 API
+            will be deprecated in a future version of the Duo Admin API.
+            Please migrate to the v2 api at your earliest convenience.
+            For details on the differences between v1 and v2,
+            please see Duo's Admin API documentation. (Optional)
 
-        Returns:
+        v1 Returns:
             [
-                {'timestamp': <int:unix timestamp>,
-                 'eventtype': "telephony",
-                 'host': <str:host>,
-                 'context': <str:context>,
-                 'type': <str:type>,
-                 'phone': <str:phone number>,
-                 'credits': <str:credits>}, ...
+                {
+                    'timestamp': <int:unix timestamp>,
+                    'eventtype': "telephony",
+                    'host': <str:host>,
+                    'context': <str:context>,
+                    'type': <str:type>,
+                    'phone': <str:phone number>,
+                    'credits': <str:credits>}
             ]
+
+        v2 Returns:
+            {
+                "items": [
+                    {
+                        'context': <str>,
+                        'credits': <int: credits used>,
+                        'phone': <str:phone number>,
+                        'telephony_id': <str:UUID>,
+                        'ts': <str:ISO timestamp>,
+                        'txid': <str:UUID>,
+                        'type': <str:"sms" or "phone">,
+                        'eventtype': <str:"telephony">,
+                        'host': <str:application hostname>
+                    }
+                ],
+                "metadata": {
+                    "next_offset": <str: comma seperated ts and offset value>
+                    "total_objects": {
+                        "relation" : <str: relational operator>
+                        "value" : <int: total objects in the time range>
+                    }
+                }
+            }
 
         Raises RuntimeError on error.
         """
-        # Sanity check mintime as unix timestamp, then transform to string
-        mintime = str(int(mintime))
-        params = {
-            'mintime': mintime,
-        }
-        response = self.json_api_call(
-            'GET',
-            '/admin/v1/logs/telephony',
-            params,
-        )
-        for row in response:
-            row['eventtype'] = 'telephony'
-            row['host'] = self.host
-        return response
+
+        if api_version not in [1,2]:
+            raise ValueError("Invalid API Version")
+
+        if api_version == 2:
+            return Telephony.get_telephony_logs_v2(self.json_api_call, self.host, **kwargs)
+        return Telephony.get_telephony_logs_v1(self.json_api_call, self.host, mintime=mintime)
 
     def get_users_iterator(self):
         """
@@ -751,6 +744,44 @@ class Admin(client.Client):
         response = self.json_api_call('GET',
                                       '/admin/v1/users',
                                       params)
+        return response
+
+    def get_users_by_names(self, usernames):
+        """
+        Returns users specified by usernames.
+
+        usernames - Users to fetch
+
+        Returns a list user objects matching usernames (or aliases).
+
+        Raises RuntimeError on error.
+        """
+        username_list = json.dumps(usernames)
+        params = {
+            'username_list': username_list,
+        }
+        response = self.json_paging_api_call('GET',
+                                             '/admin/v1/users',
+                                             params)
+        return response
+
+    def get_users_by_ids(self, user_ids):
+        """
+        Returns users specified by user ids.
+
+        user_ids - Users to fetch
+
+        Returns a list user objects matching user ids.
+
+        Raises RuntimeError on error.
+        """
+        user_id_list = json.dumps(user_ids)
+        params = {
+            'user_id_list': user_id_list,
+        }
+        response = self.json_paging_api_call('GET',
+                                             '/admin/v1/users',
+                                             params)
         return response
 
     def add_user(self, username, realname=None, status=None,
@@ -892,7 +923,7 @@ class Admin(client.Client):
 
         return self.json_api_call('POST', path, params)
 
-    def add_user_bypass_codes(self, user_id, count=None, valid_secs=None, remaining_uses=None, codes=None):
+    def add_user_bypass_codes(self, user_id, count=None, valid_secs=None, remaining_uses=None, codes=None, preserve_existing=None):
         """
         Replace a user's bypass codes with new codes.
 
@@ -922,6 +953,9 @@ class Admin(client.Client):
 
         if codes is not None:
             params['codes'] = self._canonicalize_bypass_codes(codes)
+        
+        if preserve_existing is not None:
+            params['preserve_existing'] = preserve_existing
 
         return self.json_api_call('POST', path, params)
 
@@ -1931,6 +1965,8 @@ class Admin(client.Client):
                         reactivation_integration_key=None,
                         security_checkup_enabled=None,
                         user_managers_can_put_users_in_bypass=None,
+                        email_activity_notification_enabled=None,
+                        push_activity_notification_enabled=None,
                         ):
         """
         Update settings.
@@ -1970,6 +2006,8 @@ class Admin(client.Client):
         reactivation_integration_key - <str:url>|None
         security_checkup_enabled - True|False|None
         user_managers_can_put_users_in_bypass - True|False|None
+        email_activity_notification_enabled = True|False|None
+        push_activity_notification_enabled = True|False|None
 
         Returns updated settings object.
 
@@ -2045,6 +2083,14 @@ class Admin(client.Client):
         if user_managers_can_put_users_in_bypass is not None:
             params['user_managers_can_put_users_in_bypass'] = ('1' if
                 user_managers_can_put_users_in_bypass else '0')
+        if email_activity_notification_enabled is not None:
+            params['email_activity_notification_enabled'] = (
+                '1' if email_activity_notification_enabled else '0'
+            )
+        if push_activity_notification_enabled is not None:
+            params['push_activity_notification_enabled'] = (
+                '1' if push_activity_notification_enabled else '0'
+            )
 
         if not params:
             raise TypeError("No settings were provided")
@@ -2217,6 +2263,23 @@ class Admin(client.Client):
             'GET',
             '/admin/v1/groups',
             {}
+        )
+
+    def get_groups_by_group_ids(self, group_ids):
+        """
+        Get a list of groups by their group ids
+
+        Args:
+            group_ids: list of group ids to fetch
+
+        Returns:
+            list of groups
+        """
+        group_id_list = json.dumps(group_ids)
+        return self.json_api_call(
+            'GET',
+            '/admin/v1/groups',
+            {'group_id_list': group_id_list}
         )
 
     def get_groups(self, limit=None, offset=0):
@@ -3274,6 +3337,98 @@ class Admin(client.Client):
             "/admin/v1/trust_monitor/events",
             params,
         )
+
+    def _quote_policy_id(self, policy_key):
+        return six.moves.urllib.parse.quote_plus("{}".format(policy_key))
+
+    def get_policies_v2_iterator(self):
+        """
+        Obtain an iterator for retrieving all the policies. The order isn't defined.
+        Returns: Iterator of dict elements. Each element contains the policy content.
+        """
+
+        return self.json_paging_api_call(
+            "GET",
+            "/admin/v2/policies",
+            {},
+        )
+
+    def get_policies_v2(self, limit=None, offset=0):
+        """
+        Retrieves a list of policies. The order isn't defined.
+        Args:
+            limit (int, optional): The max number of policies to fetch at once.
+            offset (int, optional): If a limit is passed, the offset to start retrieval.
+                Default 0
+        Raises RuntimeError on error.
+        """
+
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call(
+                "GET",
+                "/admin/v2/policies",
+                {"limit": limit, "offset": offset},
+            )
+        return list(self.get_policies_v2_iterator())
+
+    def delete_policy_v2(self, policy_key):
+        """
+        Deletes a policy.
+        Params:
+            policy_key (str) - Unique id of the policy
+        Notes:
+            Raises RuntimeError on error.
+        """
+
+        path = "/admin/v2/policies/" + self._quote_policy_id(policy_key)
+        return self.json_api_call("DELETE", path, {})
+
+    def update_policy_v2(self, policy_key, json_request):
+        """
+        Update the content of a single policy
+        Args:
+            policy_key (str) - Unique id of the policy
+            json_request (dict) - policy content to update.
+        Returns (dict) - policy after updates have been made.
+        """
+
+        path = "/admin/v2/policies/" + self._quote_policy_id(policy_key)
+        response = self.json_api_call("PUT", path, json_request)
+        return response
+
+    def create_policy_v2(self, json_request):
+        """
+        Args:
+            json_request (dict) - policy content to create.
+        Returns (dict) - newly created policy
+        """
+
+        path = "/admin/v2/policies"
+        response = self.json_api_call("POST", path, json_request)
+        return response
+
+    def get_policy_v2(self, policy_key):
+        """
+        Args:
+            policy_key: policy_key (str) - Unique id of the policy
+        Returns (dict) - policy content
+        """
+
+        path = "/admin/v2/policies/" + self._quote_policy_id(policy_key)
+        response = self.json_api_call("GET", path, {})
+        return response
+    
+    def get_policy_summary_v2(self):
+        """
+        Returns (dict) - summary of all policies and the applications 
+        and groups to which they are applied. 
+        """
+
+        path = "/admin/v2/policies/summary"
+        response = self.json_api_call("GET", path, {})
+        return response
+
 
 class AccountAdmin(Admin):
     """AccountAdmin manages a child account using an Accounts API integration."""
