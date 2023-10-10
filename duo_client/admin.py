@@ -175,10 +175,11 @@ from __future__ import absolute_import
 
 import six.moves.urllib
 
-from . import client
+from . import client, Accounts
 from .logs.telephony import Telephony
 import six
 import warnings
+import json
 import time
 import base64
 from datetime import datetime, timedelta, timezone
@@ -743,6 +744,44 @@ class Admin(client.Client):
         response = self.json_api_call('GET',
                                       '/admin/v1/users',
                                       params)
+        return response
+
+    def get_users_by_names(self, usernames):
+        """
+        Returns users specified by usernames.
+
+        usernames - Users to fetch
+
+        Returns a list user objects matching usernames (or aliases).
+
+        Raises RuntimeError on error.
+        """
+        username_list = json.dumps(usernames)
+        params = {
+            'username_list': username_list,
+        }
+        response = self.json_paging_api_call('GET',
+                                             '/admin/v1/users',
+                                             params)
+        return response
+
+    def get_users_by_ids(self, user_ids):
+        """
+        Returns users specified by user ids.
+
+        user_ids - Users to fetch
+
+        Returns a list user objects matching user ids.
+
+        Raises RuntimeError on error.
+        """
+        user_id_list = json.dumps(user_ids)
+        params = {
+            'user_id_list': user_id_list,
+        }
+        response = self.json_paging_api_call('GET',
+                                             '/admin/v1/users',
+                                             params)
         return response
 
     def add_user(self, username, realname=None, status=None,
@@ -2226,6 +2265,23 @@ class Admin(client.Client):
             {}
         )
 
+    def get_groups_by_group_ids(self, group_ids):
+        """
+        Get a list of groups by their group ids
+
+        Args:
+            group_ids: list of group ids to fetch
+
+        Returns:
+            list of groups
+        """
+        group_id_list = json.dumps(group_ids)
+        return self.json_api_call(
+            'GET',
+            '/admin/v1/groups',
+            {'group_id_list': group_id_list}
+        )
+
     def get_groups(self, limit=None, offset=0):
         """
         Retrieves a list of groups.
@@ -3423,10 +3479,25 @@ class Admin(client.Client):
 class AccountAdmin(Admin):
     """AccountAdmin manages a child account using an Accounts API integration."""
 
-    def __init__(self, account_id, **kwargs):
+    def __init__(self, account_id, child_api_host=None, **kwargs):
         """Initializes an AccountAdmin for administering a child account.
            account_id is the account id of the child account.
-           See the Client base class for other parameters."""
+           child_api_host is the api hostname of the child account.
+           If this is not provided, this value will be calculated for correct API usage.
+           See the Client base class for other parameters.
+          """
+        if not child_api_host:
+            child_api_host =  Accounts.child_map.get(account_id, None)
+            if child_api_host is None:
+                child_api_host = kwargs.get('host')
+                try:
+                    accounts_api = Accounts(**kwargs)
+                    accounts_api.get_child_accounts()
+                    child_api_host =  Accounts.child_map.get(account_id, kwargs['host'])
+                except RuntimeError:
+                    pass
+        kwargs['host'] = child_api_host
+        
         super(AccountAdmin, self).__init__(**kwargs)
         self.account_id = account_id
 
