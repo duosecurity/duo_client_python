@@ -3404,10 +3404,11 @@ class Admin(client.Client):
 
         Args:
             sections (dict): policy content to update
-            sections_to_delete (array): List of section names to delete
-            edit_list (array): List of new policy keys to apply the changes to.
+            sections_to_delete (list): List of section names to delete
+            edit_list (list): List of new policy keys to apply the changes to.
                                Ignored if edit_all_policies is True.
-            edit_all_policies (bool, optional): Apply changes to all policies
+            edit_all_policies (bool, optional): Apply changes to all policies.
+                                Defaults to False. 
         Returns (list): all updated policies
         """
         path = "/admin/v2/policies/update"
