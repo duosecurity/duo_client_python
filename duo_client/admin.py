@@ -3433,19 +3433,23 @@ class Admin(client.Client):
 class AccountAdmin(Admin):
     """AccountAdmin manages a child account using an Accounts API integration."""
 
-    def __init__(self, account_id, **kwargs):
+    def __init__(self, account_id, child_api_host=None, **kwargs):
         """Initializes an AccountAdmin for administering a child account.
            account_id is the account id of the child account.
-           See the Client base class for other parameters."""
-        child_api_host =  Accounts.child_map.get(account_id, None)
-        if child_api_host is None:
-            child_api_host = kwargs.get('host')
-            try:
-                accounts_api = Accounts(**kwargs)
-                accounts_api.get_child_accounts()
-                child_api_host =  Accounts.child_map.get(account_id, kwargs['host'])
-            except RuntimeError:
-                pass
+           child_api_host is the api hostname of the child account.
+           If this is not provided, this value will be calculated for correct API usage.
+           See the Client base class for other parameters.
+          """
+        if not child_api_host:
+            child_api_host =  Accounts.child_map.get(account_id, None)
+            if child_api_host is None:
+                child_api_host = kwargs.get('host')
+                try:
+                    accounts_api = Accounts(**kwargs)
+                    accounts_api.get_child_accounts()
+                    child_api_host =  Accounts.child_map.get(account_id, kwargs['host'])
+                except RuntimeError:
+                    pass
         kwargs['host'] = child_api_host
         
         super(AccountAdmin, self).__init__(**kwargs)
