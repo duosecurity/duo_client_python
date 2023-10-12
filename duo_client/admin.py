@@ -3396,6 +3396,34 @@ class Admin(client.Client):
         path = "/admin/v2/policies/" + self._quote_policy_id(policy_key)
         response = self.json_api_call("PUT", path, json_request)
         return response
+    
+    def update_policies_v2(self, sections, sections_to_delete, 
+                           edit_list, edit_all_policies=False):
+        """
+        Update the contents of multiple policies.
+
+        Args:
+            sections (dict): policy content to update
+            sections_to_delete (list): List of section names to delete
+            edit_list (list): List of new policy keys to apply the changes to.
+                               Ignored if edit_all_policies is True.
+            edit_all_policies (bool, optional): Apply changes to all policies.
+                                Defaults to False. 
+        Returns (list): all updated policies
+        """
+        path = "/admin/v2/policies/update"
+        params = {
+            "policies_to_update": {
+                "edit_all_policies": edit_all_policies,
+                "edit_list": edit_list,
+            },
+            "policy_changes": {
+                "sections": sections,
+                "sections_to_delete": sections_to_delete,
+            },
+        }
+        response = self.json_api_call("PUT", path, params)
+        return response
 
     def create_policy_v2(self, json_request):
         """
@@ -3406,6 +3434,25 @@ class Admin(client.Client):
 
         path = "/admin/v2/policies"
         response = self.json_api_call("POST", path, json_request)
+        return response
+    
+    def copy_policy_v2(self, policy_key, new_policy_names_list):
+        """
+        Copy policy to multiple new policies.
+ 
+        Args:
+            policy_key (str): Unique id of the policy to copy from
+            new_policy_names_list (array): The policy specified by policy_key
+                                            will be copied once for each name
+                                            in the list
+        Returns (list): all new policies
+        """
+        path = "/admin/v2/policies/copy"
+        params = {
+            "policy_key": policy_key, 
+            "new_policy_names_list": new_policy_names_list
+        }
+        response = self.json_api_call("POST", path, params)
         return response
 
     def get_policy_v2(self, policy_key):
