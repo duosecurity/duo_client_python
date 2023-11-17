@@ -3245,6 +3245,19 @@ class Admin(client.Client):
                 directory_key=directory_key)
         return self.json_api_call('POST', path, params)
 
+    def send_verification_push(self, user_id, phone_id):
+        return self.json_api_call(
+            'POST',
+            f'/admin/v1/users/{user_id}/send_verification_push',
+            {'phone_id': phone_id}
+        )
+
+    def get_verification_push_response(self, user_id, txid):
+        return self.json_api_call(
+            'GET',
+            f'/admin/v1/users/{user_id}/verification_push_response',
+            {'txid': txid},
+        )
     def get_trust_monitor_events_iterator(
         self,
         mintime,
