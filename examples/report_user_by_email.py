@@ -35,13 +35,7 @@ def main():
 
     # Retrieve user info from API:
     email_address = get_next_arg('E-mail address of user to retrieve: ')
-    req_params = {"email": email_address}
-    # There is no get_user_by_email in the duo_client_python library, so we use the generic api_call
-    user = admin_api.json_api_call(
-            method='GET',
-            path='/admin/v1/users',
-            params=req_params
-    )
+    user = admin_api.get_user_by_email(email_address)
 
     if user:
         pprint(user, indent=2)
