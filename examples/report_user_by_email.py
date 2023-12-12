@@ -5,7 +5,6 @@
 from __future__ import absolute_import, print_function
 import sys
 import getpass
-from pprint import pprint
 
 import duo_client
 from six.moves import input
@@ -35,16 +34,10 @@ def main():
 
     # Retrieve user info from API:
     email_address = get_next_arg('E-mail address of user to retrieve: ')
-    req_params = {"email": email_address}
-    # There is no get_user_by_email in the duo_client_python library, so we use the generic api_call
-    user = admin_api.json_api_call(
-            method='GET',
-            path='/admin/v1/users',
-            params=req_params
-    )
+    user = admin_api.get_user_by_email(email_address)
 
     if user:
-        pprint(user, indent=2)
+        print(user)
     else:
         print(f"User with email [{email_address}] could not be found.")
 
