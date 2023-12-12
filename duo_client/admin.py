@@ -728,6 +728,24 @@ class Admin(client.Client):
         response = self.json_api_call('GET', path, {})
         return response
 
+    def get_user_by_email(self, email):
+        """
+        Returns user specified by email.
+
+        email - User to fetch
+
+        Returns user object.
+
+        Raises RuntimeError on error.
+        """
+        params = {
+            'email': email,
+        }
+        response = self.json_api_call('GET',
+                                      '/admin/v1/users',
+                                      params)
+        return response
+
     def get_users_by_name(self, username):
         """
         Returns user specified by username.
