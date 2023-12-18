@@ -27,12 +27,12 @@ def _get_next_arg(prompt, secure=False):
 def prompt_for_credentials() -> dict:
     """Collect required API credentials from command line prompts
 
-    :return: dictionary containing Duo Admin API ikey, skey and hostname strings
+    :return: dictionary containing Duo Auth API ikey, skey and hostname strings
     """
 
-    ikey = _get_next_arg('Duo Admin API integration key ("DI..."): ')
-    skey = _get_next_arg('Duo Admin API integration secret key: ', secure=True)
-    host = _get_next_arg('Duo Admin API hostname ("api-....duosecurity.com"): ')
+    ikey = _get_next_arg('Duo Auth API integration key ("DI..."): ')
+    skey = _get_next_arg('Duo Auth API integration secret key: ', secure=True)
+    host = _get_next_arg('Duo Auth API hostname ("api-....duosecurity.com"): ')
     username = _get_next_arg('Duo Username: ')
 
     return {"USERNAME": username, "IKEY": ikey, "SKEY": skey, "APIHOST": host}
@@ -84,7 +84,7 @@ def main():
         # User is unknown and not enrolled in Duo with a 'New User' policy setting of 'Require Enrollment'
         # Setting a 'New User' policy to 'Require Enrollment' should only be done for Group level policies where
         # the intent is to capture "partially enrolled" users. "Parially enrolled" users are those that Duo has a
-        # defined username for but does not have an MFA device enrolled.
+        # defined username but does not have an MFA device enrolled.
         print("Please enroll in Duo using the following URL.")
         print(pre_auth['enroll_portal_url'])
     elif pre_auth['result'] == "deny":
