@@ -53,12 +53,12 @@ def main():
     child_account_list = account_client.get_child_accounts()
     for account in child_account_list:
         if account['account_id'] == inputs['ACCOUNT_ID']:
-            account_name = account['name']
+            account_name = account['worker_name']
     if account_name is None:
         print(f"Unable to find account with ID [{inputs['ACCOUNT_ID']}]")
         sys.exit()
 
-    print(f"Deleting child account with name [{account_name}]")
+    print(f"Deleting child account with worker_name [{account_name}]")
     deleted_account = account_client.delete_account(inputs['ACCOUNT_ID'])
     if deleted_account == '':
         print(f"Account {inputs['ACCOUNT_ID']} was deleted successfully.")

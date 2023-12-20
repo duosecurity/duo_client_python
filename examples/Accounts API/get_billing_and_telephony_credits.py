@@ -1,22 +1,27 @@
 #!/usr/bin/env python
 from __future__ import absolute_import
 from __future__ import print_function
-import csv
 import sys
 
 import duo_client
 from six.moves import input
 
-argv_iter = iter(sys.argv[1:])
-def get_next_arg(prompt):
+EDITIONS = {
+        "ENTERPRISE": "Duo Essentials",
+        "PLATFORM": "Duo Advantage",
+        "BEYOND": "Duo Premier",
+        "PERSONAL": "Duo Free"
+}
+
+def get_next_input(prompt):
     try:
-        return next(argv_iter)
+        return next(iter(sys.argv[1:]))
     except StopIteration:
         return input(prompt)
 
-ikey=get_next_arg('Accounts API integration key ("DI..."): ')
-skey=get_next_arg('Accounts API integration secret key: ')
-host=get_next_arg('Accounts API hostname ("api-....duosecurity.com"): ')
+ikey=get_next_input('Accounts API integration key ("DI..."): ')
+skey=get_next_input('Accounts API integration secret key: ')
+host=get_next_input('Accounts API hostname ("api-....duosecurity.com"): ')
 
 # Configuration and information about objects to create.
 accounts_api = duo_client.Accounts(
@@ -46,7 +51,7 @@ for child_account in child_accounts:
         child_account_edition = account_admin_api.get_edition()
         print("Edition for child account {name}: {edition}".format(
             name=child_account['name'],
-            edition=child_account_edition['edition'])
+            edition=EDITIONS[child_account_edition['edition']])
         )
     except RuntimeError as err:
         # The account might not have access to get billing information

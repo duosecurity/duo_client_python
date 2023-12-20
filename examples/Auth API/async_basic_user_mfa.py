@@ -1,6 +1,7 @@
 """
 Example of Duo Auth API user authentication using asynchronous resquest/response methods
 """
+import asyncio
 
 import duo_client
 import os
@@ -39,6 +40,8 @@ def prompt_for_credentials() -> dict:
 def main():
     """Main program entry point"""
 
+
+    # Collect Duo API details from TTY
     inputs = prompt_for_credentials()
 
     auth_client = duo_client.Auth(
@@ -53,6 +56,7 @@ def main():
         print("\nDuo service check completed successfully.")
     else:
         print(f"Error: {duo_ping}")
+        sys.exit(1)
 
     # Verify that IKEY and SKEY information provided are valid
     duo_check= auth_client.check()
@@ -60,6 +64,7 @@ def main():
         print("IKEY and SKEY provided have been verified.")
     else:
         print(f"Error: {duo_check}")
+        sys.exit(1)
 
     # Execute pre-authentication for given user
     print(f"\nExecuting pre-authentication for {inputs['USERNAME']}...")

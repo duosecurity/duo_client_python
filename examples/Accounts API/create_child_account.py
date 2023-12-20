@@ -3,37 +3,24 @@ Example of Duo Accounts API child account creation
 """
 
 import duo_client
-import os
-import sys
 import getpass
 
-from pprint import pprint
 
-
-argv_iter = iter(sys.argv[1:])
-
-
-def _get_next_arg(prompt, secure=False):
+def _get_user_input(prompt, secure=False):
     """Read information from STDIN, using getpass when sensitive information should not be echoed to tty"""
-    try:
-        return next(argv_iter)
-    except StopIteration:
-        if secure is True:
-            return getpass.getpass(prompt)
-        else:
-            return input(prompt)
+    if secure is True:
+        return getpass.getpass(prompt)
+    else:
+        return input(prompt)
 
 
 def prompt_for_credentials() -> dict:
-    """Collect required API credentials from command line prompts
+    """Collect required API credentials from command line prompts"""
 
-    :return: dictionary containing Duo Accounts API ikey, skey and hostname strings
-    """
-
-    ikey = _get_next_arg('Duo Accounts API integration key ("DI..."): ')
-    skey = _get_next_arg('Duo Accounts API integration secret key: ', secure=True)
-    host = _get_next_arg('Duo Accounts API hostname ("api-....duosecurity.com"): ')
-    account_name = _get_next_arg('Name for new child account: ')
+    ikey = _get_user_input('Duo Accounts API integration key ("DI..."): ')
+    skey = _get_user_input('Duo Accounts API integration secret key: ', secure=True)
+    host = _get_user_input('Duo Accounts API hostname ("api-....duosecurity.com"): ')
+    account_name = _get_user_input('Name for new child account: ')
 
     return {"IKEY": ikey, "SKEY": skey, "APIHOST": host, "ACCOUNT_NAME": account_name}
 
@@ -49,11 +36,12 @@ def main():
             host=inputs['APIHOST']
     )
 
-    print(f"Creating child account with name [{inputs['ACCOUNT_NAME']}]")
+    print(f"Creating child account with worker_name [{inputs['ACCOUNT_NAME']}]")
     child_account = account_client.create_account(inputs['ACCOUNT_NAME'])
 
     if 'account_id' in child_account:
         print(f"Child account for [{inputs['ACCOUNT_NAME']}] created successfully.")
+        set_edition_result = account_client.e
     else:
         print(f"An unexpected error occurred while creating child account for {inputs['ACCOUNT_NAME']}")
     print(child_account)

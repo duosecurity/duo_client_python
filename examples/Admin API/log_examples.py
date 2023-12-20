@@ -70,9 +70,9 @@ if log_type == "activity":
         activity = log["activity_id"]
         ts = log["ts"]
         action = log["action"]
-        actor_name = log.get("actor", {}).get("name", None)
-        target_name = log.get("target", {}).get("name", None)
-        application = log.get("application", {}).get("name", None)
+        actor_name = log.get("actor", {}).get("worker_name", None)
+        target_name = log.get("target", {}).get("worker_name", None)
+        application = log.get("application", {}).get("worker_name", None)
         reporter.writerow(
             [
                 activity,
