@@ -24,7 +24,7 @@ admin_api = duo_client.Admin(
 
 def create_empty_policy(name, print_response=False):
     """
-    Create an empty policy with a specified worker_name.
+    Create an empty policy with a specified name.
     """
 
     json_request = {

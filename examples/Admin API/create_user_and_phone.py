@@ -21,8 +21,8 @@ admin_api = duo_client.Admin(
     host=get_next_arg('API hostname ("api-....duosecurity.com"): '),
 )
 
-USERNAME = get_next_arg('user login worker_name: ')
-REALNAME = get_next_arg('user full worker_name: ')
+USERNAME = get_next_arg('user login name: ')
+REALNAME = get_next_arg('user full name: ')
 
 # Refer to http://www.duosecurity.com/docs/adminapi for more
 # information about phone types and platforms.

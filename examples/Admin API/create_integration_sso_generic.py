@@ -7,9 +7,10 @@ import sys
 import duo_client
 from six.moves import input
 
+argv_iter = iter(sys.argv[1:])
 def get_next_arg(prompt):
     try:
-        return next(iter(sys.argv[1:]))
+        return next(argv_iter)
     except StopIteration:
         return input(prompt)
 
