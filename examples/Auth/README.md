@@ -21,7 +21,7 @@ $ python3 examples/Auth/basic_user_mfa.py
 
 Or, from within this folder:
 ```python
-$ python3 ./basic_user_mfa.py
+$ python3 basic_user_mfa.py
 ```
 
 # Tested Against Python Versions

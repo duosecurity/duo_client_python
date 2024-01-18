@@ -14,12 +14,12 @@ Use of the Duo Accounts API requires special access to be enabled. Please see th
 
 To run an example query, execute a command like the following from the repo root:
 ```python
-$ python3 examples/Auth/get_billing_and_telephony_credits.py
+$ python3 examples/Accounts/get_billing_and_telephony_credits.py
 ```
 
 Or, from within this folder:
 ```python
-$ python3 ./get_billing_and_telephony_credits.py
+$ python3 get_billing_and_telephony_credits.py
 ```
 
 # Tested Against Python Versions
