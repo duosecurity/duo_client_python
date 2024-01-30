@@ -114,6 +114,7 @@ Settings objects are returned in the following format:
      'user_managers_can_put_users_in_bypass': <bool:can user managers put users in bypass status>,
      'email_activity_notification_enabled': <bool:can users get activity notifications via email>,
      'push_activity_notification_enabled': <bool:can users get activity notifications via Duo Mobile>,
+     'unenrolled_user_lockout_threshold': <int:days until a user will be locked out due to being unenrolled>,
     }
 
 
@@ -1985,6 +1986,7 @@ class Admin(client.Client):
                         user_managers_can_put_users_in_bypass=None,
                         email_activity_notification_enabled=None,
                         push_activity_notification_enabled=None,
+                        unenrolled_user_lockout_threshold=None,
                         ):
         """
         Update settings.
@@ -2026,6 +2028,7 @@ class Admin(client.Client):
         user_managers_can_put_users_in_bypass - True|False|None
         email_activity_notification_enabled = True|False|None
         push_activity_notification_enabled = True|False|None
+        unenrolled_user_lockout_threshold = <int:number of days>|0|None
 
         Returns updated settings object.
 
@@ -2108,6 +2111,10 @@ class Admin(client.Client):
         if push_activity_notification_enabled is not None:
             params['push_activity_notification_enabled'] = (
                 '1' if push_activity_notification_enabled else '0'
+            )
+        if unenrolled_user_lockout_threshold is not None:
+            params['unenrolled_user_lockout_threshold'] = str(
+                unenrolled_user_lockout_threshold
             )
 
         if not params:
