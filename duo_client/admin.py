@@ -3530,15 +3530,18 @@ class AccountAdmin(Admin):
             if child_api_host is None:
                 child_api_host = kwargs.get('host')
                 try:
-                    accounts_api = Accounts(**kwargs)
-                    accounts_api.get_child_accounts()
-                    child_api_host =  Accounts.child_map.get(account_id, kwargs['host'])
+                    child_api_host =  self.get_child_api_host(account_id, **kwargs)
                 except RuntimeError:
                     pass
         kwargs['host'] = child_api_host
         
         super(AccountAdmin, self).__init__(**kwargs)
         self.account_id = account_id
+
+    def get_child_api_host(self, account_id, **kwargs):
+        accounts_api = Accounts(**kwargs)
+        accounts_api.get_child_accounts()
+        return Accounts.child_map.get(account_id, kwargs['host'])
 
     def get_edition(self):
         """
