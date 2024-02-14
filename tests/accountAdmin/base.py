@@ -6,7 +6,7 @@ import duo_client.admin
 class TestAccountAdmin(unittest.TestCase):
 
     def setUp(self):
-        kwargs = {'ikey': 'test_ikey', 'skey': 'test_skey', 'host': 'example.com'}
+        kwargs = {'ikey': 'test_ikey', 'skey': 'test_skey', 'host': 'example.com', 'child_api_host': 'example2.com'}
         self.client = duo_client.admin.AccountAdmin(
             'DA012345678901234567', **kwargs)
         # monkeypatch client's _connect()
