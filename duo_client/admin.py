@@ -174,16 +174,17 @@ the following fields:
 """
 from __future__ import absolute_import
 
-import six.moves.urllib
-
-from . import client, Accounts
-from .logs.telephony import Telephony
-import six
-import warnings
+import base64
 import json
 import time
-import base64
+import warnings
 from datetime import datetime, timedelta, timezone
+
+import six
+import six.moves.urllib
+
+from . import Accounts, client
+from .logs.telephony import Telephony
 
 USER_STATUS_ACTIVE = "active"
 USER_STATUS_BYPASS = "bypass"
@@ -493,7 +494,7 @@ class Admin(client.Client):
         params = {}
 
         if api_version == 1: #v1
-            params['mintime'] = kwargs['mintime'] if 'mintime' in kwargs else 0;
+            params['mintime'] = kwargs['mintime'] if 'mintime' in kwargs else 0
             # Sanity check mintime as unix timestamp, then transform to string
             params['mintime'] = '{:d}'.format(int(params['mintime']))
             warnings.warn(
@@ -3512,6 +3513,93 @@ class Admin(client.Client):
 
         path = "/admin/v2/policies/summary"
         response = self.json_api_call("GET", path, {})
+        return response
+
+    def bulk_operations(self, operations):
+        """
+        Perform a series of bulk operations sequentially
+
+        Args:
+            operations (list) - list of JSON objects representing the operations to perform.
+
+        Returns (list) - response objects for each item in the operations list
+
+        Raises RuntimeError on error
+
+        Example:
+            operations = [
+                {
+                    "method": "POST",
+                    "path": "/admin/v1/users",
+                    "body": {
+                        "username": "uname1",
+                        "alias1": "my_alias1",
+                        "alias2": "my_alias2",
+                        "alias3": "my_alias3",
+                        "alias4": "my_alias4",
+                        "email": "user@example.com",
+                        "status": "active",
+                        "notes": "This is a user",
+                    },
+                },
+                {
+                    "method": "POST",
+                    "path": "/admin/v1/users/DUXXXXXXXXXXXXXXXXX1",
+                    "body": {
+                        "alias2": "updated_alias2",
+                        "email": "user2@example.com",
+                        "status": "active",
+                        "notes": "This is another user",
+                    },
+                },
+                {
+                    "method": "DELETE",
+                    "path": "/admin/v1/users/DUXXXXXXXXXXXXXXXXX1",
+                    "body": {},
+                },
+                {
+                    "method": "POST",
+                    "path": "/admin/v1/users/DUXXXXXXXXXXXXXXXXX1/groups",
+                    "body": {
+                        "group_id": "DUXXXXXXXXXXXXXXXXX1",
+                    },
+                },
+                {
+                    "method": "DELETE",
+                    "path": "/admin/v1/users/DUXXXXXXXXXXXXXXXXX1/groups/DUXXXXXXXXXXXXXXXXX1",
+                    "body": {},
+                },
+            ]
+
+        """
+
+        path = "/admin/v1/bulk"
+        params = {"operations": json.dumps(operations)}
+        response = self.json_api_call("POST", path, params)
+        return response
+
+    def bulk_add_users(self, users):
+        """
+        Create users in bulk atomically
+
+        Args:
+            users (list) - list of JSON objects representing each user object to create.
+
+        Returns (list) - user response objects for each user in the list argument
+
+        Raises RuntimeError on error
+
+        Example:
+            users = [
+                {"username": "example_username_1", "email": "example_user_1@example.com"},
+                {"username": "example_username_2", "status": "disabled"},
+            ]
+
+        """
+
+        path = "/admin/v1/bulk_create"
+        params = {"users": json.dumps(users)}
+        response = self.json_api_call("POST", path, params)
         return response
 
 
