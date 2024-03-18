@@ -87,6 +87,7 @@ class Auth(client.Client):
                 username=None,
                 user_id=None,
                 ipaddr=None,
+                client_supports_verified_push=None,
                 trusted_device_token=None):
         """
         Determine if and with what factors a user may authenticate or enroll.
@@ -100,6 +101,8 @@ class Auth(client.Client):
             params['user_id'] = user_id
         if ipaddr is not None:
             params['ipaddr'] = ipaddr
+        if client_supports_verified_push is not None:
+            params['client_supports_verified_push'] = client_supports_verified_push
         if trusted_device_token is not None:
             params['trusted_device_token'] = trusted_device_token
         response = self.json_api_call('POST',
@@ -117,7 +120,8 @@ class Auth(client.Client):
              display_username=None,
              pushinfo=None,
              device=None,
-             passcode=None):
+             passcode=None,
+             txid=None):
         """
         Perform second-factor authentication for a user.
 
@@ -156,6 +160,8 @@ class Auth(client.Client):
             params['device'] = device
         if passcode is not None:
             params['passcode'] = passcode
+        if txid is not None:
+            params['txid'] = txid
         response = self.json_api_call('POST',
                                       '/auth/v2/auth',
                                       params)
