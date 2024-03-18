@@ -44,6 +44,7 @@ class TestSettings(TestAdmin):
             email_activity_notification_enabled=True,
             push_activity_notification_enabled=True,
             unenrolled_user_lockout_threshold=100,
+            enrollment_universal_prompt_enabled=True,
         )
         response = response[0]
         self.assertEqual(response['method'], 'POST')
@@ -85,4 +86,5 @@ class TestSettings(TestAdmin):
                 'email_activity_notification_enabled': '1',
                 'push_activity_notification_enabled': '1',
                 'unenrolled_user_lockout_threshold': '100',
+                'enrollment_universal_prompt_enabled': '1',
             })

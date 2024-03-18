@@ -115,6 +115,7 @@ Settings objects are returned in the following format:
      'email_activity_notification_enabled': <bool:can users get activity notifications via email>,
      'push_activity_notification_enabled': <bool:can users get activity notifications via Duo Mobile>,
      'unenrolled_user_lockout_threshold': <int:days until a user will be locked out due to being unenrolled>,
+     'enrollment_universal_prompt_enabled': <bool:will email enrollment use Universal Prompt experience>,
     }
 
 
@@ -1989,6 +1990,7 @@ class Admin(client.Client):
                         email_activity_notification_enabled=None,
                         push_activity_notification_enabled=None,
                         unenrolled_user_lockout_threshold=None,
+                        enrollment_universal_prompt_enabled=None,
                         ):
         """
         Update settings.
@@ -2031,6 +2033,7 @@ class Admin(client.Client):
         email_activity_notification_enabled = True|False|None
         push_activity_notification_enabled = True|False|None
         unenrolled_user_lockout_threshold = <int:number of days>|0|None
+        enrollment_universal_prompt_enabled = True|False|None
 
         Returns updated settings object.
 
@@ -2117,6 +2120,10 @@ class Admin(client.Client):
         if unenrolled_user_lockout_threshold is not None:
             params['unenrolled_user_lockout_threshold'] = str(
                 unenrolled_user_lockout_threshold
+            )
+        if enrollment_universal_prompt_enabled is not None:
+            params['enrollment_universal_prompt_enabled'] = (
+                '1' if enrollment_universal_prompt_enabled else '0'
             )
 
         if not params:
