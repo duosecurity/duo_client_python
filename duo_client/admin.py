@@ -209,6 +209,8 @@ VALID_AUTHLOG_REQUEST_PARAMS = [
     "groups",
     "factors",
     "api_version",
+    "assessment",
+    "detections",
 ]
 
 VALID_ACTIVITY_REQUEST_PARAMS = ["mintime", "maxtime", "limit", "sort", "next_offset"]
