@@ -215,6 +215,7 @@ class Client(object):
     sig_version = 5
 
     def __init__(self, ikey, skey, host,
+                 mkey=None,
                  ca_certs=DEFAULT_CA_CERTS,
                  sig_timezone='UTC',
                  user_agent=('Duo API Python/' + __version__),
@@ -229,6 +230,7 @@ class Client(object):
         """
         self.ikey = ikey
         self.skey = skey
+        self.mkey = mkey
         self.host = host
         self.port = port
         self.sig_timezone = sig_timezone
