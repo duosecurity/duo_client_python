@@ -1,17 +1,14 @@
 #!/usr/bin/python
-from __future__ import absolute_import
-from __future__ import print_function
-
 import os
 import sys
 import time
 
 import duo_client
-from six.moves.configparser import ConfigParser
-from six.moves.urllib.parse import urlparse
+from configparser import ConfigParser
+from urllib.parse import urlparse
 
 
-class BaseLog(object):
+class BaseLog:
 
     def __init__(self, admin_api, path, logname):
         self.admin_api = admin_api

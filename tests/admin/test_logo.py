@@ -2,7 +2,7 @@ import json
 from .base import TestAdmin
 import os
 import base64
-import six
+import urllib.parse
 
 
 class TestLogo(TestAdmin):
@@ -18,7 +18,7 @@ class TestLogo(TestAdmin):
 
             # Prep validation text:
             base64_logo = base64.b64encode(logo_file)
-            base64_logo = six.moves.urllib.parse.quote_plus(base64_logo)
+            base64_logo = urllib.parse.quote_plus(base64_logo)
 
             # Validate response:
             self.assertTrue(

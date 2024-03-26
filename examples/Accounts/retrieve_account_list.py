@@ -3,7 +3,6 @@ Example of Duo account API uaer accountentication with synchronous request/respo
 """
 
 import duo_client
-import os
 import sys
 import getpass
 

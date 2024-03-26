@@ -2,7 +2,6 @@
 Script to pull list of all phones and modify the name of each
 """
 
-from __future__ import absolute_import, print_function
 import sys
 import getpass
 

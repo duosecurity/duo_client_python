@@ -1,7 +1,6 @@
 """
 Example of Duo Admin API policies operations
 """
-import sys
 import json
 import duo_client
 from getpass import getpass

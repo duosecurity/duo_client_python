@@ -4,7 +4,6 @@ as the MFA factor
 """
 
 import duo_client
-import os
 import sys
 import getpass
 

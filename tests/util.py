@@ -1,11 +1,9 @@
-from __future__ import absolute_import
 import json
 import collections
-import urllib
+import urllib.parse
 
 from json import JSONEncoder
 import duo_client
-import six
 
 class MockObjectJsonEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -15,7 +13,7 @@ class MockObjectJsonEncoder(json.JSONEncoder):
 def params_to_dict(param_str):
     param_dict = collections.defaultdict(list)
     for (key, val) in (param.split('=') for param in param_str.split('&')):
-        param_dict[key].append(six.moves.urllib.parse.unquote(val))
+        param_dict[key].append(urllib.parse.unquote(val))
     return param_dict
 
 
@@ -69,9 +67,9 @@ class MockHTTPConnection(object):
 
         self.headers = {}
         for k, v in headers.items():
-            if isinstance(k, six.binary_type):
+            if isinstance(k, bytes):
                 k = k.decode('ascii')
-            if isinstance(v, six.binary_type):
+            if isinstance(v, bytes):
                 v = v.decode('ascii')
             self.headers[k] = v
 
@@ -119,8 +117,8 @@ class MockPagingHTTPConnection(MockHTTPConnection):
         self.uri = uri
         self.body = body
         self.headers = headers
-        parsed = six.moves.urllib.parse.urlparse(uri)
-        params = six.moves.urllib.parse.parse_qs(parsed.query)
+        parsed = urllib.parse.urlparse(uri)
+        params = urllib.parse.parse_qs(parsed.query)
 
         self.limit = int(params['limit'][0])
 
