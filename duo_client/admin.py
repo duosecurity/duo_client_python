@@ -173,15 +173,14 @@ the following fields:
     data - Detailed error code such as
            {"code": 40401, "message": "Resource not found", "stat": "FAIL"}
 """
-import six.moves.urllib
 
 from . import client, Accounts
 from .logs.telephony import Telephony
-import six
 import warnings
 import json
 import time
 import base64
+import urllib.parse
 from datetime import datetime, timedelta, timezone
 
 USER_STATUS_ACTIVE = "active"
@@ -230,7 +229,7 @@ class Admin(client.Client):
 
     @classmethod
     def _canonicalize_ip_whitelist(klass, ip_whitelist):
-        if isinstance(ip_whitelist, six.string_types):
+        if isinstance(ip_whitelist, str):
             return ip_whitelist
         else:
             return ','.join(ip_whitelist)
@@ -238,7 +237,7 @@ class Admin(client.Client):
 
     @staticmethod
     def _canonicalize_bypass_codes(codes):
-        if isinstance(codes, six.string_types):
+        if isinstance(codes, str):
             return codes
         else:
             return ','.join([str(int(code)) for code in codes])
@@ -725,7 +724,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        user_id = urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id
         response = self.json_api_call('GET', path, {})
         return response
@@ -877,7 +876,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        user_id = urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id
         params = {}
         if username is not None:
@@ -915,7 +914,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        user_id = urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id
         return self.json_api_call('DELETE', path, {})
 
@@ -958,7 +957,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        user_id = urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/bypass_codes'
         params = {}
 
@@ -973,7 +972,7 @@ class Admin(client.Client):
 
         if codes is not None:
             params['codes'] = self._canonicalize_bypass_codes(codes)
-        
+
         if preserve_existing is not None:
             params['preserve_existing'] = preserve_existing
 
@@ -991,7 +990,7 @@ class Admin(client.Client):
             Notes:
                 Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        user_id = urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/bypass_codes'
         return self.json_paging_api_call('GET', path, {})
 
@@ -1012,7 +1011,7 @@ class Admin(client.Client):
         """
         (limit, offset) = self.normalize_paging_args(limit, offset)
         if limit:
-            user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+            user_id = urllib.parse.quote_plus(str(user_id))
             path = '/admin/v1/users/' + user_id + '/bypass_codes'
             return self.json_api_call(
                 'GET', path, {'limit': limit, 'offset': offset})
@@ -1029,7 +1028,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        user_id = urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/phones'
         return self.json_paging_api_call('GET', path, {})
 
@@ -1047,7 +1046,7 @@ class Admin(client.Client):
         """
         (limit, offset) = self.normalize_paging_args(limit, offset)
         if limit:
-            user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+            user_id = urllib.parse.quote_plus(str(user_id))
             path = '/admin/v1/users/' + user_id + '/phones'
             return self.json_api_call(
                 'GET', path, {'limit': limit, 'offset': offset})
@@ -1065,7 +1064,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        user_id = urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/phones'
         params = {
             'phone_id': phone_id,
@@ -1083,7 +1082,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        user_id = urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/phones/' + phone_id
         params = {}
         return self.json_api_call('DELETE', path,
@@ -1099,7 +1098,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        user_id = urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/tokens'
         return self.json_paging_api_call('GET', path, {})
 
@@ -1117,7 +1116,7 @@ class Admin(client.Client):
         """
         (limit, offset) = self.normalize_paging_args(limit, offset)
         if limit:
-            user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+            user_id = urllib.parse.quote_plus(str(user_id))
             path = '/admin/v1/users/' + user_id + '/tokens'
             return self.json_api_call(
                 'GET', path, {'limit': limit, 'offset': offset})
@@ -1135,7 +1134,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        user_id = urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/tokens'
         params = {
             'token_id': token_id,
@@ -1153,8 +1152,8 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
-        token_id = six.moves.urllib.parse.quote_plus(str(token_id))
+        user_id = urllib.parse.quote_plus(str(user_id))
+        token_id = urllib.parse.quote_plus(str(token_id))
         path = '/admin/v1/users/' + user_id + '/tokens/' + token_id
         return self.json_api_call('DELETE', path, {})
 
@@ -1170,7 +1169,7 @@ class Admin(client.Client):
             Notes:
                 Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        user_id = urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/u2ftokens'
         return self.json_paging_api_call('GET', path, {})
 
@@ -1190,7 +1189,7 @@ class Admin(client.Client):
         """
         (limit, offset) = self.normalize_paging_args(limit, offset)
         if limit:
-            user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+            user_id = urllib.parse.quote_plus(str(user_id))
             path = '/admin/v1/users/' + user_id + '/u2ftokens'
             return self.json_api_call(
                 'GET', path, {'limit': limit, 'offset': offset})
@@ -1209,7 +1208,7 @@ class Admin(client.Client):
             Notes:
                 Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        user_id = urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/webauthncredentials'
         return self.json_paging_api_call('GET', path, {})
 
@@ -1230,7 +1229,7 @@ class Admin(client.Client):
         """
         (limit, offset) = self.normalize_paging_args(limit, offset)
         if limit:
-            user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+            user_id = urllib.parse.quote_plus(str(user_id))
             path = '/admin/v1/users/' + user_id + '/webauthncredentials'
             return self.json_api_call(
                 'GET', path, {'limit': limit, 'offset': offset})
@@ -1247,7 +1246,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        user_id = urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/groups'
         return self.json_paging_api_call('GET', path, {})
 
@@ -1265,7 +1264,7 @@ class Admin(client.Client):
         """
         (limit, offset) = self.normalize_paging_args(limit, offset)
         if limit:
-            user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+            user_id = urllib.parse.quote_plus(str(user_id))
             path = '/admin/v1/users/' + user_id + '/groups'
             return self.json_api_call(
                 'GET', path, {'limit': limit, 'offset': offset})
@@ -1283,7 +1282,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        user_id = urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/groups'
         params = {'group_id': group_id}
         return self.json_api_call('POST', path, params)
@@ -1299,7 +1298,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        user_id = six.moves.urllib.parse.quote_plus(str(user_id))
+        user_id = urllib.parse.quote_plus(str(user_id))
         path = '/admin/v1/users/' + user_id + '/groups/' + group_id
         params = {}
         return self.json_api_call('DELETE', path, params)
@@ -1315,7 +1314,7 @@ class Admin(client.Client):
         Raises:
             RuntimeError: if the request returns a non-200 status response.
         """
-        escaped_epkey = six.moves.urllib.parse.quote_plus(str(epkey))
+        escaped_epkey = urllib.parse.quote_plus(str(epkey))
         path = '/admin/v1/endpoints/' + escaped_epkey
         return self.json_api_call('GET', path, {})
 
@@ -1479,7 +1478,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        phone_id = six.moves.urllib.parse.quote_plus(str(phone_id))
+        phone_id = urllib.parse.quote_plus(str(phone_id))
         path = '/admin/v1/phones/' + phone_id
         params = {}
         if number is not None:
@@ -1688,7 +1687,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        path = '/admin/v1/desktoptokens/' + six.moves.urllib.parse.quote_plus(desktoptoken_id)
+        path = '/admin/v1/desktoptokens/' + urllib.parse.quote_plus(desktoptoken_id)
         params = {}
         return self.json_api_call('DELETE', path, params)
 
@@ -1706,7 +1705,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        desktoptoken_id = six.moves.urllib.parse.quote_plus(str(desktoptoken_id))
+        desktoptoken_id = urllib.parse.quote_plus(str(desktoptoken_id))
         path = '/admin/v1/desktoptokens/' + desktoptoken_id
         params = {}
         if platform is not None:
@@ -1734,7 +1733,7 @@ class Admin(client.Client):
         params = {}
         if valid_secs:
             params['valid_secs'] = str(valid_secs)
-        quoted_id = six.moves.urllib.parse.quote_plus(desktoptoken_id)
+        quoted_id = urllib.parse.quote_plus(desktoptoken_id)
         response = self.json_api_call('POST',
             '/admin/v1/desktoptokens/%s/activate' % quoted_id,
             params)
@@ -1780,7 +1779,7 @@ class Admin(client.Client):
 
         Returns a token object.
         """
-        token_id = six.moves.urllib.parse.quote_plus(str(token_id))
+        token_id = urllib.parse.quote_plus(str(token_id))
         path = '/admin/v1/tokens/' + token_id
         params = {}
         response = self.json_api_call('GET', path,
@@ -1809,7 +1808,7 @@ class Admin(client.Client):
 
         token_id - Token ID
         """
-        token_id = six.moves.urllib.parse.quote_plus(str(token_id))
+        token_id = urllib.parse.quote_plus(str(token_id))
         path = '/admin/v1/tokens/' + token_id
         return self.json_api_call('DELETE', path, {})
 
@@ -1895,7 +1894,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        token_id = six.moves.urllib.parse.quote_plus(str(token_id))
+        token_id = urllib.parse.quote_plus(str(token_id))
         path = '/admin/v1/tokens/' + token_id
         params = {}
         if totp_step is not None:
@@ -1934,7 +1933,7 @@ class Admin(client.Client):
 
         Returns nothing on success.
         """
-        token_id = six.moves.urllib.parse.quote_plus(str(token_id))
+        token_id = urllib.parse.quote_plus(str(token_id))
         path = '/admin/v1/tokens/' + token_id + '/resync'
         params = {'code1': code1, 'code2': code2, 'code3': code3}
         return self.json_api_call('POST', path, params)
@@ -2661,7 +2660,7 @@ class Admin(client.Client):
         Raises RuntimeError on error.
 
         """
-        integration_key = six.moves.urllib.parse.quote_plus(str(integration_key))
+        integration_key = urllib.parse.quote_plus(str(integration_key))
         path = '/admin/v2/integrations/%s' % integration_key
         return self.json_api_call(
             'DELETE',
@@ -2728,7 +2727,7 @@ class Admin(client.Client):
         Raises RuntimeError on error.
 
         """
-        integration_key = six.moves.urllib.parse.quote_plus(str(integration_key))
+        integration_key = urllib.parse.quote_plus(str(integration_key))
         path = '/admin/v2/integrations/%s' % integration_key
         params = {}
         if name is not None:
@@ -2832,7 +2831,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        admin_id = six.moves.urllib.parse.quote_plus(str(admin_id))
+        admin_id = urllib.parse.quote_plus(str(admin_id))
         path = '/admin/v1/admins/%s' % admin_id
         response = self.json_api_call('GET', path, {})
         return response
@@ -2884,7 +2883,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        admin_id = six.moves.urllib.parse.quote_plus(str(admin_id))
+        admin_id = urllib.parse.quote_plus(str(admin_id))
         path = '/admin/v1/admins/%s' % admin_id
         params = {}
         if name is not None:
@@ -2906,7 +2905,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        admin_id = six.moves.urllib.parse.quote_plus(str(admin_id))
+        admin_id = urllib.parse.quote_plus(str(admin_id))
         path = '/admin/v1/admins/%s' % admin_id
         return self.json_api_call('DELETE', path, {})
 
@@ -2918,7 +2917,7 @@ class Admin(client.Client):
 
         Raises RuntimeError on error.
         """
-        admin_id = six.moves.urllib.parse.quote_plus(str(admin_id))
+        admin_id = urllib.parse.quote_plus(str(admin_id))
         path = '/admin/v1/admins/%s/reset' % admin_id
         return self.json_api_call('POST', path, {})
 
@@ -3007,7 +3006,7 @@ class Admin(client.Client):
         Raises RuntimeError on error.
         """
 
-        admin_id = six.moves.urllib.parse.quote_plus(str(admin_id))
+        admin_id = urllib.parse.quote_plus(str(admin_id))
         path = '/admin/v1/admins/{}/password_mgmt'.format(admin_id)
         response = self.json_api_call('GET', path, {})
         return response
@@ -3036,7 +3035,7 @@ class Admin(client.Client):
         if has_external_password_mgmt is not None:
             params['has_external_password_mgmt'] = str(has_external_password_mgmt)
 
-        admin_id = six.moves.urllib.parse.quote_plus(str(admin_id))
+        admin_id = urllib.parse.quote_plus(str(admin_id))
         path = '/admin/v1/admins/{}/password_mgmt'.format(admin_id)
         response = self.json_api_call('POST', path, params)
         return response
@@ -3153,7 +3152,7 @@ class Admin(client.Client):
             Notes:
                 Raises RuntimeError on error.
         """
-        registration_id = six.moves.urllib.parse.quote_plus(str(registration_id))
+        registration_id = urllib.parse.quote_plus(str(registration_id))
         path = '/admin/v1/u2ftokens/' + registration_id
         response = self.json_api_call('GET', path, {})
         return response
@@ -3169,7 +3168,7 @@ class Admin(client.Client):
                 Raises RuntimeError on error.
         """
         registration_id = \
-            six.moves.urllib.parse.quote_plus(str(registration_id))
+            urllib.parse.quote_plus(str(registration_id))
         path = '/admin/v1/u2ftokens/' + registration_id
         return self.json_api_call('DELETE', path, {})
 
@@ -3187,7 +3186,7 @@ class Admin(client.Client):
                 Raises RuntimeError on error.
         """
         webauthnkey = \
-            six.moves.urllib.parse.quote_plus(str(webauthnkey))
+            urllib.parse.quote_plus(str(webauthnkey))
         path = '/admin/v1/webauthncredentials/' + webauthnkey
         response = self.json_api_call('GET', path, {})
         return response
@@ -3204,7 +3203,7 @@ class Admin(client.Client):
                 Raises RuntimeError on error.
         """
         webauthnkey = \
-            six.moves.urllib.parse.quote_plus(str(webauthnkey))
+            urllib.parse.quote_plus(str(webauthnkey))
         path = '/admin/v1/webauthncredentials/' + webauthnkey
         response = self.json_api_call('DELETE', path, {})
         return response
@@ -3253,7 +3252,7 @@ class Admin(client.Client):
                 Raises RuntimeError on error.
         """
         bypass_code_id = \
-            six.moves.urllib.parse.quote_plus(str(bypass_code_id))
+            urllib.parse.quote_plus(str(bypass_code_id))
         path = '/admin/v1/bypass_codes/' + bypass_code_id
         response = self.json_api_call('DELETE', path, {})
         return response
@@ -3271,7 +3270,7 @@ class Admin(client.Client):
         params = {
             'username': username,
         }
-        directory_key = six.moves.urllib.parse.quote_plus(directory_key)
+        directory_key = urllib.parse.quote_plus(directory_key)
         path = (
             '/admin/v1/users/directorysync/{directory_key}/syncuser').format(
                 directory_key=directory_key)
@@ -3384,7 +3383,7 @@ class Admin(client.Client):
         )
 
     def _quote_policy_id(self, policy_key):
-        return six.moves.urllib.parse.quote_plus("{}".format(policy_key))
+        return urllib.parse.quote_plus("{}".format(policy_key))
 
     def get_policies_v2_iterator(self):
         """

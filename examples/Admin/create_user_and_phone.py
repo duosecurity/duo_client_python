@@ -3,7 +3,6 @@ import pprint
 import sys
 
 import duo_client
-from six.moves import input
 
 argv_iter = iter(sys.argv[1:])
 def get_next_arg(prompt):

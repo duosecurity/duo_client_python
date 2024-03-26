@@ -5,8 +5,6 @@ import json
 import sys
 from datetime import datetime, timedelta, timezone
 
-from six.moves import input
-
 from duo_client import Admin
 
 argv_iter = iter(sys.argv[1:])

@@ -18,14 +18,14 @@
 
 """Extensions to allow HTTPS requests with SSL certificate validation."""
 
-import six.moves.http_client
+import http.client
 import re
 import socket
-import six.moves.urllib
 import ssl
+import urllib.error
+import urllib.request
 
-
-class InvalidCertificateException(six.moves.http_client.HTTPException):
+class InvalidCertificateException(http.client.HTTPException):
     """Raised when a certificate is provided with an invalid hostname."""
 
     def __init__(self, host, cert, reason):
@@ -35,7 +35,7 @@ class InvalidCertificateException(six.moves.http_client.HTTPException):
           host: The hostname the connection was made to.
           cert: The SSL certificate (as a dictionary) the host returned.
         """
-        six.moves.http_client.HTTPException.__init__(self)
+        http.client.HTTPException.__init__(self)
         self.host = host
         self.cert = cert
         self.reason = reason
@@ -47,10 +47,10 @@ class InvalidCertificateException(six.moves.http_client.HTTPException):
                 (self.host, self.reason, self.cert))
 
 
-class CertValidatingHTTPSConnection(six.moves.http_client.HTTPConnection):
+class CertValidatingHTTPSConnection(http.client.HTTPConnection):
     """An HTTPConnection that connects over SSL and validates certificates."""
 
-    default_port = six.moves.http_client.HTTPS_PORT
+    default_port = http.client.HTTPS_PORT
 
     def __init__(self, host, port=None, key_file=None, cert_file=None,
                  ca_certs=None, strict=None, **kwargs):
@@ -66,7 +66,7 @@ class CertValidatingHTTPSConnection(six.moves.http_client.HTTPConnection):
           strict: When true, causes BadStatusLine to be raised if the status line
               can't be parsed as a valid HTTP/1.0 or 1.1 status line.
         """
-        six.moves.http_client.HTTPConnection.__init__(self, host, port, strict, **kwargs)
+        http.client.HTTPConnection.__init__(self, host, port, strict, **kwargs)
         context = ssl.SSLContext(ssl.PROTOCOL_TLS)
         if cert_file:
             context.load_cert_chain(cert_file, key_file)
@@ -126,7 +126,7 @@ class CertValidatingHTTPSConnection(six.moves.http_client.HTTPConnection):
                 raise InvalidCertificateException(hostname, cert, 'hostname mismatch')
 
 
-class CertValidatingHTTPSHandler(six.moves.urllib.request.HTTPSHandler):
+class CertValidatingHTTPSHandler(urllib.request.HTTPSHandler):
     """An HTTPHandler that validates SSL certificates."""
 
     def __init__(self, **kwargs):
@@ -141,10 +141,10 @@ class CertValidatingHTTPSHandler(six.moves.urllib.request.HTTPSHandler):
             return CertValidatingHTTPSConnection(host, **full_kwargs)
         try:
             return self.do_open(http_class_wrapper, req)
-        except six.moves.urllib.error.URLError as e:
+        except urllib.error.URLError as e:
             if type(e.reason) == ssl.SSLError and e.reason.args[0] == 1:
                 raise InvalidCertificateException(req.host, '',
                                                   e.reason.args[1])
             raise
 
-    https_request = six.moves.urllib.request.HTTPSHandler.do_request_
+    https_request = urllib.request.HTTPSHandler.do_request_

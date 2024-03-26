@@ -2,8 +2,6 @@
 import csv
 import sys
 import duo_client
-import json
-from six.moves import input
 
 argv_iter = iter(sys.argv[1:])
 def get_next_arg(prompt):

@@ -2,7 +2,6 @@
 import sys
 
 import duo_client
-from six.moves import input
 
 EDITIONS = {
         "ENTERPRISE": "Duo Essentials",

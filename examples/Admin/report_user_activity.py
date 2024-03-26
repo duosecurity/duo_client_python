@@ -3,7 +3,6 @@ import sys
 from datetime import datetime, timezone
 
 import duo_client
-from six.moves import input
 
 argv_iter = iter(sys.argv[1:])
 
