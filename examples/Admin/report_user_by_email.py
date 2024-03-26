@@ -2,7 +2,6 @@
 
 """ Script to illustrate how to retrieve a user from the Duo Admin API using the associated email address"""
 
-from __future__ import absolute_import, print_function
 import sys
 import getpass
 

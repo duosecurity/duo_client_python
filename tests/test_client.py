@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 import hashlib
 from unittest import mock
 import unittest

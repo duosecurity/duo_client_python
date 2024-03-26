@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 from duo_client.https_wrapper import CertValidatingHTTPSConnection
 import unittest
 from unittest import mock

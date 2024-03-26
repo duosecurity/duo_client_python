@@ -173,8 +173,6 @@ the following fields:
     data - Detailed error code such as
            {"code": 40401, "message": "Resource not found", "stat": "FAIL"}
 """
-from __future__ import absolute_import
-
 import six.moves.urllib
 
 from . import client, Accounts

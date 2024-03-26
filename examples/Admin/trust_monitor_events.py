@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 """Print Duo Trust Monitor Events which surfaced within the past two weeks."""
 
-from __future__ import absolute_import, print_function
-
 import json
 import sys
 from datetime import datetime, timedelta, timezone
