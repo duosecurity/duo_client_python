@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 import hashlib
-import mock
+from unittest import mock
 import unittest
 import six.moves.urllib
 import duo_client.client
