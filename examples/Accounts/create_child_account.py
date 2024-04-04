@@ -3,7 +3,7 @@ Example of Duo Accounts API child account creation
 """
 
 import duo_client
-import os
+
 import sys
 import getpass
 

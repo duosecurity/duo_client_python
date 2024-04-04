@@ -3,7 +3,6 @@ Duo Security Auth API reference client implementation.
 
 <http://www.duosecurity.com/docs/authapi>
 """
-from __future__ import absolute_import
 from . import client
 
 class Auth(client.Client):

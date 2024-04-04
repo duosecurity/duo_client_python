@@ -3,7 +3,6 @@ Example of Duo Auth API user authentication using asynchronous resquest/response
 """
 
 import duo_client
-import os
 import sys
 import getpass
 

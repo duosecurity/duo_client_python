@@ -1,12 +1,7 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, print_function
-
 import csv
-import json
 import sys
 from datetime import datetime, timedelta, timezone
-
-from six.moves import input
 
 import duo_client
 

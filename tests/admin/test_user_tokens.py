@@ -1,3 +1,5 @@
+import unittest
+
 from .. import util
 import duo_client.admin
 from .base import TestAdmin
