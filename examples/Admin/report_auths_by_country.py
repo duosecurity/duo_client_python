@@ -1,11 +1,7 @@
 #!/usr/bin/env python
-from __future__ import print_function
-from __future__ import absolute_import
 import csv
 import sys
 import duo_client
-import json
-from six.moves import input
 
 argv_iter = iter(sys.argv[1:])
 def get_next_arg(prompt):

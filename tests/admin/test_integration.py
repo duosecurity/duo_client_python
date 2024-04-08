@@ -1,3 +1,5 @@
+import unittest
+
 from .. import util
 import json
 import duo_client.admin

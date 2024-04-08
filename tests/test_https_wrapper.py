@@ -1,7 +1,6 @@
-from __future__ import absolute_import
 from duo_client.https_wrapper import CertValidatingHTTPSConnection
 import unittest
-import mock
+from unittest import mock
 import ssl
 
 class TestSSLContextCreation(unittest.TestCase):

@@ -2,7 +2,6 @@
 import sys
 import json
 import duo_client
-from six.moves import input
 
 
 argv_iter = iter(sys.argv[1:])

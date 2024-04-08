@@ -1,8 +1,6 @@
-from __future__ import absolute_import
 import hashlib
-import mock
+from unittest import mock
 import unittest
-import six.moves.urllib
 import duo_client.client
 from . import util
 import base64
@@ -272,10 +270,10 @@ class TestSign(unittest.TestCase):
         )
         expected = 'f01811cbbf9561623ab45b893096267fd46a5178'
         expected = ikey + ':' + expected
-        if isinstance(expected, six.text_type):
+        if isinstance(expected, str):
             expected = expected.encode('utf-8')
         expected = base64.b64encode(expected).strip()
-        if not isinstance(expected, six.text_type):
+        if not isinstance(expected, str):
             expected = expected.decode('utf-8')
         expected = 'Basic ' + expected
         self.assertEqual(actual,
@@ -302,10 +300,10 @@ class TestSign(unittest.TestCase):
         )
         expected = '0508065035a03b2a1de2f453e629e791d180329e157f65df6b3e0f08299d4321e1c5c7a7c7ee6b9e5fc80d1fb6fbf3ad5eb7c44dd3b3985a02c37aca53ec3698'
         expected = ikey + ':' + expected
-        if isinstance(expected, six.text_type):
+        if isinstance(expected, str):
             expected = expected.encode('utf-8')
         expected = base64.b64encode(expected).strip()
-        if not isinstance(expected, six.text_type):
+        if not isinstance(expected, str):
             expected = expected.decode('utf-8')
         expected = 'Basic ' + expected
         self.assertEqual(actual,
