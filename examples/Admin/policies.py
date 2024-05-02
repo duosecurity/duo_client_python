@@ -78,6 +78,14 @@ def bulk_delete_section(policy_keys, print_response=False):
         pretty = json.dumps(response, indent=4, sort_keys=True, default=str)
         print(pretty)
 
+def update_policy_with_device_health_app(policy_key, print_response=False):
+    """
+    Update a given policy to include Duo Device Health App policy
+    settings. Requires Access or Beyond editions.
+    NOTE: this function is deprecated, please use update_policy_with_duo_desktop
+    """
+    return update_policy_with_duo_desktop(policy_key, print_response)
+
 def update_policy_with_duo_desktop(policy_key, print_response=False):
     """
     Update a given policy to include Duo Desktop policy
