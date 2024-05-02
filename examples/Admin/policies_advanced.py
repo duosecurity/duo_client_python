@@ -86,19 +86,19 @@ def bulk_delete_section(policy_keys, print_response=False):
         print(pretty)
 
 
-def update_policy_with_device_health_app(policy_key, print_response=False):
+def update_policy_with_duo_desktop(policy_key, print_response=False):
     """
-    Update a given policy to include Duo Device Health App policy
+    Update a given policy to include Duo Desktop policy
     settings. Requires Access or Beyond editions.
     """
 
     json_request = {
             "sections": {
-                    "device_health_app": {
+                    "duo_desktop": {
                             "enforce_encryption":             ["windows"],
                             "enforce_firewall":               ["windows"],
                             "prompt_to_install":              ["windows"],
-                            "requires_DHA":                   ["windows"],
+                            "requires_duo_desktop":           ["windows"],
                             "windows_endpoint_security_list": ["cisco-amp"],
                             "windows_remediation_note":       "Please install Windows agent",
                     },
@@ -148,8 +148,8 @@ def main():
     policy_key_a = create_empty_policy("Test New Policy - a")
     policy_key_b = create_empty_policy("Test New Policy - b")
 
-    # Update policy with Duo Device Health App settings.
-    update_policy_with_device_health_app(policy_key_b)
+    # Update policy with Duo Desktop settings.
+    update_policy_with_duo_desktop(policy_key_b)
 
     # Create an empty policy and delete it.
     policy_key_c = create_empty_policy("Test New Policy - c")
