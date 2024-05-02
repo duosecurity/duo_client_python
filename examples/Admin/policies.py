@@ -89,7 +89,6 @@ def update_policy_with_duo_desktop(policy_key, print_response=False):
             "duo_desktop": {
                 "enforce_encryption": ["windows"],
                 "enforce_firewall": ["windows"],
-                "prompt_to_install": ["windows"],
                 "requires_duo_desktop": ["windows"],
                 "windows_endpoint_security_list": ["cisco-amp"],
                 "windows_remediation_note": "Please install Windows agent",
