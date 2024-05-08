@@ -2650,6 +2650,23 @@ class Admin(client.Client):
         )
         return response
 
+    def get_secret_key (self, integration_key):
+        """Returns the secret key of the specified integration.
+
+        integration_key - The ikey of the secret key to get.
+
+        Returns the skey
+        
+        Raises RuntimeError on error.
+        """
+        params = {}
+        response = self.json_api_call(
+            'GET',
+            '/admin/v1/integrations/' + integration_key + '/skey',
+            params,
+        )
+        return response
+
     def delete_integration(self, integration_key):
         """Deletes an integration.
 
