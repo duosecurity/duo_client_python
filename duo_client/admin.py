@@ -804,7 +804,7 @@ class Admin(client.Client):
     def add_user(self, username, realname=None, status=None,
                  notes=None, email=None, firstname=None, lastname=None,
                  alias1=None, alias2=None, alias3=None, alias4=None,
-                 aliases=None):
+                 aliases=None, enable_auto_prompt=None):
         """
         Adds a user.
 
@@ -817,6 +817,7 @@ class Admin(client.Client):
         lastname - User's surname for ID Proofing (optional)
         alias1..alias4 - Aliases for the user's primary username (optional)
         aliases - Aliases for the user's primary username (optional)
+        enable_auto_prompt - Enable auto selection in the universal prompt (optional)
 
         Returns newly created user object.
 
@@ -847,6 +848,8 @@ class Admin(client.Client):
             params['alias4'] = alias4
         if aliases is not None:
             params['aliases'] = aliases
+        if enable_auto_prompt is not None:
+            params['enable_auto_prompt'] = enable_auto_prompt
         response = self.json_api_call('POST',
                                       '/admin/v1/users',
                                       params)
@@ -855,7 +858,7 @@ class Admin(client.Client):
     def update_user(self, user_id, username=None, realname=None, status=None,
                     notes=None, email=None, firstname=None, lastname=None,
                     alias1=None, alias2=None, alias3=None, alias4=None,
-                    aliases=None):
+                    aliases=None, enable_auto_prompt=None):
         """
         Update username, realname, status, or notes for a user.
 
@@ -869,6 +872,7 @@ class Admin(client.Client):
         lastname - User's surname for ID Proofing (optional)
         alias1..alias4 - Aliases for the user's primary username (optional)
         aliases - Aliases for the user's primary username. (optional)
+        enable_auto_prompt - Enable auto selection in the universal prompt (optional)
 
         Returns updated user object.
 
@@ -901,6 +905,8 @@ class Admin(client.Client):
             params['alias4'] = alias4
         if aliases is not None:
             params['aliases'] = aliases
+        if enable_auto_prompt is not None:
+            params['enable_auto_prompt'] = enable_auto_prompt
         response = self.json_api_call('POST', path, params)
         return response
 
