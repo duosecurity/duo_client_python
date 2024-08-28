@@ -174,14 +174,15 @@ the following fields:
            {"code": 40401, "message": "Resource not found", "stat": "FAIL"}
 """
 
-from . import client, Accounts
-from .logs.telephony import Telephony
-import warnings
+import base64
 import json
 import time
-import base64
 import urllib.parse
+import warnings
 from datetime import datetime, timedelta, timezone
+
+from . import Accounts, client
+from .logs.telephony import Telephony
 
 USER_STATUS_ACTIVE = "active"
 USER_STATUS_BYPASS = "bypass"
@@ -3532,6 +3533,15 @@ class Admin(client.Client):
         """
 
         path = "/admin/v2/policies/summary"
+        response = self.json_api_call("GET", path, {})
+        return response
+
+    def get_passport_config(self):
+        """
+        Returns the current Passport configuration.
+        """
+
+        path = "/admin/v2/passport/config"
         response = self.json_api_call("GET", path, {})
         return response
 
