@@ -174,14 +174,15 @@ the following fields:
            {"code": 40401, "message": "Resource not found", "stat": "FAIL"}
 """
 
-from . import client, Accounts
-from .logs.telephony import Telephony
-import warnings
+import base64
 import json
 import time
-import base64
 import urllib.parse
+import warnings
 from datetime import datetime, timedelta, timezone
+
+from . import Accounts, client
+from .logs.telephony import Telephony
 
 USER_STATUS_ACTIVE = "active"
 USER_STATUS_BYPASS = "bypass"
@@ -538,9 +539,7 @@ class Admin(client.Client):
         """
         Returns activity log events.
 
-        As of now, the activity endpoint is not in general availability and is restricted to a few customers for private preview.
-        If you have any questions or need more information, feel free to reach out to support for guidance.
-
+        The activity endpoint is in public preview and subject to change.
 
         mintime - Unix timestamp in ms; fetch records >= mintime
         maxtime - Unix timestamp in ms; fetch records <= maxtime
@@ -2652,6 +2651,23 @@ class Admin(client.Client):
         )
         return response
 
+    def get_secret_key (self, integration_key):
+        """Returns the secret key of the specified integration.
+
+        integration_key - The ikey of the secret key to get.
+
+        Returns the skey
+        
+        Raises RuntimeError on error.
+        """
+        params = {}
+        response = self.json_api_call(
+            'GET',
+            '/admin/v1/integrations/' + integration_key + '/skey',
+            params,
+        )
+        return response
+
     def delete_integration(self, integration_key):
         """Deletes an integration.
 
@@ -3517,6 +3533,15 @@ class Admin(client.Client):
         """
 
         path = "/admin/v2/policies/summary"
+        response = self.json_api_call("GET", path, {})
+        return response
+
+    def get_passport_config(self):
+        """
+        Returns the current Passport configuration.
+        """
+
+        path = "/admin/v2/passport/config"
         response = self.json_api_call("GET", path, {})
         return response
 
