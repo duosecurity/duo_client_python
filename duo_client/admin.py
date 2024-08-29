@@ -941,16 +941,31 @@ class Admin(client.Client):
 
         return self.json_api_call('POST', path, params)
 
-    def add_user_bypass_codes(self, user_id, count=None, valid_secs=None, remaining_uses=None, codes=None, preserve_existing=None):
+    def add_user_bypass_codes(
+        self, 
+        user_id, 
+        count=None, 
+        valid_secs=None, 
+        remaining_uses=None, 
+        codes=None, 
+        preserve_existing=None,
+        endpoint_verification=None,
+    ):
         """
-        Replace a user's bypass codes with new codes.
+        Generate bypass codes for user.
+        Replaces a user's bypass codes with new codes unless
+        `preserve_existing=True` is passed.
 
-        user_id - User ID
-        count - Number of new codes to randomly generate
-        valid_secs - Seconds before codes expire (if 0 they will never expire)
-        remaining_uses - The number of times this code can be used (0 is unlimited)
-        codes - Optionally provide custom codes, otherwise will be random
-        count and codes are mutually exclusive
+        user_id                 User ID
+        count                   Number of new codes to randomly generate
+        valid_secs              Seconds before codes expire (if 0 they will never expire)
+        remaining_uses          The number of times this code can be used (0 is unlimited)
+        codes                   Optionally provide custom codes, otherwise will be random
+                                count and codes are mutually exclusive
+        preserve_existing       whether to preserve existing codes when creating new ones,
+                                default is to remove existing bypass codes
+        endpoint_verification   New argument for unreleased feature. Will be ignored if used.
+                                Client will be updated again in the future when feature is released.
 
         Returns a list of newly created codes.
 
@@ -965,6 +980,9 @@ class Admin(client.Client):
 
         if valid_secs is not None:
             params['valid_secs'] = str(int(valid_secs))
+
+        if endpoint_verification is not None:
+            params["endpoint_verification"] = str(endpoint_verification).lower()
 
         if remaining_uses is not None:
             params['reuse_count'] = str(int(remaining_uses))
