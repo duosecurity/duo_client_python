@@ -1605,21 +1605,74 @@ class Admin(client.Client):
             params['installation_msg'] = installation_msg
         return self.json_api_call('POST', path, params)
 
+    def get_desktop_authenticators_generator(self):
+        """
+        Returns a generator yielding desktop_authenticators.
+        """
+        return self.json_paging_api_call(
+            'GET', '/admin/v1/desktop_authenticators',
+            {}
+        )
+
+    def get_desktop_authenticators(self, limit=None, offset=0):
+        """
+        Retrieves a list of desktop authenticators.
+        Args:
+            limit: The max number of desktop authenticators to fetch at once. Default None
+            offset: If a limit is passed, the offset to start retrieval.
+                    Default 0
+
+        Returns: list of desktop authenticators
+
+        Raises RuntimeError on error.
+
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call('GET', '/admin/v1/desktop_authenticators', {'limit': limit, 'offset': offset})
+
+        return list(self.get_desktop_authenticators_generator())
+
+    def get_desktop_authenticator_by_key(self, desktop_authenticator_key):
+        """
+        Returns a desktop authenticator specified by desktop_authenticator_key.
+
+        desktop_authenticator_key - Desktop Authenticator Key (dakey)
+
+        Returns desktop authenticator object.
+
+        Raises RuntimeError on error.
+        """
+        path = '/admin/v1/desktop_authenticators/' + desktop_authenticator_key
+        response = self.json_api_call('GET', path, {})
+        return response
+
+    def delete_desktop_authenticator(self, desktop_authenticator_key):
+        """
+        Deletes a desktop authenticator. If the desktop authenticator has already been deleted,
+        does nothing.
+
+        desktop_authenticator_key - Desktop token ID.
+
+        Returns nothing.
+
+        Raises RuntimeError on error.
+        """
+        path = '/admin/v1/desktop_authenticators/' + urllib.parse.quote_plus(desktop_authenticator_key)
+        params = {}
+        return self.json_api_call('DELETE', path, params)
+
     def get_desktoptokens_generator(self):
         """
         Returns a generator yielding desktoptokens.
         """
-        return self.json_paging_api_call(
-            'GET',
-            '/admin/v1/desktoptokens',
-            {}
-        )
+        return self.json_paging_api_call('GET', '/admin/v1/desktoptokens', {})
 
     def get_desktoptokens(self, limit=None, offset=0):
         """
         Retrieves a list of desktoptokens.
         Args:
-            limit: The max number of admins to fetch at once. Default None
+            limit: The max number of desktoptokens to fetch at once. Default None
             offset: If a limit is passed, the offset to start retrieval.
                     Default 0
 
