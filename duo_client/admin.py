@@ -2669,7 +2669,70 @@ class Admin(client.Client):
         )
         return response
 
-    def get_secret_key (self, integration_key):
+    def get_registered_devices_generator(self):
+        """
+        Returns a generator yielding Duo Desktop registered devices.
+        """
+        return self.json_paging_api_call('GET', '/admin/v1/registered_devices', {})
+
+    def get_registered_devices(self, limit=None, offset=0):
+        """
+        Retrieves a list of Duo Desktop registered devices.
+
+        Args:
+            limit: The max number of registered devices to fetch at once. [Default: None]
+            offset: If a 'limit' is passed, the offset to start retrieval.
+                    [Default: 0]
+
+        Returns:
+            list of registered devices
+
+        Raises:
+            RuntimeError on error.
+
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call('GET', '/admin/v1/registered_devices', {'limit': limit, 'offset': offset})
+
+        return list(self.get_registered_devices_generator())
+
+    def get_registered_device_by_id(self, registered_device_id):
+        """
+        Returns a Duo Desktop registered device specified by registered_device_id (compkey).
+
+        Args:
+            registered_device_id - Duo Desktop registered device compkey
+
+        Returns:
+            registered device object.
+
+        Raises:
+             RuntimeError on error.
+        """
+        path = '/admin/v1/registered_devices/' + registered_device_id
+        response = self.json_api_call('GET', path, {})
+        return response
+
+    def delete_registered_device(self, registered_device_id):
+        """
+        Deletes a Duo Desktop registered device. If the registered device has already been deleted,
+        does nothing.
+
+        Args:
+            registered_device_id - Duo Desktop registered device ID (compkey).
+
+        Returns:
+             None
+
+        Raises:
+             RuntimeError on error.
+        """
+        path = '/admin/v1/registered_devices/' + urllib.parse.quote_plus(registered_device_id)
+        params = {}
+        return self.json_api_call('DELETE', path, params)
+
+    def get_secret_key(self, integration_key):
         """Returns the secret key of the specified integration.
 
         integration_key - The ikey of the secret key to get.
