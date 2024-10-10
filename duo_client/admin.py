@@ -2155,6 +2155,8 @@ class Admin(client.Client):
                                         mobile_otp_enabled=None,
                                         yubikey_enabled=None,
                                         hardware_token_enabled=None,
+                                        verified_push_enabled=None,
+                                        verified_push_length=None
                                         ):
         params = {}
         if push_enabled is not None:
@@ -2175,6 +2177,12 @@ class Admin(client.Client):
         if voice_enabled is not None:
             params['voice_enabled'] = (
                 '1' if voice_enabled else '0')
+        if verified_push_enabled is not None:
+            params['verified_push_enabled'] = (
+                '1' if verified_push_enabled else '0')
+            if params['verified_push_enabled'] == '1':
+                params['verified_push_length'] = (
+                    verified_push_length if verified_push_length is not None else 3)
         response = self.json_api_call(
             'POST',
             '/admin/v1/admins/allowed_auth_methods',
