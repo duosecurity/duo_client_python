@@ -99,3 +99,16 @@ class TestPolicies(TestAdmin):
 
         self.assertEqual(response["method"], "GET")
         self.assertEqual(uri, "/admin/v2/policies/summary")
+
+    def test_calculate_policy(self):
+        ikey = "DI82WWNVI5Z4V10LZJR6"
+        ukey = "DUQU89MDEWOUR277H44G"
+
+        response = self.client.calculate_policy(integration_key=ikey, user_id=ukey)
+        uri, args = response["uri"].split("?")
+
+        self.assertEqual(response["method"], "GET")
+        self.assertEqual(uri, "/admin/v2/policies/calculate")
+        self.assertDictEqual(
+            util.params_to_dict(args), {"integration_key": [ikey], "user_id": [ukey]}
+        )

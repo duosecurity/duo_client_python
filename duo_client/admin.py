@@ -3625,6 +3625,23 @@ class Admin(client.Client):
         response = self.json_api_call("GET", path, {})
         return response
 
+    def calculate_policy(self, integration_key, user_id):
+        """
+        Args:
+            integration_key - The integration_key of the application to evaluate. (required)
+            user_id - The user_id of the user to evaluate (required)
+
+        Returns (dict) - Dictionary containing "policy_elements" and "sections"
+        """
+
+        path = "/admin/v2/policies/calculate"
+        response = self.json_api_call(
+            "GET",
+            path,
+            {"integration_key": integration_key, "user_id": user_id},
+        )
+        return response
+
     def get_passport_config(self):
         """
         Returns the current Passport configuration.
