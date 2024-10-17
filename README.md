@@ -62,6 +62,8 @@ $ python examples/report_users_and_phones.py
 
 ```
 $ nose2
+
+Example: `cd tests/admin && nose2`
 ```
 
 # Linting
