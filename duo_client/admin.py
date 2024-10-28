@@ -3644,11 +3644,57 @@ class Admin(client.Client):
 
     def get_passport_config(self):
         """
-        Returns the current Passport configuration.
+        Retrieve the current Passport configuration.
+
+        Returns (dict):
+            {
+                "enabled_status": string,
+                "enabled_groups": [
+                    {
+                        "group_id": user group ID,
+                        "group_name": descriptive user group name,
+                        ...
+                    },
+                    ...
+                ]
+                "disabled_groups": [
+                    {
+                        "group_id": user group ID,
+                        "group_name": descriptive user group name,
+                        ...
+                    },
+                    ...
+                ]
+            }
         """
 
         path = "/admin/v2/passport/config"
         response = self.json_api_call("GET", path, {})
+        return response
+
+    def update_passport_config(self, enabled_status, enabled_groups=[], disabled_groups=[]):
+        """
+        Update the current Passport configuration.
+
+        Args:
+            enabled_status (str) - one of "disabled", "enabled", "enabled-for-groups",
+                or "enabled-with-exceptions"
+            enabled_groups (list[str]) - if enabled_status is "enabled-for-groups", a
+                list of user group IDs for whom Passport should be enabled
+            disabled_groups (list[str]) - if enabled_status is "enabled-with-exceptions",
+                a list of user group IDs for whom Passport should be disabled
+        """
+
+        path = "/admin/v2/passport/config"
+        response = self.json_api_call(
+            "POST",
+            path,
+            {
+                "enabled_status": enabled_status,
+                "enabled_groups": enabled_groups,
+                "disabled_groups": disabled_groups,
+            },
+        )
         return response
 
 
