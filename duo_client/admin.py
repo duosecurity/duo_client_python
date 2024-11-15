@@ -2792,7 +2792,8 @@ class Admin(client.Client):
                            trusted_device_days=None,
                            ip_whitelist=None,
                            ip_whitelist_enroll_policy=None,
-                           groups_allowed=None,
+                           groups_allowed=None, 
+                           policy_key=None,
                            self_service_allowed=None,
                            sso=None):
         """Updates an integration.
@@ -2800,7 +2801,7 @@ class Admin(client.Client):
         integration_key - The key of the integration to update. (required)
         name - The name of the integration (optional)
         visual_style - (optional, default 'default')
-                       See adminapi docs for possible values.
+                       Deprecated. May be removed in a future release.
         greeting - Voice greeting (optional, default '')
         notes - internal use (optional, uses default setting)
         enroll_policy - <'enroll'|'allow'|'deny'> (optional, default 'enroll')
@@ -2818,6 +2819,8 @@ class Admin(client.Client):
         adminapi_write_resource - True|False|None
         reset_secret_key - <any value>|None
         groups_allowed - <str: CSV list of gkeys of groups allowed to auth>
+        policy_key - <str: policy key of custom application policy>|None
+                    An empty string results in removal of any existing policy key setting.
         self_service_allowed - True|False|None
         sso - <dict: parameters for generic single sign-on> (optional)
                 New argument for unreleased feature. Will return an error if used.
@@ -2838,6 +2841,8 @@ class Admin(client.Client):
         if name is not None:
             params['name'] = name
         if visual_style is not None:
+            warnings.warn("The 'visual_style' argument is deprecated. May be removed in a future release.",
+                          DeprecationWarning, stacklevel=2)
             params['visual_style'] = visual_style
         if greeting is not None:
             params['greeting'] = greeting
@@ -2873,6 +2878,8 @@ class Admin(client.Client):
             params['reset_secret_key'] = '1'
         if groups_allowed is not None:
             params['groups_allowed'] = groups_allowed
+        if policy_key is not None:
+            params['policy_key'] = policy_key
         if self_service_allowed is not None:
             params['self_service_allowed'] = '1' if self_service_allowed else '0'
         if sso is not None:
