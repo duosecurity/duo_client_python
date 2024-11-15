@@ -2792,7 +2792,8 @@ class Admin(client.Client):
                            trusted_device_days=None,
                            ip_whitelist=None,
                            ip_whitelist_enroll_policy=None,
-                           groups_allowed=None, policy_key=None,
+                           groups_allowed=None, 
+                           policy_key=None,
                            self_service_allowed=None,
                            sso=None):
         """Updates an integration.
