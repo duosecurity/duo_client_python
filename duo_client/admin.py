@@ -174,14 +174,15 @@ the following fields:
            {"code": 40401, "message": "Resource not found", "stat": "FAIL"}
 """
 
-from . import client, Accounts
-from .logs.telephony import Telephony
-import warnings
+import base64
 import json
 import time
-import base64
 import urllib.parse
+import warnings
 from datetime import datetime, timedelta, timezone
+
+from . import Accounts, client
+from .logs.telephony import Telephony
 
 USER_STATUS_ACTIVE = "active"
 USER_STATUS_BYPASS = "bypass"
@@ -940,16 +941,31 @@ class Admin(client.Client):
 
         return self.json_api_call('POST', path, params)
 
-    def add_user_bypass_codes(self, user_id, count=None, valid_secs=None, remaining_uses=None, codes=None, preserve_existing=None):
+    def add_user_bypass_codes(
+        self, 
+        user_id, 
+        count=None, 
+        valid_secs=None, 
+        remaining_uses=None, 
+        codes=None, 
+        preserve_existing=None,
+        endpoint_verification=None,
+    ):
         """
-        Replace a user's bypass codes with new codes.
+        Generate bypass codes for user.
+        Replaces a user's bypass codes with new codes unless
+        `preserve_existing=True` is passed.
 
-        user_id - User ID
-        count - Number of new codes to randomly generate
-        valid_secs - Seconds before codes expire (if 0 they will never expire)
-        remaining_uses - The number of times this code can be used (0 is unlimited)
-        codes - Optionally provide custom codes, otherwise will be random
-        count and codes are mutually exclusive
+        user_id                 User ID
+        count                   Number of new codes to randomly generate
+        valid_secs              Seconds before codes expire (if 0 they will never expire)
+        remaining_uses          The number of times this code can be used (0 is unlimited)
+        codes                   Optionally provide custom codes, otherwise will be random
+                                count and codes are mutually exclusive
+        preserve_existing       whether to preserve existing codes when creating new ones,
+                                default is to remove existing bypass codes
+        endpoint_verification   New argument for unreleased feature. Will be ignored if used.
+                                Client will be updated again in the future when feature is released.
 
         Returns a list of newly created codes.
 
@@ -964,6 +980,9 @@ class Admin(client.Client):
 
         if valid_secs is not None:
             params['valid_secs'] = str(int(valid_secs))
+
+        if endpoint_verification is not None:
+            params["endpoint_verification"] = str(endpoint_verification).lower()
 
         if remaining_uses is not None:
             params['reuse_count'] = str(int(remaining_uses))
@@ -2136,6 +2155,8 @@ class Admin(client.Client):
                                         mobile_otp_enabled=None,
                                         yubikey_enabled=None,
                                         hardware_token_enabled=None,
+                                        verified_push_enabled=None,
+                                        verified_push_length=None
                                         ):
         params = {}
         if push_enabled is not None:
@@ -2156,6 +2177,12 @@ class Admin(client.Client):
         if voice_enabled is not None:
             params['voice_enabled'] = (
                 '1' if voice_enabled else '0')
+        if verified_push_enabled is not None:
+            params['verified_push_enabled'] = (
+                '1' if verified_push_enabled else '0')
+            if params['verified_push_enabled'] == '1':
+                params['verified_push_length'] = (
+                    verified_push_length if verified_push_length is not None else 3)
         response = self.json_api_call(
             'POST',
             '/admin/v1/admins/allowed_auth_methods',
@@ -2650,7 +2677,70 @@ class Admin(client.Client):
         )
         return response
 
-    def get_secret_key (self, integration_key):
+    def get_registered_devices_generator(self):
+        """
+        Returns a generator yielding Duo Desktop registered devices.
+        """
+        return self.json_paging_api_call('GET', '/admin/v1/registered_devices', {})
+
+    def get_registered_devices(self, limit=None, offset=0):
+        """
+        Retrieves a list of Duo Desktop registered devices.
+
+        Args:
+            limit: The max number of registered devices to fetch at once. [Default: None]
+            offset: If a 'limit' is passed, the offset to start retrieval.
+                    [Default: 0]
+
+        Returns:
+            list of registered devices
+
+        Raises:
+            RuntimeError on error.
+
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call('GET', '/admin/v1/registered_devices', {'limit': limit, 'offset': offset})
+
+        return list(self.get_registered_devices_generator())
+
+    def get_registered_device_by_id(self, registered_device_id):
+        """
+        Returns a Duo Desktop registered device specified by registered_device_id (compkey).
+
+        Args:
+            registered_device_id - Duo Desktop registered device compkey
+
+        Returns:
+            registered device object.
+
+        Raises:
+             RuntimeError on error.
+        """
+        path = '/admin/v1/registered_devices/' + registered_device_id
+        response = self.json_api_call('GET', path, {})
+        return response
+
+    def delete_registered_device(self, registered_device_id):
+        """
+        Deletes a Duo Desktop registered device. If the registered device has already been deleted,
+        does nothing.
+
+        Args:
+            registered_device_id - Duo Desktop registered device ID (compkey).
+
+        Returns:
+             None
+
+        Raises:
+             RuntimeError on error.
+        """
+        path = '/admin/v1/registered_devices/' + urllib.parse.quote_plus(registered_device_id)
+        params = {}
+        return self.json_api_call('DELETE', path, params)
+
+    def get_secret_key(self, integration_key):
         """Returns the secret key of the specified integration.
 
         integration_key - The ikey of the secret key to get.
@@ -3566,6 +3656,78 @@ class Admin(client.Client):
 
         path = "/admin/v2/policies/summary"
         response = self.json_api_call("GET", path, {})
+        return response
+
+    def calculate_policy(self, integration_key, user_id):
+        """
+        Args:
+            integration_key - The integration_key of the application to evaluate. (required)
+            user_id - The user_id of the user to evaluate (required)
+
+        Returns (dict) - Dictionary containing "policy_elements" and "sections"
+        """
+
+        path = "/admin/v2/policies/calculate"
+        response = self.json_api_call(
+            "GET",
+            path,
+            {"integration_key": integration_key, "user_id": user_id},
+        )
+        return response
+
+    def get_passport_config(self):
+        """
+        Retrieve the current Passport configuration.
+
+        Returns (dict):
+            {
+                "enabled_status": string,
+                "enabled_groups": [
+                    {
+                        "group_id": user group ID,
+                        "group_name": descriptive user group name,
+                        ...
+                    },
+                    ...
+                ]
+                "disabled_groups": [
+                    {
+                        "group_id": user group ID,
+                        "group_name": descriptive user group name,
+                        ...
+                    },
+                    ...
+                ]
+            }
+        """
+
+        path = "/admin/v2/passport/config"
+        response = self.json_api_call("GET", path, {})
+        return response
+
+    def update_passport_config(self, enabled_status, enabled_groups=[], disabled_groups=[]):
+        """
+        Update the current Passport configuration.
+
+        Args:
+            enabled_status (str) - one of "disabled", "enabled", "enabled-for-groups",
+                or "enabled-with-exceptions"
+            enabled_groups (list[str]) - if enabled_status is "enabled-for-groups", a
+                list of user group IDs for whom Passport should be enabled
+            disabled_groups (list[str]) - if enabled_status is "enabled-with-exceptions",
+                a list of user group IDs for whom Passport should be disabled
+        """
+
+        path = "/admin/v2/passport/config"
+        response = self.json_api_call(
+            "POST",
+            path,
+            {
+                "enabled_status": enabled_status,
+                "enabled_groups": enabled_groups,
+                "disabled_groups": disabled_groups,
+            },
+        )
         return response
 
 
