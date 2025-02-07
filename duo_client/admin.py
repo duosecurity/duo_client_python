@@ -2529,7 +2529,7 @@ class Admin(client.Client):
         """
         return self.json_paging_api_call(
             'GET',
-            '/admin/v2/integrations',
+            '/admin/v3/integrations',
             {},
         )
 
@@ -2549,7 +2549,7 @@ class Admin(client.Client):
         if limit:
             return self.json_api_call(
                 'GET',
-                '/admin/v2/integrations',
+                '/admin/v3/integrations',
                 {'limit': limit, 'offset': offset},
             )
 
@@ -2568,7 +2568,7 @@ class Admin(client.Client):
         params = {}
         response = self.json_api_call(
             'GET',
-            '/admin/v2/integrations/' + integration_key,
+            '/admin/v3/integrations/' + integration_key,
             params,
         )
         return response
@@ -2593,7 +2593,8 @@ class Admin(client.Client):
                            ip_whitelist_enroll_policy=None,
                            groups_allowed=None,
                            self_service_allowed=None,
-                           sso=None):
+                           sso=None,
+                           user_access=None):
         """Creates a new integration.
 
         name - The name of the integration (required)
@@ -2671,8 +2672,11 @@ class Admin(client.Client):
             params['self_service_allowed'] = '1' if self_service_allowed else '0'
         if sso is not None:
             params['sso'] = sso
+        if user_access is not None:
+            params['user_access'] = user_access
+
         response = self.json_api_call('POST',
-                                      '/admin/v2/integrations',
+                                      '/admin/v3/integrations',
                                       params,
         )
         return response
@@ -2766,7 +2770,7 @@ class Admin(client.Client):
 
         """
         integration_key = urllib.parse.quote_plus(str(integration_key))
-        path = '/admin/v2/integrations/%s' % integration_key
+        path = '/admin/v3/integrations/%s' % integration_key
         return self.json_api_call(
             'DELETE',
             path,
@@ -2794,7 +2798,9 @@ class Admin(client.Client):
                            ip_whitelist_enroll_policy=None,
                            groups_allowed=None,
                            self_service_allowed=None,
-                           sso=None):
+                           sso=None,
+                           user_access=None
+                           ):
         """Updates an integration.
 
         integration_key - The key of the integration to update. (required)
@@ -2833,7 +2839,7 @@ class Admin(client.Client):
 
         """
         integration_key = urllib.parse.quote_plus(str(integration_key))
-        path = '/admin/v2/integrations/%s' % integration_key
+        path = '/admin/v3/integrations/%s' % integration_key
         params = {}
         if name is not None:
             params['name'] = name
@@ -2877,6 +2883,8 @@ class Admin(client.Client):
             params['self_service_allowed'] = '1' if self_service_allowed else '0'
         if sso is not None:
             params['sso'] = sso
+        if user_access is not None:
+            params['user_access'] = user_access
 
         if not params:
             raise TypeError("No new values were provided")

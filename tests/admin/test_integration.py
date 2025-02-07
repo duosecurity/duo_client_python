@@ -16,7 +16,7 @@ class TestIntegration(TestAdmin):
         (uri, args) = response['uri'].split('?')
 
         self.assertEqual(response['method'], 'GET')
-        self.assertEqual(uri, '/admin/v2/integrations/{}'.format(self.integration_key))
+        self.assertEqual(uri, '/admin/v3/integrations/{}'.format(self.integration_key))
         self.assertEqual(util.params_to_dict(args), {'account_id': [self.client.account_id]})
 
     def test_delete_integration(self):
@@ -24,7 +24,7 @@ class TestIntegration(TestAdmin):
         (uri, args) = response['uri'].split('?')
 
         self.assertEqual(response['method'], 'DELETE')
-        self.assertEqual(uri, '/admin/v2/integrations/{}'.format(self.integration_key))
+        self.assertEqual(uri, '/admin/v3/integrations/{}'.format(self.integration_key))
         self.assertEqual(util.params_to_dict(args), {'account_id': [self.client.account_id]})
 
     def test_create_integration(self):
@@ -38,7 +38,7 @@ class TestIntegration(TestAdmin):
         )
 
         self.assertEqual(response['method'], 'POST')
-        self.assertEqual(response['uri'], '/admin/v2/integrations')
+        self.assertEqual(response['uri'], '/admin/v3/integrations')
         self.assertEqual(json.loads(response['body']),
             {
                 "account_id": self.client.account_id,
@@ -63,7 +63,7 @@ class TestIntegration(TestAdmin):
         )
 
         self.assertEqual(response['method'], 'POST')
-        self.assertEqual(response['uri'], '/admin/v2/integrations/{}'.format(self.integration_key))
+        self.assertEqual(response['uri'], '/admin/v3/integrations/{}'.format(self.integration_key))
         self.assertEqual(json.loads(response['body']),
             {
                 "account_id": self.client.account_id,

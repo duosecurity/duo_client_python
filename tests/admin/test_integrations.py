@@ -11,7 +11,7 @@ class TestIntegrations(TestAdmin):
         response = next(generator)
         self.assertEqual(response['method'], 'GET')
         (uri, args) = response['uri'].split('?')
-        self.assertEqual(uri, '/admin/v2/integrations')
+        self.assertEqual(uri, '/admin/v3/integrations')
         self.assertEqual(
             util.params_to_dict(args),
             {
@@ -27,7 +27,7 @@ class TestIntegrations(TestAdmin):
         response = response[0]
         self.assertEqual(response['method'], 'GET')
         (uri, args) = response['uri'].split('?')
-        self.assertEqual(uri, '/admin/v2/integrations')
+        self.assertEqual(uri, '/admin/v3/integrations')
         self.assertEqual(
             util.params_to_dict(args),
             {
@@ -43,7 +43,7 @@ class TestIntegrations(TestAdmin):
         response = response[0]
         self.assertEqual(response['method'], 'GET')
         (uri, args) = response['uri'].split('?')
-        self.assertEqual(uri, '/admin/v2/integrations')
+        self.assertEqual(uri, '/admin/v3/integrations')
         self.assertEqual(
             util.params_to_dict(args),
             {
@@ -59,7 +59,7 @@ class TestIntegrations(TestAdmin):
         response = response[0]
         self.assertEqual(response['method'], 'GET')
         (uri, args) = response['uri'].split('?')
-        self.assertEqual(uri, '/admin/v2/integrations')
+        self.assertEqual(uri, '/admin/v3/integrations')
         self.assertEqual(
             util.params_to_dict(args),
             {
@@ -75,7 +75,7 @@ class TestIntegrations(TestAdmin):
         response = response[0]
         self.assertEqual(response['method'], 'GET')
         (uri, args) = response['uri'].split('?')
-        self.assertEqual(uri, '/admin/v2/integrations')
+        self.assertEqual(uri, '/admin/v3/integrations')
         self.assertEqual(
             util.params_to_dict(args),
             {
