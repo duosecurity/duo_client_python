@@ -139,10 +139,9 @@ Integration objects are returned in the following format:
      'notes': <str:notes>,
      'secret_key': <str:secret key>,
      'type': <str:integration type>,
-     'visual_style': <str:visual style>}
+     'visual_style': Deprecated; ignored if specified.}
 
-See the adminapi docs for possible values for enroll_policy, visual_style, ip_whitelist,
-and type.
+See the adminapi docs for possible values for enroll_policy, ip_whitelist, and type.
 
 
 ADMINISTRATIVE UNITS
@@ -2599,8 +2598,7 @@ class Admin(client.Client):
         name - The name of the integration (required)
         integration_type - <str: integration type constant> (required)
                            See adminapi docs for possible values.
-        visual_style - <str:visual style constant> (optional, default 'default')
-                       See adminapi docs for possible values.
+        visual_style - Deprecated; ignored if specified.
         greeting - <str:Voice greeting> (optional, default '')
         notes - <str:internal use> (optional, uses default setting)
         enroll_policy - <str:'enroll'|'allow'|'deny'> (optional, default 'enroll')
@@ -2799,8 +2797,7 @@ class Admin(client.Client):
 
         integration_key - The key of the integration to update. (required)
         name - The name of the integration (optional)
-        visual_style - (optional, default 'default')
-                       See adminapi docs for possible values.
+        visual_style - Deprecated; ignored if specified.
         greeting - Voice greeting (optional, default '')
         notes - internal use (optional, uses default setting)
         enroll_policy - <'enroll'|'allow'|'deny'> (optional, default 'enroll')
