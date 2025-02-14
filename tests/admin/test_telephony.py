@@ -35,8 +35,37 @@ class TestTelephonyLogEndpoints(TestAdmin):
         self.assertEqual(param_dict["maxtime"], [expected_maxtime])
 
     @freeze_time("2022-10-01")
+    def test_get_telephony_logs_v2_with_kwargs(self):
+        mintime = datetime(2022, 9, 1, 0, 0, 0, tzinfo=pytz.utc)
+        expected_mintime = str(int(mintime.timestamp() * 1000))
+        maxtime = datetime(2022, 10, 1, 0, 0, 0, tzinfo=pytz.utc)
+        expected_maxtime = str(int(maxtime.timestamp() * 1000) - 120)
+        params = {"mintime": expected_mintime}
+        response = self.items_response_client.get_telephony_log(api_version=2, 
+                                                                kwargs=params)
+        uri, args = response["uri"].split("?")
+        param_dict = util.params_to_dict(args)
+        self.assertEqual(response["method"], "GET")
+        self.assertEqual(uri, "/admin/v2/logs/telephony")
+        self.assertEqual(param_dict["mintime"], [expected_mintime])
+        self.assertEqual(param_dict["maxtime"], [expected_maxtime])
+
+    @freeze_time("2022-10-01")
     def test_get_telephony_logs_v1_no_args(self):
         response = self.client_list.get_telephony_log()
         uri, args = response[0]["uri"].split("?")
         self.assertEqual(response[0]["method"], "GET")
         self.assertEqual(uri, "/admin/v1/logs/telephony")
+
+    @freeze_time("2022-10-01")
+    def test_get_telephony_logs_v1_with_mintime_arg(self):
+        freezed_time = datetime(2022, 9, 1, 0, 0, 0, tzinfo=pytz.utc)
+        expected_mintime = str(
+            int((freezed_time - timedelta(days=180)).timestamp() * 1000)
+        )
+        response = self.client_list.get_telephony_log(mintime=expected_mintime)
+        uri, args = response[0]["uri"].split("?")
+        param_dict = util.params_to_dict(args)
+        self.assertEqual(response[0]["method"], "GET")
+        self.assertEqual(uri, "/admin/v1/logs/telephony")
+        self.assertEqual(param_dict["mintime"], [expected_mintime])

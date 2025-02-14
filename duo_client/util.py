@@ -4,6 +4,8 @@ from datetime import datetime, timedelta, timezone
 
 def get_params_from_kwargs(valid_params: Sequence[str], **kwargs) -> Dict:
     params = {}
+    if isinstance(kwargs, dict):
+        kwargs = kwargs["kwargs"] if kwargs.get("kwargs") else kwargs
     for k in kwargs:
         if kwargs[k] is not None and k in valid_params:
             params[k] = kwargs[k]
