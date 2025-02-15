@@ -37,7 +37,7 @@ class TestTelephonyLogEndpoints(TestAdmin):
         self.assertEqual(param_dict["limit"], ["100"])
 
     @freeze_time("2022-10-01")
-    def test_get_telephony_logs_v2_with_kwargs(self):
+    def test_get_telephony_logs_v2_with_args(self):
         mintime = datetime(2022, 9, 1, 0, 0, 0, tzinfo=pytz.utc)
         expected_mintime = str(int(mintime.timestamp() * 1000))
         maxtime = datetime(2022, 10, 1, 0, 0, 0, tzinfo=pytz.utc)
@@ -55,7 +55,7 @@ class TestTelephonyLogEndpoints(TestAdmin):
         self.assertEqual(param_dict["limit"], ["900"])
 
     @freeze_time("2022-10-01")
-    def test_get_telephony_logs_v2_with_unsupported_kwargs(self):
+    def test_get_telephony_logs_v2_with_unsupported_args(self):
         params = {
             "unsupported": "argument",
             "non_existent": "argument"
