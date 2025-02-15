@@ -706,7 +706,7 @@ class Admin(client.Client):
 
         today = datetime.now(tz=timezone.utc)
         # If mintime is not provided, the script defaults it to 180 days in past
-        mintime = int((today - timedelta(days=180)).timestamp() * 1000) if  not mintime else mintime
+        mintime = int((today - timedelta(days=180)).timestamp() * (1000 if api_version == 2 else 1)) if  not mintime else mintime
         params["mintime"] = f"{int(mintime)}"
 
         if api_version == 2: # Add additional parameters for API Version 2
@@ -714,7 +714,7 @@ class Admin(client.Client):
                 limit = 1000 # Limit is capped at 1000
             params["limit"] = f"{int(limit)}"
 
-            params["sort"] = 'desc' if sort.lower() == 'desc' else 'asc'
+            params["sort"] = 'ts:desc' if sort.lower() == 'desc' else 'ts:asc'
             # if maxtime is not provided, the script defaults it to now
             maxtime = int(today.timestamp() * 1000) - 120 if not maxtime else maxtime
             params["maxtime"] = f"{int(maxtime)}"
@@ -724,7 +724,6 @@ class Admin(client.Client):
                 params["account_id"] = account_id
             if filters:
                 params["filters"] = filters
-            
         response = self.json_api_call("GET", path, params)
 
         if api_version == 1:
