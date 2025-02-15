@@ -178,11 +178,10 @@ import json
 import time
 import urllib.parse
 import warnings
+from typing import Optional
 from datetime import datetime, timedelta, timezone
 
 from . import Accounts, client
-from .logs.telephony import Telephony
-
 USER_STATUS_ACTIVE = "active"
 USER_STATUS_BYPASS = "bypass"
 USER_STATUS_DISABLED = "disabled"
@@ -212,6 +211,15 @@ VALID_AUTHLOG_REQUEST_PARAMS = [
 
 VALID_ACTIVITY_REQUEST_PARAMS = ["mintime", "maxtime", "limit", "sort", "next_offset"]
 
+VALID_TELEPHONY_V2_REQUEST_PARAMS = [
+    "filters",
+    "mintime",
+    "maxtime",
+    "limit",
+    "sort",
+    "next_offset",
+    "account_id",
+]
 
 class Admin(client.Client):
     account_id = None
@@ -628,12 +636,21 @@ class Admin(client.Client):
             row['host'] = self.host
         return response
 
-    def get_telephony_log(self, mintime=0, api_version=1, **kwargs):
+    def get_telephony_log(self, mintime=0, api_version=1, maxtime:int = 0, 
+                              limit: Optional[int] = 100, sort: Optional[str] = 'desc', 
+                              next_offset: Optional[str] = None, account_id = None, 
+                              filters = None, **kwargs):
         """
         Returns telephony log events.
 
         mintime - Fetch events only >= mintime (to avoid duplicate
             records that have already been fetched)
+        maxtime - Fetch events only <= maxtime. (API Version 2 only)
+        limit - Number of results to limit to, default 100, max 1000. (API Version 2 only)
+        sort - Sort order to be applied, default 'desc'. (API Version 2 only)
+        next_offset - Used to grab the next set of results from a previous response. (API Version 2 only)
+        account_id - Filter by account_id. (API Version 2 only) Type undocumented.
+        filters - Filter by filters. (API Version 2 only) Type undocumented.
         api_version - The API version of the handler to use.
             Currently, the default api version is v1, but the v1 API
             will be deprecated in a future version of the Duo Admin API.
@@ -682,11 +699,45 @@ class Admin(client.Client):
 
         if api_version not in [1,2]:
             raise ValueError("Invalid API Version")
+        
+        path = f"/admin/v{api_version}/logs/telephony"
+        
+        params = {}
 
-        if api_version == 2:
-            return Telephony.get_telephony_logs_v2(self.json_api_call, self.host, **kwargs)
-        return Telephony.get_telephony_logs_v1(self.json_api_call, self.host, mintime=mintime)
+        today = datetime.now(tz=timezone.utc)
+        # If mintime is not provided, the script defaults it to 180 days in past
+        mintime = int((today - timedelta(days=180)).timestamp() * 1000) if  not mintime else mintime
+        params["mintime"] = f"{int(mintime)}"
 
+        if api_version == 2: # Add additional parameters for API Version 2
+            if limit > 1000: 
+                limit = 1000 # Limit is capped at 1000
+            params["limit"] = f"{int(limit)}"
+
+            params["sort"] = 'desc' if sort.lower() == 'desc' else 'asc'
+            # if maxtime is not provided, the script defaults it to now
+            maxtime = int(today.timestamp() * 1000) - 120 if not maxtime else maxtime
+            params["maxtime"] = f"{int(maxtime)}"
+            if next_offset:
+                params["next_offset"] = next_offset
+            if account_id:
+                params["account_id"] = account_id
+            if filters:
+                params["filters"] = filters
+            
+        response = self.json_api_call("GET", path, params)
+
+        if api_version == 1:
+            for row in response:
+                row["eventtype"] = "telephony"
+                row["host"] = self.host
+        else:
+            for row in response["items"]:
+                row["eventtype"] = "telephony"
+                row["host"] = self.host
+        
+        return response
+    
     def get_users_iterator(self):
         """
         Returns iterator of user objects.

@@ -33,6 +33,8 @@ class TestTelephonyLogEndpoints(TestAdmin):
         self.assertEqual(uri, "/admin/v2/logs/telephony")
         self.assertEqual(param_dict["mintime"], [expected_mintime])
         self.assertEqual(param_dict["maxtime"], [expected_maxtime])
+        self.assertAlmostEqual(param_dict["sort"], ["desc"])
+        self.assertEqual(param_dict["limit"], ["100"])
 
     @freeze_time("2022-10-01")
     def test_get_telephony_logs_v2_with_kwargs(self):
@@ -40,15 +42,32 @@ class TestTelephonyLogEndpoints(TestAdmin):
         expected_mintime = str(int(mintime.timestamp() * 1000))
         maxtime = datetime(2022, 10, 1, 0, 0, 0, tzinfo=pytz.utc)
         expected_maxtime = str(int(maxtime.timestamp() * 1000) - 120)
-        params = {"mintime": expected_mintime}
+        params = {"mintime": expected_mintime, "sort": "asc", "limit": 900}
         response = self.items_response_client.get_telephony_log(api_version=2, 
-                                                                kwargs=params)
+                                                                **params)
         uri, args = response["uri"].split("?")
         param_dict = util.params_to_dict(args)
         self.assertEqual(response["method"], "GET")
         self.assertEqual(uri, "/admin/v2/logs/telephony")
         self.assertEqual(param_dict["mintime"], [expected_mintime])
         self.assertEqual(param_dict["maxtime"], [expected_maxtime])
+        self.assertEqual(param_dict["sort"], ["asc"])  
+        self.assertEqual(param_dict["limit"], ["900"])
+
+    @freeze_time("2022-10-01")
+    def test_get_telephony_logs_v2_with_unsupported_kwargs(self):
+        params = {
+            "unsupported": "argument",
+            "non_existent": "argument"
+            }
+        response = self.items_response_client.get_telephony_log(api_version=2, 
+                                                                **params)
+        uri, args = response["uri"].split("?")
+        param_dict = util.params_to_dict(args)
+        self.assertEqual(response["method"], "GET")
+        self.assertEqual(uri, "/admin/v2/logs/telephony")
+        self.assertNotIn("unsupported", param_dict)
+        self.assertNotIn("non_existent", param_dict)
 
     @freeze_time("2022-10-01")
     def test_get_telephony_logs_v1_no_args(self):
