@@ -3677,7 +3677,7 @@ class Admin(client.Client):
         response = self.json_api_call("GET", path, {})
         return response
 
-    def update_passport_config(self, enabled_status, enabled_groups=[], disabled_groups=[]):
+    def update_passport_config(self, enabled_status, enabled_groups=[], disabled_groups=[], custom_supported_browsers={"macos": [], "windows": [],}):
         """
         Update the current Passport configuration.
 
@@ -3688,6 +3688,8 @@ class Admin(client.Client):
                 list of user group IDs for whom Passport should be enabled
             disabled_groups (list[str]) - if enabled_status is "enabled-with-exceptions",
                 a list of user group IDs for whom Passport should be disabled
+            custom_supported_browsers (dict) - a dict of criteria that determines whether 
+                a Windows or macOS browsers should be supported by Passport
         """
 
         path = "/admin/v2/passport/config"
@@ -3698,6 +3700,7 @@ class Admin(client.Client):
                 "enabled_status": enabled_status,
                 "enabled_groups": enabled_groups,
                 "disabled_groups": disabled_groups,
+                "custom_supported_browsers": custom_supported_browsers,
             },
         )
         return response
