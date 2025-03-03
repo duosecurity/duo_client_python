@@ -178,6 +178,7 @@ import json
 import time
 import urllib.parse
 import warnings
+from typing import List, Optional
 from datetime import datetime, timedelta, timezone
 
 from . import Accounts, client
@@ -3677,7 +3678,7 @@ class Admin(client.Client):
         response = self.json_api_call("GET", path, {})
         return response
 
-    def update_passport_config(self, enabled_status, enabled_groups=[], disabled_groups=[], custom_supported_browsers={"macos": [], "windows": [],}):
+    def update_passport_config(self, enabled_status, enabled_groups: Optional[List[str]]=None, disabled_groups: Optional[List[str]]=None, custom_supported_browsers=None):
         """
         Update the current Passport configuration.
 
@@ -3691,6 +3692,8 @@ class Admin(client.Client):
             custom_supported_browsers (dict) - a dict of criteria that determines whether 
                 a Windows or macOS browsers should be supported by Passport
         """
+        if custom_supported_browsers == None:
+            custom_supported_browsers={"macos": [], "windows": [],}
 
         path = "/admin/v2/passport/config"
         response = self.json_api_call(

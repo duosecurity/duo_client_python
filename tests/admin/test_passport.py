@@ -22,5 +22,5 @@ class TestPassport(TestAdmin):
         body = json.loads(response["body"])
         self.assertEqual(body["enabled_status"], "enabled-for-groups")
         self.assertEqual(body["enabled_groups"], ["passport-test-group"])
-        self.assertEqual(body["disabled_groups"], [])
+        self.assertEqual(body["disabled_groups"], None)
         self.assertEqual(body["custom_supported_browsers"], {"macos":[{"team_id":"UBF8T346G9"}],"windows":[{"common_name":"Duo Security LLC"}]})
