@@ -3693,7 +3693,7 @@ class Admin(client.Client):
                 a Windows or macOS browsers should be supported by Passport
         """
         if custom_supported_browsers == None:
-            custom_supported_browsers={"macos": [], "windows": [],}
+            custom_supported_browsers = {"macos": [], "windows": [],}
 
         path = "/admin/v2/passport/config"
         response = self.json_api_call(

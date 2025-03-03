@@ -17,7 +17,7 @@ class TestPassport(TestAdmin):
     def test_update_passport(self):
         """ Test update passport configuration
         """
-        response = self.client.update_passport_config(enabled_status="enabled-for-groups", enabled_groups=["passport-test-group"], custom_supported_browsers={"macos": [{"team_id": "UBF8T346G9"},],"windows": [{"common_name": "Duo Security LLC"},],})
+        response = self.client.update_passport_config(enabled_status="enabled-for-groups", enabled_groups=["passport-test-group"], custom_supported_browsers={"macos": [{"team_id": "UBF8T346G9"},], "windows": [{"common_name": "Duo Security LLC"},],})
         self.assertEqual(response["uri"], "/admin/v2/passport/config")
         body = json.loads(response["body"])
         self.assertEqual(body["enabled_status"], "enabled-for-groups")
