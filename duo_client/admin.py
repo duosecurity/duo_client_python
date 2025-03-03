@@ -3692,7 +3692,7 @@ class Admin(client.Client):
             custom_supported_browsers (dict) - a dict of criteria that determines whether 
                 a Windows or macOS browsers should be supported by Passport
         """
-        if custom_supported_browsers == None:
+        if custom_supported_browsers is None:
             custom_supported_browsers = {"macos": [], "windows": [],}
 
         path = "/admin/v2/passport/config"
