@@ -175,3 +175,45 @@ class TestAdmins(TestAdmin):
                 'has_external_password_mgmt': 'True',
                 'password': 'dolphins'
             })
+
+    def test_create_admin(self):
+        response = self.client.add_admin('test-name', 'test-email', 'test-phone', 'test-pswd')
+        self.assertEqual(response['method'], 'POST')
+        self.assertEqual(response['uri'], '/admin/v1/admins')
+        self.assertEqual(
+            json.loads(response['body']),
+            {
+                'account_id': self.client.account_id,
+                'name': 'test-name',
+                'email': 'test-email',
+                'phone': 'test-phone',
+            })
+
+    def test_create_admin_with_role(self):
+        response = self.client.add_admin('test-name', 'test-email', 'test-phone', 'test-pswd', 'test-role')
+        self.assertEqual(response['method'], 'POST')
+        self.assertEqual(response['uri'], '/admin/v1/admins')
+        self.assertEqual(
+            json.loads(response['body']),
+            {
+                'account_id': self.client.account_id,
+                'name': 'test-name',
+                'email': 'test-email',
+                'phone': 'test-phone',
+                'role': 'test-role',
+            })
+
+    def test_create_admin_with_subaccount_role(self):
+        response = self.client.add_admin('test-name', 'test-email', 'test-phone', 'test-pswd', 'test-role', 'test-subaccount-role')
+        self.assertEqual(response['method'], 'POST')
+        self.assertEqual(response['uri'], '/admin/v1/admins')
+        self.assertEqual(
+            json.loads(response['body']),
+            {
+                'account_id': self.client.account_id,
+                'name': 'test-name',
+                'email': 'test-email',
+                'phone': 'test-phone',
+                'role': 'test-role',
+                'subaccount_role': 'test-subaccount-role',
+            })
