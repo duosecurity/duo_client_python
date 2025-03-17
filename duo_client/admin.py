@@ -2947,7 +2947,7 @@ class Admin(client.Client):
         response = self.json_api_call('GET', path, {})
         return response
 
-    def add_admin(self, name, email, phone, password, role=None):
+    def add_admin(self, name, email, phone, password, role=None, subaccount_role=None):
         """
         Create an administrator and adds it to a customer.
 
@@ -2970,6 +2970,8 @@ class Admin(client.Client):
             params['phone'] = phone
         if role is not None:
             params['role'] = role
+        if subaccount_role is not None:
+            params['subaccount_role'] = subaccount_role
         response = self.json_api_call('POST', '/admin/v1/admins', params)
         return response
 
