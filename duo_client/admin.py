@@ -2956,6 +2956,7 @@ class Admin(client.Client):
         phone - <str:phone number>
         password - Deprecated; ignored if specified.
         role - <str|None:role>
+        subaccount_role - <str|None:role>
 
         Returns the added administrator.  See the adminapi docs.
 
@@ -2981,6 +2982,8 @@ class Admin(client.Client):
                      password=None,
                      password_change_required=None,
                      status=None,
+                     role=None,
+                     subaccount_role=None
                      ):
         """
         Update one or more attributes of an administrator.
@@ -2991,6 +2994,8 @@ class Admin(client.Client):
         password - Deprecated; ignored if specified.
         password_change_required - <bool|None:Whether admin is required to change their password at next login> (optional)
         status - the status of the administrator (optional) - NOTE: Valid values are "Active" and "Disabled" - "Disabled" NOT valid for administrators with role - Owner
+        role - <str|None:role> (optional)
+        subaccount_role - <str|None:role> (optional)
 
         Returns the updated administrator.  See the adminapi docs.
 
@@ -3007,6 +3012,10 @@ class Admin(client.Client):
             params['password_change_required'] = password_change_required
         if status is not None:
             params['status'] = status
+        if role is not None:
+            params['role'] = role
+        if subaccount_role is not None:
+            params['subaccount_role'] = subaccount_role
         response = self.json_api_call('POST', path, params)
         return response
 
