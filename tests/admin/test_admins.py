@@ -217,3 +217,42 @@ class TestAdmins(TestAdmin):
                 'role': 'test-role',
                 'subaccount_role': 'test-subaccount-role',
             })
+
+    def test_update_admin_pass_all_params(self):
+        response = self.client.update_admin('test-id', 'test-name1', 'test-phone', None, False, 'test-status', 'test-role', 'test-subaccount-role')
+        self.assertEqual(response['method'], 'POST')
+        self.assertEqual(response['uri'], '/admin/v1/admins/test-id')
+        self.assertEqual(
+            json.loads(response['body']),
+            {
+                'account_id': self.client.account_id,
+                'name': 'test-name1',
+                'password_change_required': False,
+                'phone': 'test-phone',
+                'role': 'test-role',
+                'status': 'test-status',
+                'subaccount_role': 'test-subaccount-role',
+            })
+        
+    def test_update_admin_pass_two_optional_params(self):
+        response = self.client.update_admin(admin_id='test-id', name='test-name2', status='test-status')
+        self.assertEqual(response['method'], 'POST')
+        self.assertEqual(response['uri'], '/admin/v1/admins/test-id')
+        self.assertEqual(
+            json.loads(response['body']),
+            {
+                'account_id': self.client.account_id,
+                'name': 'test-name2',
+                'status': 'test-status',
+            })
+    
+    def test_update_admin_pass_one_optional_param(self):
+        response = self.client.update_admin(admin_id='test-id', name='test-name3')
+        self.assertEqual(response['method'], 'POST')
+        self.assertEqual(response['uri'], '/admin/v1/admins/test-id')
+        self.assertEqual(
+            json.loads(response['body']),
+            {
+                'account_id': self.client.account_id,
+                'name': 'test-name3',
+            })

@@ -22,8 +22,8 @@ NAME = get_next_arg('Admin name: ')
 EMAIL = get_next_arg('Email: ')
 PHONE = get_next_arg('Phone number (e.g. 2154567890): ')
 PASSWORD = get_next_arg('Password: ')
-ROLE = get_next_arg('Administrative Role: ')
-SUBACCOUNT_ROLE = get_next_arg('Subaccount Role: ')
+ROLE = get_next_arg('Administrative Role(Optional): ') or None
+SUBACCOUNT_ROLE = get_next_arg('Subaccount Role(Optional): ') or None
 
 created_admin = admin_api.add_admin(NAME, EMAIL, PHONE, PASSWORD, ROLE, SUBACCOUNT_ROLE)
 print('Created Admin: ')
