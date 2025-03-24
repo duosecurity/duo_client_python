@@ -178,8 +178,8 @@ import json
 import time
 import urllib.parse
 import warnings
-from typing import List, Optional
 from datetime import datetime, timedelta, timezone
+from typing import List, Optional
 
 from . import Accounts, client
 from .logs.telephony import Telephony
@@ -2742,6 +2742,121 @@ class Admin(client.Client):
         path = '/admin/v1/registered_devices/' + urllib.parse.quote_plus(registered_device_id)
         params = {}
         return self.json_api_call('DELETE', path, params)
+
+    def get_blocked_devices_generator(self):
+        """
+        Returns a generator yielding Duo Desktop blocked registered devices.
+        """
+        return self.json_paging_api_call('GET', '/admin/v1/registered_devices/blocked', {})
+
+    def get_blocked_devices(self, limit=None, offset=0):
+        """
+        Retrieves a list of Duo Desktop blocked registered devices.
+
+        Args:
+            limit: The max number of registered devices to fetch at once. [Default: None]
+            offset: If a 'limit' is passed, the offset to start retrieval.
+                    [Default: 0]
+
+        Returns:
+            list of blocked registered devices
+
+        Raises:
+            RuntimeError on error.
+
+        """
+        (limit, offset) = self.normalize_paging_args(limit, offset)
+        if limit:
+            return self.json_api_call('GET', '/admin/v1/registered_devices/blocked', {'limit': limit, 'offset': offset})
+
+        return list(self.get_blocked_devices_generator())
+
+    def get_blocked_device_by_id(self, registered_device_id):
+        """
+        Returns a Duo Desktop blocked registered device specified by registered_device_id (compkey).
+
+        Args:
+            registered_device_id - Duo Desktop registered device compkey
+
+        Returns:
+            registered device object.
+
+        Raises:
+             RuntimeError on error.
+        """
+        path = '/admin/v1/registered_devices/blocked/' + registered_device_id
+        response = self.json_api_call('GET', path, {})
+        return response
+
+    def block_registered_devices(self, registered_device_key_list):
+        """
+        Blocks devices from accessing any application protected by Duo policy that requires device registration.
+
+        Args:
+            registered_device_key_list (list): A list of Duo Desktop registered device IDs (compkey).
+
+        Returns:
+            a list of registered devices that were blocked.
+
+        Raises:
+            RuntimeError on error.
+        """
+        path = '/admin/v1/registered_devices/blocked'
+        params = {'registered_device_key_list': json.dumps(registered_device_key_list)}
+        response = self.json_api_call('POST', path, params)
+        return response
+
+    def block_registered_device_by_id(self, compkey):
+        """
+        Blocks a device from accessing any application protected by Duo policy that requires device registration.
+
+        Args:
+            compkey (str): A Duo Desktop registered device ID (compkey).
+
+        Returns:
+            the registered device object that was blocked.
+
+        Raises:
+            RuntimeError on error.
+        """
+        path = '/admin/v1/registered_devices/blocked/' + urllib.parse.quote_plus(compkey)
+        response = self.json_api_call('POST', path, {})
+        return response
+
+    def unblock_registered_devices(self, registered_device_key_list):
+        """
+        Unblocks devices from accessing any application protected by Duo policy that requires device registration.
+
+        Args:
+            registered_device_key_list (list): A list of Duo Desktop registered device IDs (compkey).
+
+        Returns:
+            a list of registered devices that were blocked.
+
+        Raises:
+            RuntimeError on error.
+        """
+        path = '/admin/v1/registered_devices/blocked'
+        params = {'registered_device_key_list': json.dumps(registered_device_key_list)}
+        response = self.json_api_call('DELETE', path, params)
+        return response
+
+    def unblock_registered_device_by_id(self, compkey):
+        """
+        Unblocks a device from accessing any application protected by Duo policy that requires device registration.
+
+        Args:
+            compkey (str): A Duo Desktop registered device ID (compkey).
+
+        Returns:
+            the registered device object that was blocked.
+
+        Raises:
+            RuntimeError on error.
+        """
+        path = '/admin/v1/registered_devices/blocked/' + urllib.parse.quote_plus(compkey)
+        response = self.json_api_call('DELETE', path, {})
+        return response
 
     def get_secret_key(self, integration_key):
         """Returns the secret key of the specified integration.
