@@ -2040,8 +2040,8 @@ class Admin(client.Client):
         helpdesk_bypass_expiration - <int:minutes>|0
         helpdesk_message - <str:message|None>
         helpdesk_can_send_enroll_email - True|False|None
-        reactivation_url - <str:url>|None
-        reactivation_integration_key - <str:url>|None
+        reactivation_url - Deprecated; ignored if specified.
+        reactivation_integration_key - Deprecated; ignored if specified.
         security_checkup_enabled - True|False|None
         user_managers_can_put_users_in_bypass - True|False|None
         email_activity_notification_enabled = True|False|None
@@ -2113,10 +2113,6 @@ class Admin(client.Client):
         if helpdesk_can_send_enroll_email is not None:
             params['helpdesk_can_send_enroll_email'] = ('1' if
               helpdesk_can_send_enroll_email else '0')
-        if reactivation_url is not None:
-            params['reactivation_url'] = reactivation_url
-        if reactivation_integration_key is not None:
-            params['reactivation_integration_key'] = reactivation_integration_key
         if security_checkup_enabled is not None:
             params['security_checkup_enabled'] = ('1' if
                 security_checkup_enabled else '0')
