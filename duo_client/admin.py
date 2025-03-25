@@ -1997,6 +1997,8 @@ class Admin(client.Client):
                         helpdesk_bypass_expiration=None,
                         helpdesk_message=None,
                         helpdesk_can_send_enroll_email=None,
+                        reactivation_url=None,
+                        reactivation_integration_key=None,
                         security_checkup_enabled=None,
                         user_managers_can_put_users_in_bypass=None,
                         email_activity_notification_enabled=None,
@@ -2038,6 +2040,8 @@ class Admin(client.Client):
         helpdesk_bypass_expiration - <int:minutes>|0
         helpdesk_message - <str:message|None>
         helpdesk_can_send_enroll_email - True|False|None
+        reactivation_url - Deprecated; ignored if specified.
+        reactivation_integration_key - Deprecated; ignored if specified.
         security_checkup_enabled - True|False|None
         user_managers_can_put_users_in_bypass - True|False|None
         email_activity_notification_enabled = True|False|None
