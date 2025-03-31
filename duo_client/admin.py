@@ -139,10 +139,9 @@ Integration objects are returned in the following format:
      'notes': <str:notes>,
      'secret_key': <str:secret key>,
      'type': <str:integration type>,
-     'visual_style': <str:visual style>}
+     'visual_style': Deprecated; ignored if specified.}
 
-See the adminapi docs for possible values for enroll_policy, visual_style, ip_whitelist,
-and type.
+See the adminapi docs for possible values for enroll_policy, ip_whitelist, and type.
 
 
 ADMINISTRATIVE UNITS
@@ -179,6 +178,7 @@ import json
 import time
 import urllib.parse
 import warnings
+from typing import List, Optional
 from datetime import datetime, timedelta, timezone
 
 from . import Accounts, client
@@ -2040,8 +2040,8 @@ class Admin(client.Client):
         helpdesk_bypass_expiration - <int:minutes>|0
         helpdesk_message - <str:message|None>
         helpdesk_can_send_enroll_email - True|False|None
-        reactivation_url - <str:url>|None
-        reactivation_integration_key - <str:url>|None
+        reactivation_url - Deprecated; ignored if specified.
+        reactivation_integration_key - Deprecated; ignored if specified.
         security_checkup_enabled - True|False|None
         user_managers_can_put_users_in_bypass - True|False|None
         email_activity_notification_enabled = True|False|None
@@ -2113,10 +2113,6 @@ class Admin(client.Client):
         if helpdesk_can_send_enroll_email is not None:
             params['helpdesk_can_send_enroll_email'] = ('1' if
               helpdesk_can_send_enroll_email else '0')
-        if reactivation_url is not None:
-            params['reactivation_url'] = reactivation_url
-        if reactivation_integration_key is not None:
-            params['reactivation_integration_key'] = reactivation_integration_key
         if security_checkup_enabled is not None:
             params['security_checkup_enabled'] = ('1' if
                 security_checkup_enabled else '0')
@@ -2529,7 +2525,7 @@ class Admin(client.Client):
         """
         return self.json_paging_api_call(
             'GET',
-            '/admin/v2/integrations',
+            '/admin/v3/integrations',
             {},
         )
 
@@ -2549,7 +2545,7 @@ class Admin(client.Client):
         if limit:
             return self.json_api_call(
                 'GET',
-                '/admin/v2/integrations',
+                '/admin/v3/integrations',
                 {'limit': limit, 'offset': offset},
             )
 
@@ -2568,7 +2564,7 @@ class Admin(client.Client):
         params = {}
         response = self.json_api_call(
             'GET',
-            '/admin/v2/integrations/' + integration_key,
+            '/admin/v3/integrations/' + integration_key,
             params,
         )
         return response
@@ -2593,14 +2589,14 @@ class Admin(client.Client):
                            ip_whitelist_enroll_policy=None,
                            groups_allowed=None,
                            self_service_allowed=None,
-                           sso=None):
+                           sso=None,
+                           user_access=None):
         """Creates a new integration.
 
         name - The name of the integration (required)
         integration_type - <str: integration type constant> (required)
                            See adminapi docs for possible values.
-        visual_style - <str:visual style constant> (optional, default 'default')
-                       See adminapi docs for possible values.
+        visual_style - Deprecated; ignored if specified.
         greeting - <str:Voice greeting> (optional, default '')
         notes - <str:internal use> (optional, uses default setting)
         enroll_policy - <str:'enroll'|'allow'|'deny'> (optional, default 'enroll')
@@ -2671,8 +2667,11 @@ class Admin(client.Client):
             params['self_service_allowed'] = '1' if self_service_allowed else '0'
         if sso is not None:
             params['sso'] = sso
+        if user_access is not None:
+            params['user_access'] = user_access
+
         response = self.json_api_call('POST',
-                                      '/admin/v2/integrations',
+                                      '/admin/v3/integrations',
                                       params,
         )
         return response
@@ -2766,7 +2765,7 @@ class Admin(client.Client):
 
         """
         integration_key = urllib.parse.quote_plus(str(integration_key))
-        path = '/admin/v2/integrations/%s' % integration_key
+        path = '/admin/v3/integrations/%s' % integration_key
         return self.json_api_call(
             'DELETE',
             path,
@@ -2794,13 +2793,14 @@ class Admin(client.Client):
                            ip_whitelist_enroll_policy=None,
                            groups_allowed=None,
                            self_service_allowed=None,
-                           sso=None):
+                           sso=None,
+                           user_access=None
+                           ):
         """Updates an integration.
 
         integration_key - The key of the integration to update. (required)
         name - The name of the integration (optional)
-        visual_style - (optional, default 'default')
-                       See adminapi docs for possible values.
+        visual_style - Deprecated; ignored if specified.
         greeting - Voice greeting (optional, default '')
         notes - internal use (optional, uses default setting)
         enroll_policy - <'enroll'|'allow'|'deny'> (optional, default 'enroll')
@@ -2833,7 +2833,7 @@ class Admin(client.Client):
 
         """
         integration_key = urllib.parse.quote_plus(str(integration_key))
-        path = '/admin/v2/integrations/%s' % integration_key
+        path = '/admin/v3/integrations/%s' % integration_key
         params = {}
         if name is not None:
             params['name'] = name
@@ -2877,6 +2877,8 @@ class Admin(client.Client):
             params['self_service_allowed'] = '1' if self_service_allowed else '0'
         if sso is not None:
             params['sso'] = sso
+        if user_access is not None:
+            params['user_access'] = user_access
 
         if not params:
             raise TypeError("No new values were provided")
@@ -2941,7 +2943,7 @@ class Admin(client.Client):
         response = self.json_api_call('GET', path, {})
         return response
 
-    def add_admin(self, name, email, phone, password, role=None):
+    def add_admin(self, name, email, phone, password, role=None, subaccount_role=None):
         """
         Create an administrator and adds it to a customer.
 
@@ -2950,6 +2952,7 @@ class Admin(client.Client):
         phone - <str:phone number>
         password - Deprecated; ignored if specified.
         role - <str|None:role>
+        subaccount_role - <str|None:role>
 
         Returns the added administrator.  See the adminapi docs.
 
@@ -2964,6 +2967,8 @@ class Admin(client.Client):
             params['phone'] = phone
         if role is not None:
             params['role'] = role
+        if subaccount_role is not None:
+            params['subaccount_role'] = subaccount_role
         response = self.json_api_call('POST', '/admin/v1/admins', params)
         return response
 
@@ -2973,6 +2978,8 @@ class Admin(client.Client):
                      password=None,
                      password_change_required=None,
                      status=None,
+                     role=None,
+                     subaccount_role=None
                      ):
         """
         Update one or more attributes of an administrator.
@@ -2983,6 +2990,8 @@ class Admin(client.Client):
         password - Deprecated; ignored if specified.
         password_change_required - <bool|None:Whether admin is required to change their password at next login> (optional)
         status - the status of the administrator (optional) - NOTE: Valid values are "Active" and "Disabled" - "Disabled" NOT valid for administrators with role - Owner
+        role - <str|None:role> (optional)
+        subaccount_role - <str|None:role> (optional)
 
         Returns the updated administrator.  See the adminapi docs.
 
@@ -2999,6 +3008,10 @@ class Admin(client.Client):
             params['password_change_required'] = password_change_required
         if status is not None:
             params['status'] = status
+        if role is not None:
+            params['role'] = role
+        if subaccount_role is not None:
+            params['subaccount_role'] = subaccount_role
         response = self.json_api_call('POST', path, params)
         return response
 
@@ -3705,7 +3718,7 @@ class Admin(client.Client):
         response = self.json_api_call("GET", path, {})
         return response
 
-    def update_passport_config(self, enabled_status, enabled_groups=[], disabled_groups=[]):
+    def update_passport_config(self, enabled_status, enabled_groups: Optional[List[str]]=None, disabled_groups: Optional[List[str]]=None, custom_supported_browsers=None):
         """
         Update the current Passport configuration.
 
@@ -3716,7 +3729,11 @@ class Admin(client.Client):
                 list of user group IDs for whom Passport should be enabled
             disabled_groups (list[str]) - if enabled_status is "enabled-with-exceptions",
                 a list of user group IDs for whom Passport should be disabled
+            custom_supported_browsers (dict) - a dict of criteria that determines whether 
+                a Windows or macOS browsers should be supported by Passport
         """
+        if custom_supported_browsers is None:
+            custom_supported_browsers = {"macos": [], "windows": [],}
 
         path = "/admin/v2/passport/config"
         response = self.json_api_call(
@@ -3726,6 +3743,7 @@ class Admin(client.Client):
                 "enabled_status": enabled_status,
                 "enabled_groups": enabled_groups,
                 "disabled_groups": disabled_groups,
+                "custom_supported_browsers": custom_supported_browsers,
             },
         )
         return response
