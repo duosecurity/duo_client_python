@@ -211,15 +211,6 @@ VALID_AUTHLOG_REQUEST_PARAMS = [
 
 VALID_ACTIVITY_REQUEST_PARAMS = ["mintime", "maxtime", "limit", "sort", "next_offset"]
 
-VALID_TELEPHONY_V2_REQUEST_PARAMS = [
-    "filters",
-    "mintime",
-    "maxtime",
-    "limit",
-    "sort",
-    "next_offset",
-    "account_id",
-]
 
 class Admin(client.Client):
     account_id = None
@@ -700,8 +691,6 @@ class Admin(client.Client):
         if api_version not in [1,2]:
             raise ValueError("Invalid API Version")
         
-        path = f"/admin/v{api_version}/logs/telephony"
-        
         params = {}
 
         today = datetime.now(tz=timezone.utc)
@@ -724,7 +713,7 @@ class Admin(client.Client):
                 params["account_id"] = account_id
             if filters:
                 params["filters"] = filters
-        response = self.json_api_call("GET", path, params)
+        response = self.json_api_call("GET", '/admin/v{}/logs/telephony'.format(api_version), params)
 
         if api_version == 1:
             for row in response:
