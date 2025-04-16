@@ -636,7 +636,7 @@ class Admin(client.Client):
             row['host'] = self.host
         return response
 
-    def get_telephony_log(self, mintime=0, api_version=1, maxtime:int = 0, 
+    def get_telephony_log(self, mintime: int = 0, api_version: int = 1, maxtime: Optional[int] = 0, 
                               limit: Optional[int] = 100, sort: Optional[str] = 'desc', 
                               next_offset: Optional[str] = None, account_id = None, 
                               filters = None, **kwargs):
