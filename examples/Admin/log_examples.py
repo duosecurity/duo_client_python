@@ -79,7 +79,7 @@ if log_type == "activity":
             ]
         )
 if log_type == "telephony_v2":
-    telephony_logs = admin_api.get_telephony_log(api_version=2, kwargs=params)
+    telephony_logs = admin_api.get_telephony_log(api_version=2, **params)
     reporter.writerow(("telephony_id", "txid", "credits", "context", "phone", "type"))
     
     for log in telephony_logs["items"]:
