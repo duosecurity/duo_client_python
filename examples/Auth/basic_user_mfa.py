@@ -2,37 +2,33 @@
 Example of Duo Auth API uaer authentication with synchronous request/response
 """
 
+from argparse import ArgumentParser, Namespace
 import duo_client
-import sys
 import getpass
 
-from pprint import pprint
+
+def _get_arg(args: Namespace, name: str, prompt: str, secure=False):
+    """Read arg from CLI flags or stdin, using getpass when sensitive information should not be echoed to tty"""
+    value = getattr(args, name)
+    if value is not None:
+        return value
+
+    if secure is True:
+        return getpass.getpass(prompt)
+    else:
+        return input(prompt)
 
 
-argv_iter = iter(sys.argv[1:])
-
-
-def _get_next_arg(prompt, secure=False):
-    """Read information from STDIN, using getpass when sensitive information should not be echoed to tty"""
-    try:
-        return next(argv_iter)
-    except StopIteration:
-        if secure is True:
-            return getpass.getpass(prompt)
-        else:
-            return input(prompt)
-
-
-def prompt_for_credentials() -> dict:
+def prompt_for_credentials(args: Namespace) -> dict:
     """Collect required API credentials from command line prompts
 
     :return: dictionary containing Duo Auth API ikey, skey and hostname strings
     """
 
-    ikey = _get_next_arg('Duo Auth API integration key ("DI..."): ')
-    skey = _get_next_arg('Duo Auth API integration secret key: ', secure=True)
-    host = _get_next_arg('Duo Auth API hostname ("api-....duosecurity.com"): ')
-    username = _get_next_arg('Duo Username: ')
+    ikey = _get_arg(args, "ikey", 'Duo Auth API integration key ("DI..."): ')
+    skey = _get_arg(args, "skey", 'Duo Auth API integration secret key: ', secure=True)
+    host = _get_arg(args, "api_host", 'Duo Auth API hostname ("api-....duosecurity.com"): ')
+    username = _get_arg(args, "username", 'Duo Username: ')
 
     return {"USERNAME": username, "IKEY": ikey, "SKEY": skey, "APIHOST": host}
 
@@ -40,7 +36,16 @@ def prompt_for_credentials() -> dict:
 def main():
     """Main program entry point"""
 
-    inputs = prompt_for_credentials()
+    parser = ArgumentParser()
+    parser.add_argument("--ipaddr", type=str)
+    parser.add_argument("--ikey", type=str)
+    parser.add_argument("--skey", type=str)
+    parser.add_argument("--api-host", type=str)
+    parser.add_argument("--username", type=str)
+    parser.add_argument("--verbose", action="store_true", default=False)
+    args = parser.parse_args()
+
+    inputs = prompt_for_credentials(args)
 
     auth_client = duo_client.Auth(
             ikey=inputs['IKEY'],
@@ -64,7 +69,9 @@ def main():
 
     # Execute pre-authentication for given user
     print(f"\nExecuting pre-authentication for {inputs['USERNAME']}...")
-    pre_auth = auth_client.preauth(username=inputs['USERNAME'])
+    pre_auth = auth_client.preauth(username=inputs['USERNAME'], ipaddr=args.ipaddr)
+    if args.verbose:
+        print(f"{pre_auth=}")
 
     if pre_auth['result'] == "auth":
         try:
@@ -72,7 +79,10 @@ def main():
             print(f"Executing authentication action for {inputs['USERNAME']}...")
             # "auto" is selected for the factor in this example, however the pre_auth['devices'] dictionary
             # element contains a list of factors available for the provided user, if an alternate method is desired
-            auth = auth_client.auth(factor="auto", username=inputs['USERNAME'], device="auto")
+            auth = auth_client.auth(factor="auto", username=inputs['USERNAME'], device="auto", ipaddr=args.ipaddr)
+            if args.verbose:
+                print(f"{auth=}")
+
             print(f"\n{auth['status_msg']}")
         except Exception as e_str:
             print(e_str)
