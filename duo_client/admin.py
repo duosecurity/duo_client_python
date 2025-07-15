@@ -843,7 +843,7 @@ class Admin(client.Client):
     def add_user(self, username, realname=None, status=None,
                  notes=None, email=None, firstname=None, lastname=None,
                  alias1=None, alias2=None, alias3=None, alias4=None,
-                 aliases=None):
+                 aliases=None, custom_attribute_map=None):
         """
         Adds a user.
 
@@ -856,6 +856,9 @@ class Admin(client.Client):
         lastname - User's surname for ID Proofing (optional)
         alias1..alias4 - Aliases for the user's primary username (optional)
         aliases - Aliases for the user's primary username (optional)
+        custom_attribute_map - Map of custom attributes (optional). When provided this will be of type Dict[str|str]. e.g.
+        {"attribute_name":"attribute_value"}
+        Note: the custom attribute names have to be created prior to adding users
 
         Returns newly created user object.
 
@@ -886,6 +889,11 @@ class Admin(client.Client):
             params['alias4'] = alias4
         if aliases is not None:
             params['aliases'] = aliases
+        if isinstance(custom_attribute_map, dict):
+            for key in custom_attribute_map:
+                if isinstance(key, str) and isinstance(custom_attribute_map[key], str):
+                    params[f'custom_attributes.{key}'] = custom_attribute_map[key]
+        
         response = self.json_api_call('POST',
                                       '/admin/v1/users',
                                       params)
