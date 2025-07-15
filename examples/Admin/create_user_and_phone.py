@@ -33,7 +33,7 @@ PHONE_PLATFORM = get_next_arg('phone platform (e.g. google android): ')
 user = admin_api.add_user(
     username=USERNAME,
     realname=REALNAME,
-    custom_attribute_map=json.loads(CUSTOM_ATTRIBUTE_MAP_STR),
+    custom_attribute_map=json.loads(CUSTOM_ATTRIBUTE_MAP_STR) if CUSTOM_ATTRIBUTE_MAP_STR else None ,
 )
 print('Created user:')
 pprint.pprint(user)
