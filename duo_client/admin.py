@@ -889,10 +889,9 @@ class Admin(client.Client):
             params['alias4'] = alias4
         if aliases is not None:
             params['aliases'] = aliases
-        if isinstance(custom_attribute_map, dict):
+        if custom_attribute_map is not None:
             for key in custom_attribute_map:
-                if isinstance(key, str) and isinstance(custom_attribute_map[key], str):
-                    params[f'custom_attributes.{key}'] = custom_attribute_map[key]
+                params[f'custom_attributes.{key}'] = custom_attribute_map[key]
         
         response = self.json_api_call('POST',
                                       '/admin/v1/users',
