@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import pprint
 import sys
+import json
 
 import duo_client
 
@@ -20,6 +21,7 @@ admin_api = duo_client.Admin(
 
 USERNAME = get_next_arg('user login name: ')
 REALNAME = get_next_arg('user full name: ')
+CUSTOM_ATTRIBUTE_MAP_STR = get_next_arg('custom attribute map (optional): ')
 
 # Refer to http://www.duosecurity.com/docs/adminapi for more
 # information about phone types and platforms.
@@ -31,6 +33,7 @@ PHONE_PLATFORM = get_next_arg('phone platform (e.g. google android): ')
 user = admin_api.add_user(
     username=USERNAME,
     realname=REALNAME,
+    custom_attribute_map=json.loads(CUSTOM_ATTRIBUTE_MAP_STR) if CUSTOM_ATTRIBUTE_MAP_STR else None ,
 )
 print('Created user:')
 pprint.pprint(user)
