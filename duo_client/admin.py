@@ -178,10 +178,11 @@ import json
 import time
 import urllib.parse
 import warnings
-from typing import List, Optional
 from datetime import datetime, timedelta, timezone
+from typing import List, Optional
 
 from . import Accounts, client
+
 USER_STATUS_ACTIVE = "active"
 USER_STATUS_BYPASS = "bypass"
 USER_STATUS_DISABLED = "disabled"
@@ -3759,6 +3760,49 @@ class Admin(client.Client):
             },
         )
         return response
+
+    def start_idv(self, user_id):
+        """
+        Start identity verification process
+
+        Args:
+            user_id (str) - The ID of the Duo user (required)
+
+        Returns (dict) - Dictionary containing details of IDV process
+        """
+        path = f"/admin/v2/identity_verification/{user_id}/start"
+        return self.json_api_call(
+                "POST",
+                path,
+                {}
+                )
+
+    def cancel_idv(self, user_id, inquiry_id):
+        """
+        Cancel identity verification process
+
+        Args:
+            user_id (str) - The ID of the Duo user (required)
+            inquiry_id (str) - The inquiry_id of the request to cancel (required)
+        """
+        path = f"/admin/v2/identity_verification/{user_id}/cancel"
+        return self.json_api_call(
+                "POST",
+                path,
+                {"inquiry_id": inquiry_id}
+                )
+
+    def get_idv_status(self, user_id):
+        """
+        Get the status of a identity verification process
+
+        Args:
+            user_id (str) - The ID of the Duo user (required)
+
+        Returns (dict) - Dictionary containing details of the identity verification process status
+        """
+        path = f"/admin/v2/identity_verification/{user_id}/status"
+        return self.json_api_call("GET", path, {})
 
 
 class AccountAdmin(Admin):
