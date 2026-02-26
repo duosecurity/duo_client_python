@@ -13,9 +13,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.x'
     - name: Install dependencies
@@ -24,8 +24,8 @@ jobs:
         pip install setuptools wheel twine
     - name: Generate SBOM
       run: |
-        pip install cyclonedx-bom==3.11.7
-        cyclonedx-py --e --format json -o cyclonedx-sbom.json
+        pip install cyclonedx-bom==7.2.2
+        cyclonedx-py environment -o cyclonedx-sbom.json
     - name: Convert SBOM
       uses: duosecurity/duo_client_python/.github/actions/sbom-convert@master
     - name: Build and publish
