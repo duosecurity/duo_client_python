@@ -4,7 +4,7 @@ runs:
   steps:
     - name: Install CycloneDX
       run: |
-        wget https://github.com/CycloneDX/cyclonedx-cli/releases/download/v0.24.2/cyclonedx-linux-x64
+        wget https://github.com/CycloneDX/cyclonedx-cli/releases/download/v0.30.0/cyclonedx-linux-x64
         chmod a+x cyclonedx-linux-x64
       shell: bash
     - name: Convert SBOM

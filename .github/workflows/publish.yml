@@ -24,8 +24,8 @@ jobs:
         pip install setuptools wheel twine
     - name: Generate SBOM
       run: |
-        pip install cyclonedx-bom==3.11.7
-        cyclonedx-py --e --format json -o cyclonedx-sbom.json
+        pip install cyclonedx-bom==7.2.2
+        cyclonedx-py environment -o cyclonedx-sbom.json
     - name: Convert SBOM
       uses: duosecurity/duo_client_python/.github/actions/sbom-convert@master
     - name: Build and publish
