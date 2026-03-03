@@ -517,6 +517,8 @@ class Admin(client.Client):
             # Sanity check maxtime as unix timestamp, then transform to string
             params['maxtime'] = '{:d}'.format(int(params['maxtime']))
 
+            if "limit" in params:
+                params["limit"] = f"{int(params['limit'])}"
 
         response = self.json_api_call(
             'GET',
