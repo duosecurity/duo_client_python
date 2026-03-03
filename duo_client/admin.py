@@ -3235,6 +3235,39 @@ class Admin(client.Client):
     def delete_logo(self):
         return self.json_api_call('DELETE', '/admin/v1/logo', params={})
 
+    def get_custom_branding(self):
+        """
+        Returns current live custom branding.
+
+        Raises RuntimeError on error.
+        """
+        response, data = self.api_call('GET',
+                                       '/admin/v1/branding',
+                                       params={})
+        return self.parse_json_response(response, data)
+
+    def get_draft_custom_branding(self):
+        """
+        Returns current draft custom branding.
+
+        Raises RuntimeError on error.
+        """
+        response, data = self.api_call('GET',
+                                       '/admin/v1/branding/draft',
+                                       params={})
+        return self.parse_json_response(response, data)
+
+    def get_custom_messaging(self):
+        """
+        Returns current messaging.
+
+        Raises RuntimeError on error.
+        """
+        response, data = self.api_call('GET',
+                                       '/admin/v1/branding/custom_messaging',
+                                       params={})
+        return self.parse_json_response(response, data)
+
     def get_u2ftokens(self, limit=None, offset=0):
         """
         Retrieves a list of u2ftokens
