@@ -76,5 +76,125 @@ class TestIntegration(TestAdmin):
             }
         )
 
+    def test_create_integration_with_permissions(self):
+        response = self.client.create_integration(
+            name="Admin API integration",
+            integration_type="adminapi",
+            adminapi_admins=True,
+            adminapi_admins_read=True,
+            adminapi_info=True,
+            adminapi_integrations=True,
+            adminapi_integrations_read=True,
+            adminapi_read_log=True,
+            adminapi_read_resource=True,
+            adminapi_settings=True,
+            adminapi_settings_read=True,
+            adminapi_write_resource=True,
+            adminapi_allow_to_set_permissions=True,
+            self_service_allowed=True,
+        )
+
+        self.assertEqual(response['method'], 'POST')
+        self.assertEqual(response['uri'], '/admin/v3/integrations')
+        self.assertEqual(json.loads(response['body']),
+            {
+                "account_id": self.client.account_id,
+                "name": "Admin API integration",
+                "type": "adminapi",
+                "adminapi_admins": "1",
+                "adminapi_admins_read": "1",
+                "adminapi_info": "1",
+                "adminapi_integrations": "1",
+                "adminapi_integrations_read": "1",
+                "adminapi_read_log": "1",
+                "adminapi_read_resource": "1",
+                "adminapi_settings": "1",
+                "adminapi_settings_read": "1",
+                "adminapi_write_resource": "1",
+                "adminapi_allow_to_set_permissions": "1",
+                "self_service_allowed": "1",
+            }
+        )
+
+    def test_create_integration_with_permissions_disabled(self):
+        response = self.client.create_integration(
+            name="Admin API integration",
+            integration_type="adminapi",
+            adminapi_admins=False,
+            adminapi_admins_read=False,
+            adminapi_integrations_read=False,
+            adminapi_settings_read=False,
+            adminapi_allow_to_set_permissions=False,
+        )
+
+        self.assertEqual(response['method'], 'POST')
+        self.assertEqual(response['uri'], '/admin/v3/integrations')
+        self.assertEqual(json.loads(response['body']),
+            {
+                "account_id": self.client.account_id,
+                "name": "Admin API integration",
+                "type": "adminapi",
+                "adminapi_admins": "0",
+                "adminapi_admins_read": "0",
+                "adminapi_integrations_read": "0",
+                "adminapi_settings_read": "0",
+                "adminapi_allow_to_set_permissions": "0",
+            }
+        )
+
+    def test_update_integration_with_permissions(self):
+        response = self.client.update_integration(
+            self.integration_key,
+            adminapi_admins=True,
+            adminapi_admins_read=True,
+            adminapi_info=True,
+            adminapi_integrations=True,
+            adminapi_integrations_read=True,
+            adminapi_read_log=True,
+            adminapi_read_resource=True,
+            adminapi_settings=True,
+            adminapi_settings_read=True,
+            adminapi_write_resource=True,
+            self_service_allowed=True,
+        )
+
+        self.assertEqual(response['method'], 'POST')
+        self.assertEqual(response['uri'], '/admin/v3/integrations/{}'.format(self.integration_key))
+        self.assertEqual(json.loads(response['body']),
+            {
+                "account_id": self.client.account_id,
+                "adminapi_admins": "1",
+                "adminapi_admins_read": "1",
+                "adminapi_info": "1",
+                "adminapi_integrations": "1",
+                "adminapi_integrations_read": "1",
+                "adminapi_read_log": "1",
+                "adminapi_read_resource": "1",
+                "adminapi_settings": "1",
+                "adminapi_settings_read": "1",
+                "adminapi_write_resource": "1",
+                "self_service_allowed": "1",
+            }
+        )
+
+    def test_update_integration_with_permissions_disabled(self):
+        response = self.client.update_integration(
+            self.integration_key,
+            adminapi_admins_read=False,
+            adminapi_integrations_read=False,
+            adminapi_settings_read=False,
+        )
+
+        self.assertEqual(response['method'], 'POST')
+        self.assertEqual(response['uri'], '/admin/v3/integrations/{}'.format(self.integration_key))
+        self.assertEqual(json.loads(response['body']),
+            {
+                "account_id": self.client.account_id,
+                "adminapi_admins_read": "0",
+                "adminapi_integrations_read": "0",
+                "adminapi_settings_read": "0",
+            }
+        )
+
 if __name__ == '__main__':
     unittest.main()
