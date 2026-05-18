@@ -1,6 +1,7 @@
 import unittest
 from .base import TestAuthorization
 from .. import util
+from duo_client.authorization import McpCapabilities
 
 
 class TestPing(TestAuthorization):
@@ -27,10 +28,11 @@ class TestEvaluate(TestAuthorization):
         self.client._connect = lambda: self.mock_conn
 
     def test_evaluate(self):
-        response = self.client.evaluate(
+        capabilities = McpCapabilities(
             access_token='test_token',
             mcp_server_id='server_123',
         )
+        response = self.client.evaluate(capabilities)
         self.assertEqual(self.mock_conn.method, 'POST')
         self.assertIn('/authorize/v1/mcp_capabilities/evaluate', self.mock_conn.uri)
         self.assertIn('allowed_capabilities', response)
@@ -41,12 +43,13 @@ class TestEvaluate(TestAuthorization):
         self.assertIn('policy_version_id', response)
 
     def test_evaluate_with_optional_params(self):
-        response = self.client.evaluate(
+        capabilities = McpCapabilities(
             access_token='test_token',
             mcp_server_id='server_123',
             mcp_server_name='my_server',
             tool='my_tool',
         )
+        response = self.client.evaluate(capabilities)
         self.assertEqual(self.mock_conn.method, 'POST')
         self.assertIn('/authorize/v1/mcp_capabilities/evaluate', self.mock_conn.uri)
 

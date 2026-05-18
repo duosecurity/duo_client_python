@@ -1,7 +1,19 @@
 """
 Duo Security Authorization API reference client implementation.
 """
+from dataclasses import dataclass
+from typing import ClassVar, Final, Optional
+
 from . import client
+
+
+@dataclass
+class McpCapabilities:
+    route_fragment: ClassVar[Final[str]] = 'mcp_capabilities'
+    access_token: str
+    mcp_server_id: str
+    mcp_server_name: str = ''
+    tool: Optional[str] = None
 
 
 class Authorization(client.Client):
@@ -26,7 +38,7 @@ class Authorization(client.Client):
         """
         return self.json_api_call('GET', '/authorize/v1/check', {})
 
-    def evaluate(self, access_token, mcp_server_id, mcp_server_name='', tool=None):
+    def evaluate(self, input: McpCapabilities):
         """
         Evaluate authorization policy for MCP server capabilities.
 
@@ -40,13 +52,13 @@ class Authorization(client.Client):
         }
         """
         params = {
-            'access_token': access_token,
-            'mcp_server_id': mcp_server_id,
-            'mcp_server_name': mcp_server_name,
+            'access_token': input.access_token,
+            'mcp_server_id': input.mcp_server_id,
+            'mcp_server_name': input.mcp_server_name,
         }
-        if tool is not None:
-            params['tool'] = tool
-        response = self.json_api_call('POST', '/authorize/v1/mcp_capabilities/evaluate', params)
+        if input.tool is not None:
+            params['tool'] = input.tool
+        response = self.json_api_call('POST', f'/authorize/v1/{input.route_fragment}/evaluate', params)
         return {
             'allowed_capabilities': response.get('allowed_capabilities'),
             'authorized': response.get('authorized'),
