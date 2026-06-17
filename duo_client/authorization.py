@@ -2,14 +2,14 @@
 Duo Security Authorization API reference client implementation.
 """
 from dataclasses import dataclass
-from typing import ClassVar, Final, Optional
+from typing import ClassVar, Optional
 
 from . import client
 
 
 @dataclass
 class McpCapabilities:
-    route_fragment: ClassVar[Final[str]] = 'mcp_capabilities'
+    route_fragment: ClassVar[str] = 'mcp_capabilities'
     access_token: str
     mcp_server_id: str
     mcp_server_name: str = ''
