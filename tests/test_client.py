@@ -1,7 +1,10 @@
 import hashlib
+import http.client
+import ssl
 from unittest import mock
 import unittest
 import duo_client.client
+import duo_client.https_wrapper
 from . import util
 import base64
 import collections
@@ -759,6 +762,87 @@ class TestInstantiate(unittest.TestCase):
             duo_client.client.Client(
                 'test_ikey', 'test_akey', 'example.com', sig_timezone='America/Detroit',
                 sig_version=3)
+
+
+class TestDisableCaPinningInit(unittest.TestCase):
+    """Tests for the disable_ca_pinning parameter on Client.__init__."""
+
+    def test_default_is_pinning_enabled(self):
+        client = duo_client.client.Client('ikey', 'skey', 'host.example.com')
+        self.assertFalse(client.disable_ca_pinning)
+        self.assertEqual(client.ca_certs, duo_client.client.DEFAULT_CA_CERTS)
+
+    def test_disable_ca_pinning_true(self):
+        client = duo_client.client.Client('ikey', 'skey', 'host.example.com',
+                        disable_ca_pinning=True)
+        self.assertTrue(client.disable_ca_pinning)
+
+    def test_disable_ca_pinning_with_default_ca_certs(self):
+        client = duo_client.client.Client('ikey', 'skey', 'host.example.com',
+                        ca_certs=duo_client.client.DEFAULT_CA_CERTS, disable_ca_pinning=True)
+        self.assertTrue(client.disable_ca_pinning)
+
+    def test_disable_ca_pinning_with_none_ca_certs(self):
+        client = duo_client.client.Client('ikey', 'skey', 'host.example.com',
+                        ca_certs=None, disable_ca_pinning=True)
+        self.assertTrue(client.disable_ca_pinning)
+
+    def test_disable_ca_pinning_with_custom_ca_certs_raises(self):
+        with self.assertRaises(ValueError) as ctx:
+            duo_client.client.Client('ikey', 'skey', 'host.example.com',
+                   ca_certs='/path/to/custom.pem', disable_ca_pinning=True)
+        self.assertIn("Cannot both disable CA pinning", str(ctx.exception))
+
+    def test_disable_ca_pinning_with_http_ca_certs_raises(self):
+        with self.assertRaises(ValueError) as ctx:
+            duo_client.client.Client('ikey', 'skey', 'host.example.com',
+                   ca_certs='HTTP', disable_ca_pinning=True)
+        self.assertIn("Cannot both disable CA pinning", str(ctx.exception))
+
+    def test_disable_ca_pinning_with_disable_ca_certs_raises(self):
+        with self.assertRaises(ValueError) as ctx:
+            duo_client.client.Client('ikey', 'skey', 'host.example.com',
+                   ca_certs='DISABLE', disable_ca_pinning=True)
+        self.assertIn("Cannot both disable CA pinning", str(ctx.exception))
+
+
+class TestDisableCaPinningConnect(unittest.TestCase):
+    """Tests that _connect() uses the correct connection type."""
+
+    def test_connect_with_pinning_uses_cert_validating(self):
+        client = duo_client.client.Client('ikey', 'skey', 'host.example.com')
+        conn = client._connect()
+        self.assertIsInstance(conn, duo_client.https_wrapper.CertValidatingHTTPSConnection)
+
+    def test_connect_with_pinning_disabled_uses_https_connection(self):
+        client = duo_client.client.Client('ikey', 'skey', 'host.example.com',
+                        disable_ca_pinning=True)
+        conn = client._connect()
+        self.assertIsInstance(conn, http.client.HTTPSConnection)
+        self.assertNotIsInstance(conn, duo_client.https_wrapper.CertValidatingHTTPSConnection)
+
+    def test_connect_with_pinning_disabled_has_verification_enabled(self):
+        client = duo_client.client.Client('ikey', 'skey', 'host.example.com',
+                        disable_ca_pinning=True)
+        conn = client._connect()
+        self.assertEqual(conn._context.verify_mode, ssl.CERT_REQUIRED)
+        self.assertTrue(conn._context.check_hostname)
+
+    def test_connect_with_pinning_disabled_uses_system_ca(self):
+        client = duo_client.client.Client('ikey', 'skey', 'host.example.com',
+                        disable_ca_pinning=True)
+        conn = client._connect()
+        default_ctx = ssl.create_default_context()
+        self.assertEqual(
+            conn._context.verify_mode, default_ctx.verify_mode)
+        self.assertEqual(
+            conn._context.check_hostname, default_ctx.check_hostname)
+
+    def test_connect_with_pinning_enabled_default(self):
+        client = duo_client.client.Client('ikey', 'skey', 'host.example.com')
+        conn = client._connect()
+        self.assertIsInstance(conn, duo_client.https_wrapper.CertValidatingHTTPSConnection)
+        self.assertEqual(conn.default_ssl_context.verify_mode, ssl.CERT_REQUIRED)
 
 if __name__ == '__main__':
     unittest.main()
