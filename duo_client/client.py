@@ -36,6 +36,7 @@ except ImportError as e:
 from .https_wrapper import CertValidatingHTTPSConnection
 
 DEFAULT_CA_CERTS = os.path.join(os.path.dirname(__file__), 'ca_certs.pem')
+CA_BUNDLE_VERSION = '1.0'
 
 
 def canon_params(params):
@@ -243,7 +244,14 @@ class Client(object):
         if ca_certs is None:
             ca_certs = DEFAULT_CA_CERTS
         self.ca_certs = ca_certs
-        self.user_agent = user_agent
+        ca_pinning_status = 'disabled' if disable_ca_pinning else 'enabled'
+        if user_agent:
+            self.user_agent = (
+                f"{user_agent} ca_bundle/{CA_BUNDLE_VERSION}"
+                f" (ca_pinning={ca_pinning_status})"
+            )
+        else:
+            self.user_agent = user_agent
         self.set_proxy(host=None, proxy_type=None)
         self.paging_limit = paging_limit
         self.digestmod = digestmod

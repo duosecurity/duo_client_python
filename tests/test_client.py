@@ -806,6 +806,50 @@ class TestDisableCaPinningInit(unittest.TestCase):
         self.assertIn("Cannot both disable CA pinning", str(ctx.exception))
 
 
+class TestUserAgent(unittest.TestCase):
+    """Tests for user agent string including CA bundle version and pinning status."""
+
+    def test_default_user_agent_includes_ca_bundle_version(self):
+        client = duo_client.client.Client('ikey', 'skey', 'host.example.com')
+        self.assertIn(
+            f"ca_bundle/{duo_client.client.CA_BUNDLE_VERSION}",
+            client.user_agent,
+        )
+
+    def test_default_user_agent_includes_ca_pinning_enabled(self):
+        client = duo_client.client.Client('ikey', 'skey', 'host.example.com')
+        self.assertIn("(ca_pinning=enabled)", client.user_agent)
+
+    def test_user_agent_includes_ca_pinning_disabled(self):
+        client = duo_client.client.Client('ikey', 'skey', 'host.example.com',
+                        disable_ca_pinning=True)
+        self.assertIn("(ca_pinning=disabled)", client.user_agent)
+
+    def test_default_user_agent_format(self):
+        client = duo_client.client.Client('ikey', 'skey', 'host.example.com')
+        expected = (
+            f"Duo API Python/{duo_client.client.__version__}"
+            f" ca_bundle/{duo_client.client.CA_BUNDLE_VERSION}"
+            f" (ca_pinning=enabled)"
+        )
+        self.assertEqual(client.user_agent, expected)
+
+    def test_custom_user_agent_includes_ca_fields(self):
+        client = duo_client.client.Client('ikey', 'skey', 'host.example.com',
+                        user_agent='MyApp/1.0')
+        expected = (
+            f"MyApp/1.0"
+            f" ca_bundle/{duo_client.client.CA_BUNDLE_VERSION}"
+            f" (ca_pinning=enabled)"
+        )
+        self.assertEqual(client.user_agent, expected)
+
+    def test_empty_user_agent_not_modified(self):
+        client = duo_client.client.Client('ikey', 'skey', 'host.example.com',
+                        user_agent='')
+        self.assertEqual(client.user_agent, '')
+
+
 class TestDisableCaPinningConnect(unittest.TestCase):
     """Tests that _connect() uses the correct connection type."""
 
