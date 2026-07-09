@@ -248,7 +248,7 @@ class Client(object):
         if user_agent:
             self.user_agent = (
                 f"{user_agent} ca_bundle/{CA_BUNDLE_VERSION}"
-                f" ca_pinning/{ca_pinning_status}"
+                f" (ca_pinning={ca_pinning_status})"
             )
         else:
             self.user_agent = user_agent

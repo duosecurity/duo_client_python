@@ -818,19 +818,19 @@ class TestUserAgent(unittest.TestCase):
 
     def test_default_user_agent_includes_ca_pinning_enabled(self):
         client = duo_client.client.Client('ikey', 'skey', 'host.example.com')
-        self.assertIn("ca_pinning/enabled", client.user_agent)
+        self.assertIn("(ca_pinning=enabled)", client.user_agent)
 
     def test_user_agent_includes_ca_pinning_disabled(self):
         client = duo_client.client.Client('ikey', 'skey', 'host.example.com',
                         disable_ca_pinning=True)
-        self.assertIn("ca_pinning/disabled", client.user_agent)
+        self.assertIn("(ca_pinning=disabled)", client.user_agent)
 
     def test_default_user_agent_format(self):
         client = duo_client.client.Client('ikey', 'skey', 'host.example.com')
         expected = (
             f"Duo API Python/{duo_client.client.__version__}"
             f" ca_bundle/{duo_client.client.CA_BUNDLE_VERSION}"
-            f" ca_pinning/enabled"
+            f" (ca_pinning=enabled)"
         )
         self.assertEqual(client.user_agent, expected)
 
@@ -840,7 +840,7 @@ class TestUserAgent(unittest.TestCase):
         expected = (
             f"MyApp/1.0"
             f" ca_bundle/{duo_client.client.CA_BUNDLE_VERSION}"
-            f" ca_pinning/enabled"
+            f" (ca_pinning=enabled)"
         )
         self.assertEqual(client.user_agent, expected)
 
