@@ -1,7 +1,7 @@
 """
 Low level functions for generating Duo Web API calls and parsing results.
 """
-__version__ = '5.6.1'
+__version__ = '5.7.0'
 
 import base64
 import collections
