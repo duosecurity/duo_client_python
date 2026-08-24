@@ -126,9 +126,11 @@ Integration objects are returned in the following format:
     {'adminapi_admins': <bool:admins permission (0|1)>,
      'adminapi_info': <bool:info permission (0|1)>,
      'adminapi_integrations': <bool:integrations permission (0|1)>,
+     'adminapi_integrations_read': <bool:integrations read permission (0|1)>,
      'adminapi_read_log': <bool:read log permission (0|1)>,
      'adminapi_read_resource': <bool:read resource permission (0|1)>,
      'adminapi_settings': <bool:settings permission (0|1)>,
+     'adminapi_settings_read': <bool:settings read permission (0|1)>,
      'adminapi_write_resource': <bool:write resource permission (0|1)>,
      'self_service_allowed': <bool:self service permission (0|1)>,
      'enroll_policy': <str:enroll policy (enroll|allow|deny)>,
@@ -2624,12 +2626,16 @@ class Admin(client.Client):
                            enroll_policy=None,
                            username_normalization_policy=None,
                            adminapi_admins=None,
+                           adminapi_admins_read=None,
                            adminapi_info=None,
                            adminapi_integrations=None,
+                           adminapi_integrations_read=None,
                            adminapi_read_log=None,
                            adminapi_read_resource=None,
                            adminapi_settings=None,
+                           adminapi_settings_read=None,
                            adminapi_write_resource=None,
+                           adminapi_allow_to_set_permissions=None,
                            trusted_device_days=None,
                            ip_whitelist=None,
                            ip_whitelist_enroll_policy=None,
@@ -2655,9 +2661,11 @@ class Admin(client.Client):
         adminapi_admins - <bool: admins permission>|None
         adminapi_info - <bool: info permission>|None
         adminapi_integrations - <bool:integrations permission>|None
+        adminapi_integrations_read - <bool:integrations read permission>|None
         adminapi_read_log - <bool:read log permission>|None
         adminapi_read_resource - <bool: read resource permission>|None
         adminapi_settings - <bool: settings permission>|None
+        adminapi_settings_read - <bool:settings read permission>|None
         adminapi_write_resource - <bool:write resource permission>|None
         groups_allowed - <str: CSV list of gkeys of groups allowed to auth>
         self_service_allowed - <bool: self service permission>|None
@@ -2693,10 +2701,14 @@ class Admin(client.Client):
             params['ip_whitelist_enroll_policy'] = ip_whitelist_enroll_policy
         if adminapi_admins is not None:
             params['adminapi_admins'] = '1' if adminapi_admins else '0'
+        if adminapi_admins_read is not None:
+            params['adminapi_admins_read'] = '1' if adminapi_admins_read else '0'
         if adminapi_info is not None:
             params['adminapi_info'] = '1' if adminapi_info else '0'
         if adminapi_integrations is not None:
             params['adminapi_integrations'] = '1' if adminapi_integrations else '0'
+        if adminapi_integrations_read is not None:
+            params['adminapi_integrations_read'] = '1' if adminapi_integrations_read else '0'
         if adminapi_read_log is not None:
             params['adminapi_read_log'] = '1' if adminapi_read_log else '0'
         if adminapi_read_resource is not None:
@@ -2704,9 +2716,13 @@ class Admin(client.Client):
                 '1' if adminapi_read_resource else '0')
         if adminapi_settings is not None:
             params['adminapi_settings'] = '1' if adminapi_settings else '0'
+        if adminapi_settings_read is not None:
+            params['adminapi_settings_read'] = '1' if adminapi_settings_read else '0'
         if adminapi_write_resource is not None:
             params['adminapi_write_resource'] = (
                 '1' if adminapi_write_resource else '0')
+        if adminapi_allow_to_set_permissions is not None:
+            params['adminapi_allow_to_set_permissions'] = '1' if adminapi_allow_to_set_permissions else '0'
         if groups_allowed is not None:
             params['groups_allowed'] = groups_allowed
         if self_service_allowed is not None:
@@ -2827,11 +2843,14 @@ class Admin(client.Client):
                            enroll_policy=None,
                            username_normalization_policy=None,
                            adminapi_admins=None,
+                           adminapi_admins_read=None,
                            adminapi_info=None,
                            adminapi_integrations=None,
+                           adminapi_integrations_read=None,
                            adminapi_read_log=None,
                            adminapi_read_resource=None,
                            adminapi_settings=None,
+                           adminapi_settings_read=None,
                            adminapi_write_resource=None,
                            reset_secret_key=None,
                            trusted_device_days=None,
@@ -2856,11 +2875,14 @@ class Admin(client.Client):
         ip_whitelist_enroll_policy - <bool: policy>
                                      See adminapi docs for more details.
         adminapi_admins - <int:0|1>|None
+        adminapi_admins_read - True|False|None
         adminapi_info - True|False|None
         adminapi_integrations - True|False|None
+        adminapi_integrations_read - True|False|None
         adminapi_read_log - True|False|None
         adminapi_read_resource - True|False|None
         adminapi_settings - True|False|None
+        adminapi_settings_read - True|False|None
         adminapi_write_resource - True|False|None
         reset_secret_key - <any value>|None
         groups_allowed - <str: CSV list of gkeys of groups allowed to auth>
@@ -2901,10 +2923,14 @@ class Admin(client.Client):
             params['ip_whitelist_enroll_policy'] = ip_whitelist_enroll_policy
         if adminapi_admins is not None:
             params['adminapi_admins'] = '1' if adminapi_admins else '0'
+        if adminapi_admins_read is not None:
+            params['adminapi_admins_read'] = '1' if adminapi_admins_read else '0'
         if adminapi_info is not None:
             params['adminapi_info'] = '1' if adminapi_info else '0'
         if adminapi_integrations is not None:
             params['adminapi_integrations'] = '1' if adminapi_integrations else '0'
+        if adminapi_integrations_read is not None:
+            params['adminapi_integrations_read'] = '1' if adminapi_integrations_read else '0'
         if adminapi_read_log is not None:
             params['adminapi_read_log'] = '1' if adminapi_read_log else '0'
         if adminapi_read_resource is not None:
@@ -2912,6 +2938,8 @@ class Admin(client.Client):
                 '1' if adminapi_read_resource else '0')
         if adminapi_settings is not None:
             params['adminapi_settings'] = '1' if adminapi_settings else '0'
+        if adminapi_settings_read is not None:
+            params['adminapi_settings_read'] = '1' if adminapi_settings_read else '0'
         if adminapi_write_resource is not None:
             params['adminapi_write_resource'] = (
                 '1' if adminapi_write_resource else '0')
