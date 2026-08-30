@@ -963,6 +963,17 @@ class Admin(client.Client):
         path = '/admin/v1/users/' + user_id
         return self.json_api_call('DELETE', path, {})
 
+    def bulk_trash_user(self, user_ids: list):
+        """
+        Move user/s to trash.
+        user_ids - List of user ids
+        Returns a list of dicts with the 'success' and 'user_id' data.
+        Raises RuntimeError on error.
+        """
+        user_ids = [urllib.parse.quote_plus(str(user_id)) for user_id in user_ids]
+        path = '/admin/v1/users/bulk_send_to_trash'
+        return self.json_api_call('POST', path, {"user_id_list": json.dumps(user_ids)})
+
     def enroll_user(self, username, email, valid_secs=None):
         """
         Enroll a user and send them an enrollment email.
