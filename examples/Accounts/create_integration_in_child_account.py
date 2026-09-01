@@ -29,10 +29,10 @@ def _get_next_arg(prompt, secure=False):
 def prompt_for_credentials() -> dict:
     """Collect required API credentials from command line prompts
 
-    :return: dictionary containing Duo Accounts API ikey, skey and hostname strings
+    :return: dictionary containing Duo Admin API ikey, skey and hostname strings
     """
-    answers = {'ikey':       _get_next_arg('Duo Accounts API integration key ("DI..."): '),
-               'skey':       _get_next_arg('Duo Accounts API integration secret key: ', secure=True),
+    answers = {'ikey':       _get_next_arg('Duo Admin API integration key ("DI..."): '),
+               'skey':       _get_next_arg('Duo Admin API integration secret key: ', secure=True),
                'host':       _get_next_arg('Duo API hostname of child account ("api-....duosecurity.com"): '),
                'account_id': _get_next_arg('Child account ID: '), 
                'app_name': _get_next_arg('New application name: '),

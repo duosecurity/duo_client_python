@@ -5,6 +5,24 @@ import json
 import duo_client.admin
 from .base import TestAdmin
 
+SUBACCOUNT_PERMISSIONS = [
+    'adminapi_subaccount_accounts',
+    'adminapi_subaccount_accounts_read',
+    'adminapi_subaccount_admins',
+    'adminapi_subaccount_admins_read',
+    'adminapi_subaccount_info',
+    'adminapi_subaccount_integrations',
+    'adminapi_subaccount_integrations_read',
+    'adminapi_subaccount_settings',
+    'adminapi_subaccount_settings_read',
+    'adminapi_subaccount_read_log',
+    'adminapi_subaccount_read_resource',
+    'adminapi_subaccount_write_resource',
+    'adminapi_subaccount_allow_to_set_permissions',
+    'adminapi_subaccount_user_limits',
+    'adminapi_subaccount_user_limits_read',
+]
+
 
 class TestIntegration(TestAdmin):
     def setUp(self):
@@ -50,6 +68,39 @@ class TestIntegration(TestAdmin):
                 },
             }
         )
+
+    def test_create_integration_subaccount_permissions(self):
+        response = self.client.create_integration(
+            name="Subaccount integration",
+            integration_type="adminapi",
+            **{perm: True for perm in SUBACCOUNT_PERMISSIONS}
+        )
+
+        expected = {
+            "account_id": self.client.account_id,
+            "name": "Subaccount integration",
+            "type": "adminapi",
+        }
+        expected.update({perm: "1" for perm in SUBACCOUNT_PERMISSIONS})
+
+        self.assertEqual(response['method'], 'POST')
+        self.assertEqual(response['uri'], '/admin/v3/integrations')
+        self.assertEqual(json.loads(response['body']), expected)
+
+    def test_update_integration_subaccount_permissions(self):
+        response = self.client.update_integration(
+            self.integration_key,
+            **{perm: False for perm in SUBACCOUNT_PERMISSIONS}
+        )
+
+        expected = {"account_id": self.client.account_id}
+        expected.update({perm: "0" for perm in SUBACCOUNT_PERMISSIONS})
+
+        self.assertEqual(response['method'], 'POST')
+        self.assertEqual(
+            response['uri'],
+            '/admin/v3/integrations/{}'.format(self.integration_key))
+        self.assertEqual(json.loads(response['body']), expected)
 
     def test_update_integration_success(self):
         response = self.client.update_integration(

@@ -1,7 +1,7 @@
 """
-Duo Security Accounts API reference client implementation.
+Duo Security Admin API subaccount management reference client implementation.
 
-<http://www.duosecurity.com/docs/accountsapi>
+<https://duo.com/docs/adminapi#subaccounts>
 """
 from . import client
 

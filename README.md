@@ -10,7 +10,7 @@
 
 **Admin** - https://www.duosecurity.com/docs/adminapi
 
-**Accounts** - https://www.duosecurity.com/docs/accountsapi
+  - **Subaccount access** - https://duo.com/docs/adminapi#subaccounts
 
 **Activity** - The activity endpoint is in public preview and subject to change
 

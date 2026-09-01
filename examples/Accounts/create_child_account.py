@@ -1,5 +1,5 @@
 """
-Example of Duo Accounts API child account creation
+Example of Duo Admin API child account creation
 """
 
 import duo_client
@@ -27,12 +27,12 @@ def _get_next_arg(prompt, secure=False):
 def prompt_for_credentials() -> dict:
     """Collect required API credentials from command line prompts
 
-    :return: dictionary containing Duo Accounts API ikey, skey and hostname strings
+    :return: dictionary containing Duo Admin API ikey, skey and hostname strings
     """
 
-    ikey = _get_next_arg('Duo Accounts API integration key ("DI..."): ')
-    skey = _get_next_arg('Duo Accounts API integration secret key: ', secure=True)
-    host = _get_next_arg('Duo Accounts API hostname ("api-....duosecurity.com"): ')
+    ikey = _get_next_arg('Duo Admin API integration key ("DI..."): ')
+    skey = _get_next_arg('Duo Admin API integration secret key: ', secure=True)
+    host = _get_next_arg('Duo Admin API hostname ("api-....duosecurity.com"): ')
     account_name = _get_next_arg('Name for new child account: ')
 
     return {"IKEY": ikey, "SKEY": skey, "APIHOST": host, "ACCOUNT_NAME": account_name}
