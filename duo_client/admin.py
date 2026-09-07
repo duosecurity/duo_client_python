@@ -2263,9 +2263,6 @@ class Admin(client.Client):
     def get_child_accounts(self):
         """
         Return a list of all child accounts of the integration's account.
-
-        This is the maintained implementation. The copy on the deprecated
-        Accounts client is frozen; add new subaccount methods here only.
         """
         params = {}
         response = self.json_api_call('POST',
