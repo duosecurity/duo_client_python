@@ -41,7 +41,7 @@ def main():
 
     inputs = prompt_for_credentials()
 
-    account_client = duo_client.Accounts(
+    account_client = duo_client.Admin(
             ikey=inputs['IKEY'],
             skey=inputs['SKEY'],
             host=inputs['APIHOST']

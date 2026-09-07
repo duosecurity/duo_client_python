@@ -3,9 +3,13 @@
 
 ## Examples
 
-This folder contains various examples to illustrate the usage of the `Accounts` module within the 
-`duo_client_python` library.  Subaccount management in Admin API is primarily intended for use by Managed Service 
-Partners (MSP) to assist in the automation of managing their child (customer) Duo accounts.
+This folder contains various examples to illustrate the usage of the subaccount management methods of the `Admin`
+module within the `duo_client_python` library.  Subaccount management in Admin API is primarily intended for use by
+Managed Service Partners (MSP) to assist in the automation of managing their child (customer) Duo accounts.
+
+The child account methods (`get_child_accounts`, `create_account`, `delete_account`) live on `Admin`. The `Accounts`
+client also provides them, but it is deprecated and will be removed in a future release, and its copy of these
+methods is frozen -- new subaccount API methods are added to `Admin` only. Use `Admin` for new code.
 
 Subaccount management in Admin API requires special access to be enabled. Please see the 
 [online documentation](https://duo.com/docs/adminapi#subaccounts) for more information.

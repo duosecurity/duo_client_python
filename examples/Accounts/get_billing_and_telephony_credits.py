@@ -24,7 +24,7 @@ def main():
     host=get_next_input('Admin API hostname ("api-....duosecurity.com"): ')
 
     # Configuration and information about objects to create.
-    accounts_api = duo_client.Accounts(
+    accounts_api = duo_client.Admin(
         ikey=ikey,
         skey=skey,
         host=host,

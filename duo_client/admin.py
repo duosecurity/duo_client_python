@@ -231,6 +231,10 @@ VALID_ACTIVITY_REQUEST_PARAMS = ["mintime", "maxtime", "limit", "sort", "next_of
 class Admin(client.Client):
     account_id = None
 
+    # Shared with Accounts.child_map so that child api hostnames discovered by
+    # either client are visible to AccountAdmin. This is an alias, not a copy.
+    child_map = Accounts.child_map
+
     def api_call(self, method, path, params):
         if self.account_id is not None:
             params['account_id'] = self.account_id
@@ -2256,6 +2260,57 @@ class Admin(client.Client):
         )
         return response
 
+    def get_child_accounts(self):
+        """
+        Return a list of all child accounts of the integration's account.
+
+        This is the maintained implementation. The copy on the deprecated
+        Accounts client is frozen; add new subaccount methods here only.
+        """
+        params = {}
+        response = self.json_api_call('POST',
+                                      '/accounts/v1/account/list',
+                                      params)
+        if response and isinstance(response, list):
+            for account in response:
+                account_id = account.get('account_id', None)
+                api_hostname = account.get('api_hostname', None)
+                if account_id and api_hostname:
+                    Admin.child_map[account_id] = api_hostname
+        return response
+
+    def create_account(self, name):
+        """
+        Create a new child account of the integration's account.
+        """
+        params = {
+            'name': name,
+        }
+        response = self.json_api_call('POST',
+                                      '/accounts/v1/account/create',
+                                      params)
+        return response
+
+    def delete_account(self, account_id):
+        """
+        Delete a child account of the integration's account.
+
+        account_id - The child account to delete. This is only honored on a
+                     parent level client, i.e. one with no account_id of its
+                     own. api_call() overwrites params['account_id'] with
+                     self.account_id whenever that is set, so on an
+                     account scoped client (any AccountAdmin, or an Admin with
+                     account_id assigned) this argument is ignored and the
+                     client's own account is the one deleted.
+        """
+        params = {
+            'account_id': account_id,
+        }
+        response = self.json_api_call('POST',
+                                      '/accounts/v1/account/delete',
+                                      params)
+        return response
+
     def get_info_summary(self):
         """
         Returns a summary of objects in the account.
@@ -3987,7 +4042,7 @@ class AccountAdmin(Admin):
            See the Client base class for other parameters.
           """
         if not child_api_host:
-            child_api_host =  Accounts.child_map.get(account_id, None)
+            child_api_host =  Admin.child_map.get(account_id, None)
             if child_api_host is None:
                 child_api_host = kwargs.get('host')
                 try:
@@ -4000,9 +4055,9 @@ class AccountAdmin(Admin):
         self.account_id = account_id
 
     def get_child_api_host(self, account_id, **kwargs):
-        accounts_api = Accounts(**kwargs)
-        accounts_api.get_child_accounts()
-        return Accounts.child_map.get(account_id, kwargs['host'])
+        admin_api = Admin(**kwargs)
+        admin_api.get_child_accounts()
+        return Admin.child_map.get(account_id, kwargs['host'])
 
     def get_edition(self):
         """

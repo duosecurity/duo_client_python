@@ -2,15 +2,28 @@
 Duo Security Admin API subaccount management reference client implementation.
 
 <https://duo.com/docs/adminapi#subaccounts>
+
+DEPRECATED: this module is deprecated and will be removed in a future release.
+Use the equivalent methods on duo_client.Admin instead.
 """
 from . import client
 
 class Accounts(client.Client):
+    """
+    DEPRECATED: use duo_client.Admin instead. This client will be removed in a
+    future release.
+
+    The subaccount methods below are duplicated on Admin and are frozen: they
+    will not be updated going forward. Any new subaccount API method is added
+    to Admin only, and fixes to these methods may not be mirrored here.
+    """
     child_map = {}
 
     def get_child_accounts(self):
         """
         Return a list of all child accounts of the integration's account.
+
+        DEPRECATED: use Admin.get_child_accounts instead. Not maintained.
         """
         params = {}
         response = self.json_api_call('POST',
@@ -27,6 +40,8 @@ class Accounts(client.Client):
     def create_account(self, name):
         """
         Create a new child account of the integration's account.
+
+        DEPRECATED: use Admin.create_account instead. Not maintained.
         """
         params = {
             'name': name,
@@ -39,6 +54,8 @@ class Accounts(client.Client):
     def delete_account(self, account_id):
         """
         Delete a child account of the integration's account.
+
+        DEPRECATED: use Admin.delete_account instead. Not maintained.
         """
         params = {
             'account_id': account_id,
