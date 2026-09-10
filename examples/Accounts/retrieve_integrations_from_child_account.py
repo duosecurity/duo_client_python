@@ -7,13 +7,13 @@ import duo_client
 
 
 parser = argparse.ArgumentParser()
-duo_arg_group = parser.add_argument_group('Duo Accounts API Credentials')
+duo_arg_group = parser.add_argument_group('Duo Admin API Credentials')
 duo_arg_group.add_argument('--ikey',
-                           help='Duo Accounts API IKEY',
+                           help='Duo Admin API IKEY',
                            required=True
                            )
 duo_arg_group.add_argument('--skey',
-                           help='Duo Accounts API Secret Key',
+                           help='Duo Admin API Secret Key',
                            required=True,
                            )
 duo_arg_group.add_argument('--host',
@@ -26,7 +26,7 @@ parser.add_argument('--child_account_id',
                     )
 args = parser.parse_args()
 
-# It is important to note that we are using the IKEY/SKEY combination for an Accounts API integration in the
+# It is important to note that we are using the IKEY/SKEY combination for an Admin API integration in the
 # parent account along with the api-hostname of a child account to create a new duo_client.Admin instance
 account_client = duo_client.Admin(
         ikey=args.ikey,

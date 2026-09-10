@@ -1,5 +1,5 @@
 """
-Example of Duo Accounts API get child account edition
+Example of Duo Admin API get child account edition
 """
 
 import duo_client
@@ -23,9 +23,9 @@ def _get_user_input(prompt, secure=False):
 def prompt_for_credentials() -> dict:
     """Collect required API credentials from command line prompts"""
 
-    ikey = _get_user_input('Duo Accounts API integration key ("DI..."): ')
-    skey = _get_user_input('Duo Accounts API integration secret key: ', secure=True)
-    host = _get_user_input('Duo Accounts API hostname ("api-....duosecurity.com"): ')
+    ikey = _get_user_input('Duo Admin API integration key ("DI..."): ')
+    skey = _get_user_input('Duo Admin API integration secret key: ', secure=True)
+    host = _get_user_input('Duo Admin API hostname ("api-....duosecurity.com"): ')
     account_id = _get_user_input('Child account ID: ')
 
     return {

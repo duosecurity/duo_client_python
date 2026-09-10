@@ -1,5 +1,5 @@
 """
-Example of Duo Accounts API child account deletiom
+Example of Duo Admin API child account deletion
 """
 
 import duo_client
@@ -26,12 +26,12 @@ def _get_next_arg(prompt, secure=False):
 def prompt_for_credentials() -> dict:
     """Collect required API credentials from command line prompts
 
-    :return: dictionary containing Duo Accounts API ikey, skey and hostname strings
+    :return: dictionary containing Duo Admin API ikey, skey and hostname strings
     """
 
-    ikey = _get_next_arg('Duo Accounts API integration key ("DI..."): ')
-    skey = _get_next_arg('Duo Accounts API integration secret key: ', secure=True)
-    host = _get_next_arg('Duo Accounts API hostname ("api-....duosecurity.com"): ')
+    ikey = _get_next_arg('Duo Admin API integration key ("DI..."): ')
+    skey = _get_next_arg('Duo Admin API integration secret key: ', secure=True)
+    host = _get_next_arg('Duo Admin API hostname ("api-....duosecurity.com"): ')
     account_id = _get_next_arg('ID of child account to delete: ')
 
     return {"IKEY": ikey, "SKEY": skey, "APIHOST": host, "ACCOUNT_ID": account_id}
@@ -42,7 +42,7 @@ def main():
 
     inputs = prompt_for_credentials()
 
-    account_client = duo_client.Accounts(
+    account_client = duo_client.Admin(
             ikey=inputs['IKEY'],
             skey=inputs['SKEY'],
             host=inputs['APIHOST']

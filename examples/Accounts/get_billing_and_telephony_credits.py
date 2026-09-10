@@ -19,12 +19,12 @@ def get_next_input(prompt):
 
 def main():
     """Program entry point"""
-    ikey=get_next_input('Accounts API integration key ("DI..."): ')
-    skey=get_next_input('Accounts API integration secret key: ')
-    host=get_next_input('Accounts API hostname ("api-....duosecurity.com"): ')
+    ikey=get_next_input('Admin API integration key ("DI..."): ')
+    skey=get_next_input('Admin API integration secret key: ')
+    host=get_next_input('Admin API hostname ("api-....duosecurity.com"): ')
 
     # Configuration and information about objects to create.
-    accounts_api = duo_client.Accounts(
+    accounts_api = duo_client.Admin(
         ikey=ikey,
         skey=skey,
         host=host,

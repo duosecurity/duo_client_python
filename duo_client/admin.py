@@ -130,6 +130,21 @@ Integration objects are returned in the following format:
      'adminapi_read_resource': <bool:read resource permission (0|1)>,
      'adminapi_settings': <bool:settings permission (0|1)>,
      'adminapi_write_resource': <bool:write resource permission (0|1)>,
+     'adminapi_subaccount_accounts': <bool:subaccount accounts permission (0|1)>,
+     'adminapi_subaccount_accounts_read': <bool:subaccount accounts read permission (0|1)>,
+     'adminapi_subaccount_admins': <bool:subaccount admins permission (0|1)>,
+     'adminapi_subaccount_admins_read': <bool:subaccount admins read permission (0|1)>,
+     'adminapi_subaccount_info': <bool:subaccount info permission (0|1)>,
+     'adminapi_subaccount_integrations': <bool:subaccount integrations permission (0|1)>,
+     'adminapi_subaccount_integrations_read': <bool:subaccount integrations read permission (0|1)>,
+     'adminapi_subaccount_settings': <bool:subaccount settings permission (0|1)>,
+     'adminapi_subaccount_settings_read': <bool:subaccount settings read permission (0|1)>,
+     'adminapi_subaccount_read_log': <bool:subaccount read log permission (0|1)>,
+     'adminapi_subaccount_read_resource': <bool:subaccount read resource permission (0|1)>,
+     'adminapi_subaccount_write_resource': <bool:subaccount write resource permission (0|1)>,
+     'adminapi_subaccount_allow_to_set_permissions': <bool:subaccount set permissions permission (0|1)>,
+     'adminapi_subaccount_user_limits': <bool:subaccount user limits permission (0|1)>,
+     'adminapi_subaccount_user_limits_read': <bool:subaccount user limits read permission (0|1)>,
      'self_service_allowed': <bool:self service permission (0|1)>,
      'enroll_policy': <str:enroll policy (enroll|allow|deny)>,
      'username_normalization_policy': <str:normalization policy (simple|none)>,
@@ -215,6 +230,10 @@ VALID_ACTIVITY_REQUEST_PARAMS = ["mintime", "maxtime", "limit", "sort", "next_of
 
 class Admin(client.Client):
     account_id = None
+
+    # Shared with Accounts.child_map so that child api hostnames discovered by
+    # either client are visible to AccountAdmin. This is an alias, not a copy.
+    child_map = Accounts.child_map
 
     def api_call(self, method, path, params):
         if self.account_id is not None:
@@ -2241,6 +2260,54 @@ class Admin(client.Client):
         )
         return response
 
+    def get_child_accounts(self):
+        """
+        Return a list of all child accounts of the integration's account.
+        """
+        params = {}
+        response = self.json_api_call('POST',
+                                      '/accounts/v1/account/list',
+                                      params)
+        if response and isinstance(response, list):
+            for account in response:
+                account_id = account.get('account_id', None)
+                api_hostname = account.get('api_hostname', None)
+                if account_id and api_hostname:
+                    Admin.child_map[account_id] = api_hostname
+        return response
+
+    def create_account(self, name):
+        """
+        Create a new child account of the integration's account.
+        """
+        params = {
+            'name': name,
+        }
+        response = self.json_api_call('POST',
+                                      '/accounts/v1/account/create',
+                                      params)
+        return response
+
+    def delete_account(self, account_id):
+        """
+        Delete a child account of the integration's account.
+
+        account_id - The child account to delete. This is only honored on a
+                     parent level client, i.e. one with no account_id of its
+                     own. api_call() overwrites params['account_id'] with
+                     self.account_id whenever that is set, so on an
+                     account scoped client (any AccountAdmin, or an Admin with
+                     account_id assigned) this argument is ignored and the
+                     client's own account is the one deleted.
+        """
+        params = {
+            'account_id': account_id,
+        }
+        response = self.json_api_call('POST',
+                                      '/accounts/v1/account/delete',
+                                      params)
+        return response
+
     def get_info_summary(self):
         """
         Returns a summary of objects in the account.
@@ -2636,7 +2703,22 @@ class Admin(client.Client):
                            groups_allowed=None,
                            self_service_allowed=None,
                            sso=None,
-                           user_access=None):
+                           user_access=None,
+                           adminapi_subaccount_accounts=None,
+                           adminapi_subaccount_accounts_read=None,
+                           adminapi_subaccount_admins=None,
+                           adminapi_subaccount_admins_read=None,
+                           adminapi_subaccount_info=None,
+                           adminapi_subaccount_integrations=None,
+                           adminapi_subaccount_integrations_read=None,
+                           adminapi_subaccount_settings=None,
+                           adminapi_subaccount_settings_read=None,
+                           adminapi_subaccount_read_log=None,
+                           adminapi_subaccount_read_resource=None,
+                           adminapi_subaccount_write_resource=None,
+                           adminapi_subaccount_allow_to_set_permissions=None,
+                           adminapi_subaccount_user_limits=None,
+                           adminapi_subaccount_user_limits_read=None):
         """Creates a new integration.
 
         name - The name of the integration (required)
@@ -2659,11 +2741,29 @@ class Admin(client.Client):
         adminapi_read_resource - <bool: read resource permission>|None
         adminapi_settings - <bool: settings permission>|None
         adminapi_write_resource - <bool:write resource permission>|None
+        adminapi_subaccount_accounts - <bool:subaccount accounts permission>|None
+        adminapi_subaccount_accounts_read - <bool:subaccount accounts read permission>|None
+        adminapi_subaccount_admins - <bool:subaccount admins permission>|None
+        adminapi_subaccount_admins_read - <bool:subaccount admins read permission>|None
+        adminapi_subaccount_info - <bool:subaccount info permission>|None
+        adminapi_subaccount_integrations - <bool:subaccount integrations permission>|None
+        adminapi_subaccount_integrations_read - <bool:subaccount integrations read permission>|None
+        adminapi_subaccount_settings - <bool:subaccount settings permission>|None
+        adminapi_subaccount_settings_read - <bool:subaccount settings read permission>|None
+        adminapi_subaccount_read_log - <bool:subaccount read log permission>|None
+        adminapi_subaccount_read_resource - <bool:subaccount read resource permission>|None
+        adminapi_subaccount_write_resource - <bool:subaccount write resource permission>|None
+        adminapi_subaccount_allow_to_set_permissions - <bool:subaccount set permissions permission>|None
+        adminapi_subaccount_user_limits - <bool:subaccount user limits permission>|None
+        adminapi_subaccount_user_limits_read - <bool:subaccount user limits read permission>|None
         groups_allowed - <str: CSV list of gkeys of groups allowed to auth>
         self_service_allowed - <bool: self service permission>|None
         sso - <dict: parameters for generic single sign-on> (optional)
                 New argument for unreleased feature. Will return an error if used.
                 Client will be updated again in the future when feature is released.
+
+        The adminapi_subaccount_* permissions apply only to 'adminapi'
+        integrations and are ignored for other integration types.
 
         Returns the created integration.
 
@@ -2707,6 +2807,51 @@ class Admin(client.Client):
         if adminapi_write_resource is not None:
             params['adminapi_write_resource'] = (
                 '1' if adminapi_write_resource else '0')
+        if adminapi_subaccount_accounts is not None:
+            params['adminapi_subaccount_accounts'] = (
+                '1' if adminapi_subaccount_accounts else '0')
+        if adminapi_subaccount_accounts_read is not None:
+            params['adminapi_subaccount_accounts_read'] = (
+                '1' if adminapi_subaccount_accounts_read else '0')
+        if adminapi_subaccount_admins is not None:
+            params['adminapi_subaccount_admins'] = (
+                '1' if adminapi_subaccount_admins else '0')
+        if adminapi_subaccount_admins_read is not None:
+            params['adminapi_subaccount_admins_read'] = (
+                '1' if adminapi_subaccount_admins_read else '0')
+        if adminapi_subaccount_info is not None:
+            params['adminapi_subaccount_info'] = (
+                '1' if adminapi_subaccount_info else '0')
+        if adminapi_subaccount_integrations is not None:
+            params['adminapi_subaccount_integrations'] = (
+                '1' if adminapi_subaccount_integrations else '0')
+        if adminapi_subaccount_integrations_read is not None:
+            params['adminapi_subaccount_integrations_read'] = (
+                '1' if adminapi_subaccount_integrations_read else '0')
+        if adminapi_subaccount_settings is not None:
+            params['adminapi_subaccount_settings'] = (
+                '1' if adminapi_subaccount_settings else '0')
+        if adminapi_subaccount_settings_read is not None:
+            params['adminapi_subaccount_settings_read'] = (
+                '1' if adminapi_subaccount_settings_read else '0')
+        if adminapi_subaccount_read_log is not None:
+            params['adminapi_subaccount_read_log'] = (
+                '1' if adminapi_subaccount_read_log else '0')
+        if adminapi_subaccount_read_resource is not None:
+            params['adminapi_subaccount_read_resource'] = (
+                '1' if adminapi_subaccount_read_resource else '0')
+        if adminapi_subaccount_write_resource is not None:
+            params['adminapi_subaccount_write_resource'] = (
+                '1' if adminapi_subaccount_write_resource else '0')
+        if adminapi_subaccount_allow_to_set_permissions is not None:
+            params['adminapi_subaccount_allow_to_set_permissions'] = (
+                '1' if adminapi_subaccount_allow_to_set_permissions else '0')
+        if adminapi_subaccount_user_limits is not None:
+            params['adminapi_subaccount_user_limits'] = (
+                '1' if adminapi_subaccount_user_limits else '0')
+        if adminapi_subaccount_user_limits_read is not None:
+            params['adminapi_subaccount_user_limits_read'] = (
+                '1' if adminapi_subaccount_user_limits_read else '0')
         if groups_allowed is not None:
             params['groups_allowed'] = groups_allowed
         if self_service_allowed is not None:
@@ -2840,7 +2985,22 @@ class Admin(client.Client):
                            groups_allowed=None,
                            self_service_allowed=None,
                            sso=None,
-                           user_access=None
+                           user_access=None,
+                           adminapi_subaccount_accounts=None,
+                           adminapi_subaccount_accounts_read=None,
+                           adminapi_subaccount_admins=None,
+                           adminapi_subaccount_admins_read=None,
+                           adminapi_subaccount_info=None,
+                           adminapi_subaccount_integrations=None,
+                           adminapi_subaccount_integrations_read=None,
+                           adminapi_subaccount_settings=None,
+                           adminapi_subaccount_settings_read=None,
+                           adminapi_subaccount_read_log=None,
+                           adminapi_subaccount_read_resource=None,
+                           adminapi_subaccount_write_resource=None,
+                           adminapi_subaccount_allow_to_set_permissions=None,
+                           adminapi_subaccount_user_limits=None,
+                           adminapi_subaccount_user_limits_read=None
                            ):
         """Updates an integration.
 
@@ -2862,12 +3022,30 @@ class Admin(client.Client):
         adminapi_read_resource - True|False|None
         adminapi_settings - True|False|None
         adminapi_write_resource - True|False|None
+        adminapi_subaccount_accounts - True|False|None
+        adminapi_subaccount_accounts_read - True|False|None
+        adminapi_subaccount_admins - True|False|None
+        adminapi_subaccount_admins_read - True|False|None
+        adminapi_subaccount_info - True|False|None
+        adminapi_subaccount_integrations - True|False|None
+        adminapi_subaccount_integrations_read - True|False|None
+        adminapi_subaccount_settings - True|False|None
+        adminapi_subaccount_settings_read - True|False|None
+        adminapi_subaccount_read_log - True|False|None
+        adminapi_subaccount_read_resource - True|False|None
+        adminapi_subaccount_write_resource - True|False|None
+        adminapi_subaccount_allow_to_set_permissions - True|False|None
+        adminapi_subaccount_user_limits - True|False|None
+        adminapi_subaccount_user_limits_read - True|False|None
         reset_secret_key - <any value>|None
         groups_allowed - <str: CSV list of gkeys of groups allowed to auth>
         self_service_allowed - True|False|None
         sso - <dict: parameters for generic single sign-on> (optional)
                 New argument for unreleased feature. Will return an error if used.
                 Client will be updated again in the future when feature is released.
+
+        The adminapi_subaccount_* permissions apply only to 'adminapi'
+        integrations and are ignored for other integration types.
 
         If any value other than None is provided for 'reset_secret_key'
         (for example, 1), then a new secret key will be generated for the
@@ -2915,6 +3093,51 @@ class Admin(client.Client):
         if adminapi_write_resource is not None:
             params['adminapi_write_resource'] = (
                 '1' if adminapi_write_resource else '0')
+        if adminapi_subaccount_accounts is not None:
+            params['adminapi_subaccount_accounts'] = (
+                '1' if adminapi_subaccount_accounts else '0')
+        if adminapi_subaccount_accounts_read is not None:
+            params['adminapi_subaccount_accounts_read'] = (
+                '1' if adminapi_subaccount_accounts_read else '0')
+        if adminapi_subaccount_admins is not None:
+            params['adminapi_subaccount_admins'] = (
+                '1' if adminapi_subaccount_admins else '0')
+        if adminapi_subaccount_admins_read is not None:
+            params['adminapi_subaccount_admins_read'] = (
+                '1' if adminapi_subaccount_admins_read else '0')
+        if adminapi_subaccount_info is not None:
+            params['adminapi_subaccount_info'] = (
+                '1' if adminapi_subaccount_info else '0')
+        if adminapi_subaccount_integrations is not None:
+            params['adminapi_subaccount_integrations'] = (
+                '1' if adminapi_subaccount_integrations else '0')
+        if adminapi_subaccount_integrations_read is not None:
+            params['adminapi_subaccount_integrations_read'] = (
+                '1' if adminapi_subaccount_integrations_read else '0')
+        if adminapi_subaccount_settings is not None:
+            params['adminapi_subaccount_settings'] = (
+                '1' if adminapi_subaccount_settings else '0')
+        if adminapi_subaccount_settings_read is not None:
+            params['adminapi_subaccount_settings_read'] = (
+                '1' if adminapi_subaccount_settings_read else '0')
+        if adminapi_subaccount_read_log is not None:
+            params['adminapi_subaccount_read_log'] = (
+                '1' if adminapi_subaccount_read_log else '0')
+        if adminapi_subaccount_read_resource is not None:
+            params['adminapi_subaccount_read_resource'] = (
+                '1' if adminapi_subaccount_read_resource else '0')
+        if adminapi_subaccount_write_resource is not None:
+            params['adminapi_subaccount_write_resource'] = (
+                '1' if adminapi_subaccount_write_resource else '0')
+        if adminapi_subaccount_allow_to_set_permissions is not None:
+            params['adminapi_subaccount_allow_to_set_permissions'] = (
+                '1' if adminapi_subaccount_allow_to_set_permissions else '0')
+        if adminapi_subaccount_user_limits is not None:
+            params['adminapi_subaccount_user_limits'] = (
+                '1' if adminapi_subaccount_user_limits else '0')
+        if adminapi_subaccount_user_limits_read is not None:
+            params['adminapi_subaccount_user_limits_read'] = (
+                '1' if adminapi_subaccount_user_limits_read else '0')
         if reset_secret_key is not None:
             params['reset_secret_key'] = '1'
         if groups_allowed is not None:
@@ -3806,7 +4029,7 @@ class Admin(client.Client):
 
 
 class AccountAdmin(Admin):
-    """AccountAdmin manages a child account using an Accounts API integration."""
+    """AccountAdmin manages a child account using an Admin API integration."""
 
     def __init__(self, account_id, child_api_host=None, **kwargs):
         """Initializes an AccountAdmin for administering a child account.
@@ -3816,7 +4039,7 @@ class AccountAdmin(Admin):
            See the Client base class for other parameters.
           """
         if not child_api_host:
-            child_api_host =  Accounts.child_map.get(account_id, None)
+            child_api_host =  Admin.child_map.get(account_id, None)
             if child_api_host is None:
                 child_api_host = kwargs.get('host')
                 try:
@@ -3829,9 +4052,9 @@ class AccountAdmin(Admin):
         self.account_id = account_id
 
     def get_child_api_host(self, account_id, **kwargs):
-        accounts_api = Accounts(**kwargs)
-        accounts_api.get_child_accounts()
-        return Accounts.child_map.get(account_id, kwargs['host'])
+        admin_api = Admin(**kwargs)
+        admin_api.get_child_accounts()
+        return Admin.child_map.get(account_id, kwargs['host'])
 
     def get_edition(self):
         """
