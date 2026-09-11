@@ -14,6 +14,8 @@
 
 **Activity** - The activity endpoint is in public preview and subject to change
 
+**Authorization** - The authorization endpoint is in public preview and subject to change
+
 ## Tested Against Python Versions
 * 3.7
 * 3.8
